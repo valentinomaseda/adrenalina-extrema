@@ -35,8 +35,8 @@ export default function StudentList() {
   }
 
   return (
-    <div className="space-y-4 p-4">
-      <div className="flex flex-col md:flex-row gap-3">
+    <div className="space-y-4 p-4 animate-fade-in">
+      <div className="flex flex-col md:flex-row gap-3 animate-slide-in-left">
         {/* Buscador */}
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#00BFFF]" size={20} />
@@ -67,11 +67,12 @@ export default function StudentList() {
 
       {/* Lista de alumnos */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredStudents.map((student) => (
+        {filteredStudents.map((student, index) => (
           <button
             key={student.id}
             onClick={() => handleStudentClick(student)}
-            className="bg-[#1E40AF] rounded-xl shadow-md hover:shadow-xl transition-all p-6 text-left hover:scale-105 active:scale-95 border-2 border-transparent hover:border-[#00BFFF]"
+            className="bg-[#1E40AF] rounded-xl shadow-md hover:shadow-xl transition-all p-6 text-left hover:scale-105 active:scale-95 border-2 border-transparent hover:border-[#00BFFF] animate-scale-in"
+            style={{ animationDelay: `${index * 0.1}s`, opacity: 0 }}
           >
             <div className="flex items-center space-x-4">
               <img

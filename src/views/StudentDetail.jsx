@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowLeft, TrendingUp, Calendar, CheckCircle2, XCircle, Send, Plus } from 'lucide-react'
+import { ArrowLeft, TrendingUp, Calendar, CheckCircle2, XCircle, Send, Plus, ChevronDown, ChevronUp, Info, X, Phone, Mail, Weight, Ruler, MapPin, Cake } from 'lucide-react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { useAppContext } from '../context/AppContext'
 
@@ -7,6 +7,8 @@ export default function StudentDetail() {
   const { selectedStudent, setCurrentView, setSelectedStudent, savedRoutines, assignRoutineToStudent } = useAppContext()
   const [selectedRoutineId, setSelectedRoutineId] = useState('')
   const [showAssignSuccess, setShowAssignSuccess] = useState(false)
+  const [showProgress, setShowProgress] = useState(false)
+  const [showInfoModal, setShowInfoModal] = useState(false)
 
   // Función para formatear rutina como texto plano para WhatsApp
   const formatRoutineForWhatsApp = (routine) => {
@@ -68,9 +70,9 @@ export default function StudentDetail() {
   }))
 
   return (
-    <div className="p-4 space-y-6 pb-24 md:pb-6">
+    <div className="p-4 space-y-6 pb-24 md:pb-6 animate-fade-in">
       {/* Header */}
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-4 animate-slide-in-left">
         <button
           onClick={handleBack}
           className="p-2 rounded-lg hover:bg-[#1E40AF] active:scale-95 transition-all text-[#00BFFF]"
@@ -81,15 +83,24 @@ export default function StudentDetail() {
       </div>
 
       {/* Card del alumno */}
-      <div className="bg-white rounded-xl shadow-lg p-6">
-        <div className="flex items-center space-x-4 mb-6">
+      <div className="bg-white rounded-xl shadow-lg p-6 animate-slide-in-up delay-100">
+        <div className="flex items-center space-x-4">
           <img
             src={selectedStudent.photo}
             alt={selectedStudent.name}
             className="w-24 h-24 rounded-full border-4 border-[#00BFFF]"
           />
-          <div>
-            <h3 className="text-2xl font-bold text-[#1E40AF]">{selectedStudent.name}</h3>
+          <div className="flex-1">
+            <div className="flex items-center space-x-3">
+              <h3 className="text-2xl font-bold text-[#1E40AF]">{selectedStudent.name}</h3>
+              <button
+                onClick={() => setShowInfoModal(true)}
+                className="p-2 bg-[#00BFFF] text-white rounded-full hover:bg-[#1E40AF] active:scale-95 transition-all"
+                title="Ver información completa"
+              >
+                <Info size={20} strokeWidth={2.5} />
+              </button>
+            </div>
             <p className="text-sm text-gray-600 mt-1">
               <span
                 className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
@@ -105,57 +116,101 @@ export default function StudentDetail() {
             </p>
           </div>
         </div>
-
-        {/* Gráfico de progreso */}
-        <div className="mb-6">
-          <div className="flex items-center space-x-2 mb-4">
-            <TrendingUp className="text-[#00BFFF]" size={20} />
-            <h4 className="text-lg font-semibold text-[#1E40AF]">Progreso Reciente</h4>
-          </div>
-          <div className="bg-[#111827] rounded-lg p-4" style={{ height: '300px' }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="sesion" />
-                <YAxis domain={[0, 100]} />
-                <Tooltip />
-                <Line
-                  type="monotone"
-                  dataKey="rendimiento"
-                  stroke="#00BFFF"
-                  strokeWidth={3}
-                  dot={{ fill: '#00BFFF', r: 6 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Estadísticas rápidas */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-          <div className="bg-[#1E40AF] rounded-lg p-4 text-center">
-            <p className="text-3xl font-bold text-[#00BFFF]">
-              {selectedStudent.progress[selectedStudent.progress.length - 1]}%
-            </p>
-            <p className="text-xs text-[#F3F4F6] mt-1">Último rendimiento</p>
-          </div>
-          <div className="bg-[#111827] rounded-lg p-4 text-center">
-            <p className="text-3xl font-bold text-[#00BFFF]">
-              {Math.round(selectedStudent.progress.reduce((a, b) => a + b, 0) / selectedStudent.progress.length)}%
-            </p>
-            <p className="text-xs text-[#F3F4F6] mt-1">Promedio</p>
-          </div>
-          <div className="bg-[#1E40AF] rounded-lg p-4 text-center col-span-2 md:col-span-1">
-            <p className="text-3xl font-bold text-[#00BFFF]">
-              {selectedStudent.routineHistory.filter((r) => r.completed).length}
-            </p>
-            <p className="text-xs text-[#F3F4F6] mt-1">Rutinas completadas</p>
-          </div>
-        </div>
       </div>
 
+      {/* Modal de información del alumno */}
+      {showInfoModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 animate-fade-in">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto animate-scale-in">
+            <div className="sticky top-0 bg-[#1E40AF] text-white p-6 flex items-center justify-between rounded-t-xl">
+              <h3 className="text-xl font-bold">Información del Alumno</h3>
+              <button
+                onClick={() => setShowInfoModal(false)}
+                className="p-2 hover:bg-[#00BFFF] rounded-full active:scale-95 transition-all"
+              >
+                <X size={24} strokeWidth={2.5} />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <div className="flex items-center space-x-4 pb-4 border-b border-gray-200">
+                <img
+                  src={selectedStudent.photo}
+                  alt={selectedStudent.name}
+                  className="w-20 h-20 rounded-full border-4 border-[#00BFFF]"
+                />
+                <div>
+                  <h4 className="text-xl font-bold text-[#1E40AF]">{selectedStudent.name}</h4>
+                  <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold mt-1 ${
+                    selectedStudent.level === 'Avanzado'
+                      ? 'bg-[#00FF88] text-[#111827]'
+                      : selectedStudent.level === 'Intermedio'
+                      ? 'bg-[#00BFFF] text-white'
+                      : 'bg-[#FFD700] text-[#111827]'
+                  }`}>
+                    {selectedStudent.level}
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                  <Phone className="text-[#00BFFF] mt-1" size={20} strokeWidth={2.5} />
+                  <div>
+                    <p className="text-xs text-gray-500 font-semibold">Teléfono</p>
+                    <p className="text-[#1E40AF] font-semibold">{selectedStudent.phone}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                  <Mail className="text-[#00BFFF] mt-1" size={20} strokeWidth={2.5} />
+                  <div>
+                    <p className="text-xs text-gray-500 font-semibold">Email</p>
+                    <p className="text-[#1E40AF] font-semibold">{selectedStudent.email}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                  <MapPin className="text-[#00BFFF] mt-1" size={20} strokeWidth={2.5} />
+                  <div>
+                    <p className="text-xs text-gray-500 font-semibold">Dirección</p>
+                    <p className="text-[#1E40AF] font-semibold">{selectedStudent.address}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                  <Cake className="text-[#00BFFF] mt-1" size={20} strokeWidth={2.5} />
+                  <div>
+                    <p className="text-xs text-gray-500 font-semibold">Fecha de Nacimiento</p>
+                    <p className="text-[#1E40AF] font-semibold">{new Date(selectedStudent.birthDate).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                    <Weight className="text-[#00BFFF] mt-1" size={20} strokeWidth={2.5} />
+                    <div>
+                      <p className="text-xs text-gray-500 font-semibold">Peso</p>
+                      <p className="text-[#1E40AF] font-bold">{selectedStudent.weight} kg</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                    <Ruler className="text-[#00BFFF] mt-1" size={20} strokeWidth={2.5} />
+                    <div>
+                      <p className="text-xs text-gray-500 font-semibold">Altura</p>
+                      <p className="text-[#1E40AF] font-bold">{selectedStudent.height} cm</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Asignar nueva rutina */}
-      <div className="bg-[#1E40AF] rounded-xl shadow-lg p-6">
+      <div className="bg-[#1E40AF] rounded-xl shadow-lg p-6 animate-slide-in-up delay-200">
         <div className="flex items-center space-x-2 mb-4">
           <Plus className="text-[#00BFFF]" size={20} />
           <h4 className="text-lg font-semibold text-[#F3F4F6]">Asignar Nueva Rutina</h4>
@@ -194,7 +249,7 @@ export default function StudentDetail() {
       </div>
 
       {/* Historial de rutinas */}
-      <div className="bg-[#1E40AF] rounded-xl shadow-lg p-6">
+      <div className="bg-[#1E40AF] rounded-xl shadow-lg p-6 animate-slide-in-up delay-300">
         <div className="flex items-center space-x-2 mb-4">
           <Calendar className="text-[#00BFFF]" size={20} />
           <h4 className="text-lg font-semibold text-[#F3F4F6]">Historial de Rutinas</h4>
@@ -236,6 +291,67 @@ export default function StudentDetail() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+      </div>
+
+      {/* Botón para mostrar progreso */}
+      <div className="bg-[#1E40AF] rounded-xl shadow-lg p-6 animate-slide-in-up delay-400">
+        <button
+          onClick={() => setShowProgress(!showProgress)}
+          className="w-full flex items-center justify-between px-4 py-3 bg-[#111827] text-[#F3F4F6] rounded-lg hover:bg-[#00BFFF] hover:text-[#111827] active:scale-95 transition-all font-semibold"
+        >
+          <div className="flex items-center space-x-2">
+            <TrendingUp size={20} strokeWidth={2.5} />
+            <span>Progreso Reciente</span>
+          </div>
+          {showProgress ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+        </button>
+
+        {showProgress && (
+          <div className="mt-6 space-y-6">
+            {/* Gráfico de progreso */}
+            <div>
+              <div className="bg-[#111827] rounded-lg p-4" style={{ height: '300px' }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="sesion" />
+                    <YAxis domain={[0, 100]} />
+                    <Tooltip />
+                    <Line
+                      type="monotone"
+                      dataKey="rendimiento"
+                      stroke="#00BFFF"
+                      strokeWidth={3}
+                      dot={{ fill: '#00BFFF', r: 6 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Estadísticas rápidas */}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <div className="bg-[#111827] rounded-lg p-4 text-center">
+                <p className="text-3xl font-bold text-[#00BFFF]">
+                  {selectedStudent.progress[selectedStudent.progress.length - 1]}%
+                </p>
+                <p className="text-xs text-[#F3F4F6] mt-1">Último rendimiento</p>
+              </div>
+              <div className="bg-[#111827] rounded-lg p-4 text-center">
+                <p className="text-3xl font-bold text-[#00BFFF]">
+                  {Math.round(selectedStudent.progress.reduce((a, b) => a + b, 0) / selectedStudent.progress.length)}%
+                </p>
+                <p className="text-xs text-[#F3F4F6] mt-1">Promedio</p>
+              </div>
+              <div className="bg-[#111827] rounded-lg p-4 text-center col-span-2 md:col-span-1">
+                <p className="text-3xl font-bold text-[#00BFFF]">
+                  {selectedStudent.routineHistory.filter((r) => r.completed).length}
+                </p>
+                <p className="text-xs text-[#F3F4F6] mt-1">Rutinas completadas</p>
+              </div>
+            </div>
           </div>
         )}
       </div>

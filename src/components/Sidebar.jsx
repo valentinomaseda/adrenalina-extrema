@@ -16,8 +16,8 @@ export default function Sidebar() {
   ]
 
   return (
-    <aside className="hidden md:flex flex-col w-64 bg-[#111827] border-r border-[#1E40AF] shadow-sm h-screen fixed left-0 top-0">
-      <div className="p-6 border-b border-[#1E40AF]">
+    <aside className="hidden md:flex flex-col w-64 bg-[#111827] border-r border-[#1E40AF] shadow-sm h-screen fixed left-0 top-0 animate-slide-in-left">
+      <div className="p-6 border-b border-[#1E40AF] animate-fade-in delay-200">
         <div className="flex items-center space-x-3 mb-2">
           <img src="/src/public/logo-png.png" alt="Adrenalina Extrema Logo" className="w-12 h-12 object-contain" />
           <h1 className="text-2xl font-bold text-[#00BFFF]">Adrenalina Extrema</h1>
@@ -26,15 +26,16 @@ export default function Sidebar() {
       </div>
 
       <nav className="flex-1 p-4 space-y-2">
-        {navItems.map(({ id, label, icon: Icon }) => (
+        {navItems.map(({ id, label, icon: Icon }, index) => (
           <button
             key={id}
             onClick={() => handleNavigation(id)}
-            className={`flex items-center space-x-3 w-full px-4 py-3 rounded-lg transition-all hover:scale-105 active:scale-95 ${
+            className={`flex items-center space-x-3 w-full px-4 py-3 rounded-lg transition-all hover:scale-105 active:scale-95 animate-slide-in-left ${
               currentView === id
                 ? 'bg-[#00BFFF] text-[#111827] shadow-md'
                 : 'text-[#F3F4F6] hover:bg-[#1E40AF]'
             }`}
+            style={{ animationDelay: `${0.3 + index * 0.1}s` }}
           >
             <Icon size={22} strokeWidth={2.5} />
             <span className="font-semibold">{label}</span>

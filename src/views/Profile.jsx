@@ -2,14 +2,13 @@ import { UserCircle, Mail, Phone, Award } from 'lucide-react'
 
 export default function Profile() {
   return (
-    <div className="p-4 space-y-6 pb-24 md:pb-6">
-      <div className="flex items-center space-x-3">
+    <div className="p-4 space-y-6 pb-24 md:pb-6 animate-fade-in">
+      <div className="flex items-center space-x-3 animate-slide-in-left">
         <UserCircle className="text-[#00BFFF]" size={28} strokeWidth={2.5} />
         <h2 className="text-2xl font-bold text-[#1E40AF]">Mi Perfil</h2>
       </div>
 
-      <div className="bg-[#1E40AF] rounded-xl shadow-lg p-6 space-y-6">
-        <div className="flex flex-col items-center">
+      <div className="bg-[#1E40AF] rounded-xl shadow-lg p-6 space-y-6 animate-slide-in-up delay-100">\n        <div className="flex flex-col items-center animate-scale-in delay-200">
           <div className="w-32 h-32 bg-[#00BFFF] rounded-full flex items-center justify-center mb-4">
             <UserCircle size={80} className="text-[#111827]" strokeWidth={2} />
           </div>
@@ -18,7 +17,7 @@ export default function Profile() {
         </div>
 
         <div className="space-y-4 pt-6 border-t border-[#111827]">
-          <div className="flex items-center space-x-3 p-4 bg-[#111827] rounded-lg">
+          <div className="flex items-center space-x-3 p-4 bg-[#111827] rounded-lg animate-slide-in-right delay-300">
             <Mail className="text-[#00BFFF]" size={24} />
             <div>
               <p className="text-xs text-[#00BFFF]">Email</p>
@@ -26,7 +25,7 @@ export default function Profile() {
             </div>
           </div>
 
-          <div className="flex items-center space-x-3 p-4 bg-[#111827] rounded-lg">
+          <div className="flex items-center space-x-3 p-4 bg-[#111827] rounded-lg animate-slide-in-right delay-400">
             <Phone className="text-[#00BFFF]" size={24} />
             <div>
               <p className="text-xs text-[#00BFFF]">Teléfono</p>
@@ -34,7 +33,7 @@ export default function Profile() {
             </div>
           </div>
 
-          <div className="flex items-center space-x-3 p-4 bg-[#111827] rounded-lg">
+          <div className="flex items-center space-x-3 p-4 bg-[#111827] rounded-lg animate-slide-in-right delay-500">
             <Award className="text-[#00BFFF]" size={24} />
             <div>
               <p className="text-xs text-[#00BFFF]">Alumnos Activos</p>
@@ -43,7 +42,7 @@ export default function Profile() {
           </div>
         </div>
 
-        <button className="w-full px-6 py-3 bg-[#00BFFF] text-[#111827] rounded-lg hover:bg-[#1E40AF] hover:text-[#00BFFF] active:scale-95 transition-all font-semibold">
+        <button className="w-full px-6 py-3 bg-[#00BFFF] text-[#111827] rounded-lg hover:bg-[#1E40AF] hover:text-[#00BFFF] active:scale-95 transition-all font-semibold animate-fade-in delay-500">
           Editar Perfil
         </button>
       </div>

@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { Plus, Trash2, Save, Dumbbell } from 'lucide-react'
+import { Plus, Trash2, Save, Dumbbell, List } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
 
 export default function RoutineBuilder() {
-  const { exercises, saveRoutine } = useAppContext()
+  const { exercises, saveRoutine, savedRoutines } = useAppContext()
   const [routineName, setRoutineName] = useState('')
   const [exerciseInstances, setExerciseInstances] = useState([])
   const [showSuccess, setShowSuccess] = useState(false)
@@ -73,19 +73,19 @@ export default function RoutineBuilder() {
   }
 
   return (
-    <div className="p-4 space-y-6 pb-24 md:pb-6">
-      <div className="flex items-center space-x-3">
+    <div className="p-4 space-y-6 pb-24 md:pb-6 animate-fade-in">
+      <div className="flex items-center space-x-3 animate-slide-in-left">
         <Dumbbell className="text-[#00BFFF]" size={28} strokeWidth={2.5} />
         <h2 className="text-2xl font-bold text-[#1E40AF]">Constructor de Rutinas</h2>
       </div>
 
       {showSuccess && (
-        <div className="bg-[#1E40AF] border-2 border-[#00BFFF] text-[#00BFFF] px-6 py-4 rounded-lg animate-pulse">
+        <div className="bg-[#1E40AF] border-2 border-[#00BFFF] text-[#00BFFF] px-6 py-4 rounded-lg animate-pulse animate-scale-in">
           <p className="font-semibold">✓ Rutina guardada exitosamente</p>
         </div>
       )}
 
-      <div className="bg-[#1E40AF] rounded-xl shadow-lg p-6 space-y-6">
+      <div className="bg-[#1E40AF] rounded-xl shadow-lg p-6 space-y-6 animate-slide-in-up delay-100">
         {/* Nombre de la rutina */}
         <div>
           <label className="block text-sm font-semibold text-[#F3F4F6] mb-2">
@@ -211,6 +211,59 @@ export default function RoutineBuilder() {
           <span>Guardar Rutina</span>
         </button>
       </div>
+
+      {/* Lista de rutinas guardadas */}
+      {savedRoutines.length > 0 && (
+        <div className="bg-[#1E40AF] rounded-xl shadow-lg p-6 space-y-4 animate-slide-in-up delay-200">
+          <div className="flex items-center space-x-3">
+            <List className="text-[#00BFFF]" size={24} strokeWidth={2.5} />
+            <h3 className="text-xl font-bold text-[#F3F4F6]">Rutinas Guardadas</h3>
+            <span className="bg-[#00BFFF] text-[#111827] px-3 py-1 rounded-full text-sm font-bold">
+              {savedRoutines.length}
+            </span>
+          </div>
+
+          <div className="space-y-3">
+            {savedRoutines.map((routine) => (
+              <div
+                key={routine.id}
+                className="bg-[#111827] border-2 border-[#1E40AF] rounded-lg p-4 hover:border-[#00BFFF] transition-all"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <h4 className="text-lg font-bold text-[#00BFFF] mb-2">{routine.name}</h4>
+                    <div className="space-y-2">
+                      {routine.exercises.map((exercise, idx) => (
+                        <div
+                          key={idx}
+                          className="text-sm text-[#F3F4F6] flex items-center space-x-2"
+                        >
+                          <span className="font-semibold text-[#00BFFF]">{idx + 1}.</span>
+                          <span>{exercise.name}</span>
+                          <span className="text-gray-400">•</span>
+                          <span className="text-gray-300">
+                            {exercise.sets} sets × {exercise.value}{' '}
+                            {exercise.type === 'reps' ? 'reps' : 'seg'}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-xs text-gray-400 mt-3">
+                      Creada: {new Date(routine.createdAt).toLocaleDateString('es-ES', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

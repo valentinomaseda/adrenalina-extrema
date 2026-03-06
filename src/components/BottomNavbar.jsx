@@ -16,17 +16,18 @@ export default function BottomNavbar() {
   ]
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#111827] border-t border-[#1E40AF] shadow-lg z-50">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#111827] border-t border-[#1E40AF] shadow-lg z-50 animate-slide-in-up">
       <div className="flex justify-around items-center h-16">
-        {navItems.map(({ id, label, icon: Icon }) => (
+        {navItems.map(({ id, label, icon: Icon }, index) => (
           <button
             key={id}
             onClick={() => handleNavigation(id)}
-            className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors active:scale-95 ${
+            className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors active:scale-95 animate-fade-in ${
               currentView === id
                 ? 'text-[#00BFFF] bg-[#1E40AF]'
                 : 'text-[#F3F4F6] hover:text-[#00BFFF] hover:bg-[#1E40AF]'
             }`}
+            style={{ animationDelay: `${index * 0.1}s` }}
           >
             <Icon size={24} strokeWidth={2.5} />
             <span className="text-xs font-semibold">{label}</span>
