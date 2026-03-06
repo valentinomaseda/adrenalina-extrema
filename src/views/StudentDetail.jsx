@@ -83,7 +83,7 @@ export default function StudentDetail() {
       </div>
 
       {/* Card del alumno */}
-      <div className="bg-white rounded-xl shadow-lg p-6 animate-slide-in-up delay-100">
+      <div className="bg-gradient-to-br from-[#1a2942] to-[#0f1729] rounded-xl shadow-lg p-6 animate-slide-in-up delay-100 border border-[#1E40AF]">
         <div className="flex items-center space-x-4">
           <img
             src={selectedStudent.photo}
@@ -92,7 +92,7 @@ export default function StudentDetail() {
           />
           <div className="flex-1">
             <div className="flex items-center space-x-3">
-              <h3 className="text-2xl font-bold text-[#1E40AF]">{selectedStudent.name}</h3>
+              <h3 className="text-2xl font-bold text-[#00BFFF]">{selectedStudent.name}</h3>
               <button
                 onClick={() => setShowInfoModal(true)}
                 className="p-2 bg-[#00BFFF] text-white rounded-full hover:bg-[#1E40AF] active:scale-95 transition-all"
@@ -121,7 +121,7 @@ export default function StudentDetail() {
       {/* Modal de información del alumno */}
       {showInfoModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 animate-fade-in">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto animate-scale-in">
+          <div className="bg-gradient-to-br from-[#1a2942] to-[#0f1729] rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto animate-scale-in border border-[#00BFFF]">
             <div className="sticky top-0 bg-[#1E40AF] text-white p-6 flex items-center justify-between rounded-t-xl">
               <h3 className="text-xl font-bold">Información del Alumno</h3>
               <button
@@ -133,14 +133,14 @@ export default function StudentDetail() {
             </div>
             
             <div className="p-6 space-y-4">
-              <div className="flex items-center space-x-4 pb-4 border-b border-gray-200">
+              <div className="flex items-center space-x-4 pb-4 border-b border-[#1E40AF]">
                 <img
                   src={selectedStudent.photo}
                   alt={selectedStudent.name}
                   className="w-20 h-20 rounded-full border-4 border-[#00BFFF]"
                 />
                 <div>
-                  <h4 className="text-xl font-bold text-[#1E40AF]">{selectedStudent.name}</h4>
+                  <h4 className="text-xl font-bold text-[#00BFFF]">{selectedStudent.name}</h4>
                   <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold mt-1 ${
                     selectedStudent.level === 'Avanzado'
                       ? 'bg-[#00FF88] text-[#111827]'
@@ -154,52 +154,52 @@ export default function StudentDetail() {
               </div>
 
               <div className="space-y-3">
-                <div className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-start space-x-3 p-3 bg-[#111827] rounded-lg border border-[#1E40AF]">
                   <Phone className="text-[#00BFFF] mt-1" size={20} strokeWidth={2.5} />
                   <div>
-                    <p className="text-xs text-gray-500 font-semibold">Teléfono</p>
-                    <p className="text-[#1E40AF] font-semibold">{selectedStudent.phone}</p>
+                    <p className="text-xs text-[#00BFFF] font-semibold">Teléfono</p>
+                    <p className="text-[#F3F4F6] font-semibold">{selectedStudent.phone}</p>
                   </div>
                 </div>
 
-                <div className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-start space-x-3 p-3 bg-[#111827] rounded-lg border border-[#1E40AF]">
                   <Mail className="text-[#00BFFF] mt-1" size={20} strokeWidth={2.5} />
                   <div>
-                    <p className="text-xs text-gray-500 font-semibold">Email</p>
-                    <p className="text-[#1E40AF] font-semibold">{selectedStudent.email}</p>
+                    <p className="text-xs text-[#00BFFF] font-semibold">Email</p>
+                    <p className="text-[#F3F4F6] font-semibold">{selectedStudent.email}</p>
                   </div>
                 </div>
 
-                <div className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-start space-x-3 p-3 bg-[#111827] rounded-lg border border-[#1E40AF]">
                   <MapPin className="text-[#00BFFF] mt-1" size={20} strokeWidth={2.5} />
                   <div>
-                    <p className="text-xs text-gray-500 font-semibold">Dirección</p>
-                    <p className="text-[#1E40AF] font-semibold">{selectedStudent.address}</p>
+                    <p className="text-xs text-[#00BFFF] font-semibold">Dirección</p>
+                    <p className="text-[#F3F4F6] font-semibold">{selectedStudent.address}</p>
                   </div>
                 </div>
 
-                <div className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-start space-x-3 p-3 bg-[#111827] rounded-lg border border-[#1E40AF]">
                   <Cake className="text-[#00BFFF] mt-1" size={20} strokeWidth={2.5} />
                   <div>
-                    <p className="text-xs text-gray-500 font-semibold">Fecha de Nacimiento</p>
-                    <p className="text-[#1E40AF] font-semibold">{new Date(selectedStudent.birthDate).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                    <p className="text-xs text-[#00BFFF] font-semibold">Fecha de Nacimiento</p>
+                    <p className="text-[#F3F4F6] font-semibold">{new Date(selectedStudent.birthDate).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-start space-x-3 p-3 bg-[#111827] rounded-lg border border-[#1E40AF]">
                     <Weight className="text-[#00BFFF] mt-1" size={20} strokeWidth={2.5} />
                     <div>
-                      <p className="text-xs text-gray-500 font-semibold">Peso</p>
-                      <p className="text-[#1E40AF] font-bold">{selectedStudent.weight} kg</p>
+                      <p className="text-xs text-[#00BFFF] font-semibold">Peso</p>
+                      <p className="text-[#F3F4F6] font-bold">{selectedStudent.weight} kg</p>
                     </div>
                   </div>
 
-                  <div className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-start space-x-3 p-3 bg-[#111827] rounded-lg border border-[#1E40AF]">
                     <Ruler className="text-[#00BFFF] mt-1" size={20} strokeWidth={2.5} />
                     <div>
-                      <p className="text-xs text-gray-500 font-semibold">Altura</p>
-                      <p className="text-[#1E40AF] font-bold">{selectedStudent.height} cm</p>
+                      <p className="text-xs text-[#00BFFF] font-semibold">Altura</p>
+                      <p className="text-[#F3F4F6] font-bold">{selectedStudent.height} cm</p>
                     </div>
                   </div>
                 </div>
@@ -210,7 +210,7 @@ export default function StudentDetail() {
       )}
 
       {/* Asignar nueva rutina */}
-      <div className="bg-[#1E40AF] rounded-xl shadow-lg p-6 animate-slide-in-up delay-200">
+      <div className="bg-gradient-to-br from-[#1E40AF] to-[#152e6b] rounded-xl shadow-lg p-6 animate-slide-in-up delay-200 border border-[#00BFFF]/20">
         <div className="flex items-center space-x-2 mb-4">
           <Plus className="text-[#00BFFF]" size={20} />
           <h4 className="text-lg font-semibold text-[#F3F4F6]">Asignar Nueva Rutina</h4>
@@ -249,7 +249,7 @@ export default function StudentDetail() {
       </div>
 
       {/* Historial de rutinas */}
-      <div className="bg-[#1E40AF] rounded-xl shadow-lg p-6 animate-slide-in-up delay-300">
+      <div className="bg-gradient-to-br from-[#1E40AF] to-[#152e6b] rounded-xl shadow-lg p-6 animate-slide-in-up delay-300 border border-[#00BFFF]/20">
         <div className="flex items-center space-x-2 mb-4">
           <Calendar className="text-[#00BFFF]" size={20} />
           <h4 className="text-lg font-semibold text-[#F3F4F6]">Historial de Rutinas</h4>
@@ -296,7 +296,7 @@ export default function StudentDetail() {
       </div>
 
       {/* Botón para mostrar progreso */}
-      <div className="bg-[#1E40AF] rounded-xl shadow-lg p-6 animate-slide-in-up delay-400">
+      <div className="bg-gradient-to-br from-[#1E40AF] to-[#152e6b] rounded-xl shadow-lg p-6 animate-slide-in-up delay-400 border border-[#00BFFF]/20">
         <button
           onClick={() => setShowProgress(!showProgress)}
           className="w-full flex items-center justify-between px-4 py-3 bg-[#111827] text-[#F3F4F6] rounded-lg hover:bg-[#00BFFF] hover:text-[#111827] active:scale-95 transition-all font-semibold"

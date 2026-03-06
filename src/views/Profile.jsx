@@ -8,7 +8,7 @@ export default function Profile() {
         <h2 className="text-2xl font-bold text-[#1E40AF]">Mi Perfil</h2>
       </div>
 
-      <div className="bg-[#1E40AF] rounded-xl shadow-lg p-6 space-y-6 animate-slide-in-up delay-100">\n        <div className="flex flex-col items-center animate-scale-in delay-200">
+      <div className="bg-gradient-to-br from-[#1E40AF] to-[#152e6b] rounded-xl shadow-lg p-6 space-y-6 animate-slide-in-up delay-100 border border-[#00BFFF]/20">\n        <div className="flex flex-col items-center animate-scale-in delay-200">
           <div className="w-32 h-32 bg-[#00BFFF] rounded-full flex items-center justify-center mb-4">
             <UserCircle size={80} className="text-[#111827]" strokeWidth={2} />
           </div>

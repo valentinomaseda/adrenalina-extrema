@@ -71,7 +71,7 @@ export default function StudentList() {
           <button
             key={student.id}
             onClick={() => handleStudentClick(student)}
-            className="bg-[#1E40AF] rounded-xl shadow-md hover:shadow-xl transition-all p-6 text-left hover:scale-105 active:scale-95 border-2 border-transparent hover:border-[#00BFFF] animate-scale-in"
+            className="bg-gradient-to-br from-[#1E40AF] to-[#152e6b] rounded-xl shadow-md hover:shadow-2xl transition-all p-6 text-left hover:scale-105 active:scale-95 border-2 border-transparent hover:border-[#00BFFF] animate-scale-in"
             style={{ animationDelay: `${index * 0.1}s`, opacity: 0 }}
           >
             <div className="flex items-center space-x-4">

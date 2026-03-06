@@ -85,7 +85,7 @@ export default function RoutineBuilder() {
         </div>
       )}
 
-      <div className="bg-[#1E40AF] rounded-xl shadow-lg p-6 space-y-6 animate-slide-in-up delay-100">
+      <div className="bg-gradient-to-br from-[#1E40AF] to-[#152e6b] rounded-xl shadow-lg p-6 space-y-6 animate-slide-in-up delay-100 border border-[#00BFFF]/20">
         {/* Nombre de la rutina */}
         <div>
           <label className="block text-sm font-semibold text-[#F3F4F6] mb-2">
@@ -214,7 +214,7 @@ export default function RoutineBuilder() {
 
       {/* Lista de rutinas guardadas */}
       {savedRoutines.length > 0 && (
-        <div className="bg-[#1E40AF] rounded-xl shadow-lg p-6 space-y-4 animate-slide-in-up delay-200">
+        <div className="bg-gradient-to-br from-[#1E40AF] to-[#152e6b] rounded-xl shadow-lg p-6 space-y-4 animate-slide-in-up delay-200 border border-[#00BFFF]/20">
           <div className="flex items-center space-x-3">
             <List className="text-[#00BFFF]" size={24} strokeWidth={2.5} />
             <h3 className="text-xl font-bold text-[#F3F4F6]">Rutinas Guardadas</h3>
