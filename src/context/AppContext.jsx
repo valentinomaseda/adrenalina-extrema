@@ -83,6 +83,39 @@ export const AppProvider = ({ children }) => {
   const [exercises] = useState(MOCK_EXERCISES)
   const [currentView, setCurrentView] = useState('students')
   const [selectedStudent, setSelectedStudent] = useState(null)
+  const [savedRoutines, setSavedRoutines] = useState([])
+
+  // Función para guardar rutina
+  const saveRoutine = (routine) => {
+    const newRoutine = {
+      ...routine,
+      id: Date.now(),
+    }
+    setSavedRoutines([...savedRoutines, newRoutine])
+    return newRoutine
+  }
+
+  // Función para asignar rutina a alumno
+  const assignRoutineToStudent = (studentId, routine) => {
+    setStudents(students.map(student => {
+      if (student.id === studentId) {
+        return {
+          ...student,
+          routineHistory: [
+            {
+              id: Date.now(),
+              name: routine.name,
+              date: new Date().toISOString().split('T')[0],
+              completed: false,
+              exercises: routine.exercises
+            },
+            ...student.routineHistory
+          ]
+        }
+      }
+      return student
+    }))
+  }
 
   const value = {
     userRole,
@@ -93,6 +126,9 @@ export const AppProvider = ({ children }) => {
     setCurrentView,
     selectedStudent,
     setSelectedStudent,
+    savedRoutines,
+    saveRoutine,
+    assignRoutineToStudent,
   }
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>

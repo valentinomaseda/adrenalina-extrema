@@ -1,9 +1,52 @@
-import { ArrowLeft, TrendingUp, Calendar, CheckCircle2, XCircle } from 'lucide-react'
+import { useState } from 'react'
+import { ArrowLeft, TrendingUp, Calendar, CheckCircle2, XCircle, Send, Plus } from 'lucide-react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { useAppContext } from '../context/AppContext'
 
 export default function StudentDetail() {
-  const { selectedStudent, setCurrentView, setSelectedStudent } = useAppContext()
+  const { selectedStudent, setCurrentView, setSelectedStudent, savedRoutines, assignRoutineToStudent } = useAppContext()
+  const [selectedRoutineId, setSelectedRoutineId] = useState('')
+  const [showAssignSuccess, setShowAssignSuccess] = useState(false)
+
+  // Función para formatear rutina como texto plano para WhatsApp
+  const formatRoutineForWhatsApp = (routine) => {
+    let text = `🏃 *${routine.name}*\n\n`
+    
+    routine.exercises.forEach((exercise, index) => {
+      text += `${index + 1}. *${exercise.name}*\n`
+      text += `   • ${exercise.value} ${exercise.type === 'reps' ? 'repeticiones' : 'segundos'}\n`
+      text += `   • ${exercise.sets} ${exercise.sets === 1 ? 'serie' : 'series'}\n\n`
+    })
+    
+    text += '💪 _¡Vamos con todo!_'
+    return text
+  }
+
+  // Función para enviar por WhatsApp
+  const handleSendWhatsApp = (routine) => {
+    const formattedText = formatRoutineForWhatsApp(routine)
+    const encodedText = encodeURIComponent(formattedText)
+    const whatsappUrl = `https://wa.me/?text=${encodedText}`
+    window.open(whatsappUrl, '_blank')
+  }
+
+  // Función para asignar rutina
+  const handleAssignRoutine = () => {
+    if (!selectedRoutineId) {
+      alert('Por favor selecciona una rutina')
+      return
+    }
+    
+    const routine = savedRoutines.find(r => r.id === parseInt(selectedRoutineId))
+    if (routine) {
+      assignRoutineToStudent(selectedStudent.id, routine)
+      setShowAssignSuccess(true)
+      setTimeout(() => {
+        setShowAssignSuccess(false)
+        setSelectedRoutineId('')
+      }, 2000)
+    }
+  }
 
   if (!selectedStudent) {
     return (
@@ -30,11 +73,11 @@ export default function StudentDetail() {
       <div className="flex items-center space-x-4">
         <button
           onClick={handleBack}
-          className="p-2 rounded-lg hover:bg-gray-100 active:scale-95 transition-all"
+          className="p-2 rounded-lg hover:bg-[#1E40AF] active:scale-95 transition-all text-[#00BFFF]"
         >
           <ArrowLeft size={24} strokeWidth={2.5} />
         </button>
-        <h2 className="text-2xl font-bold text-gray-900">Detalle del Alumno</h2>
+        <h2 className="text-2xl font-bold text-[#1E40AF]">Detalle del Alumno</h2>
       </div>
 
       {/* Card del alumno */}
@@ -43,18 +86,18 @@ export default function StudentDetail() {
           <img
             src={selectedStudent.photo}
             alt={selectedStudent.name}
-            className="w-24 h-24 rounded-full border-4 border-primary"
+            className="w-24 h-24 rounded-full border-4 border-[#00BFFF]"
           />
           <div>
-            <h3 className="text-2xl font-bold text-gray-900">{selectedStudent.name}</h3>
+            <h3 className="text-2xl font-bold text-[#1E40AF]">{selectedStudent.name}</h3>
             <p className="text-sm text-gray-600 mt-1">
               <span
                 className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
                   selectedStudent.level === 'Avanzado'
-                    ? 'bg-green-100 text-green-800'
+                    ? 'bg-[#00FF88] text-[#111827]'
                     : selectedStudent.level === 'Intermedio'
-                    ? 'bg-blue-100 text-blue-800'
-                    : 'bg-yellow-100 text-yellow-800'
+                    ? 'bg-[#00BFFF] text-[#111827]'
+                    : 'bg-[#FFD700] text-[#111827]'
                 }`}
               >
                 {selectedStudent.level}
@@ -66,10 +109,10 @@ export default function StudentDetail() {
         {/* Gráfico de progreso */}
         <div className="mb-6">
           <div className="flex items-center space-x-2 mb-4">
-            <TrendingUp className="text-primary" size={20} />
-            <h4 className="text-lg font-semibold text-gray-800">Progreso Reciente</h4>
+            <TrendingUp className="text-[#00BFFF]" size={20} />
+            <h4 className="text-lg font-semibold text-[#1E40AF]">Progreso Reciente</h4>
           </div>
-          <div className="bg-gray-50 rounded-lg p-4" style={{ height: '300px' }}>
+          <div className="bg-[#111827] rounded-lg p-4" style={{ height: '300px' }}>
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -79,9 +122,9 @@ export default function StudentDetail() {
                 <Line
                   type="monotone"
                   dataKey="rendimiento"
-                  stroke="#FF5722"
+                  stroke="#00BFFF"
                   strokeWidth={3}
-                  dot={{ fill: '#FF5722', r: 6 }}
+                  dot={{ fill: '#00BFFF', r: 6 }}
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -90,53 +133,106 @@ export default function StudentDetail() {
 
         {/* Estadísticas rápidas */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-          <div className="bg-orange-50 rounded-lg p-4 text-center">
-            <p className="text-3xl font-bold text-primary">
+          <div className="bg-[#1E40AF] rounded-lg p-4 text-center">
+            <p className="text-3xl font-bold text-[#00BFFF]">
               {selectedStudent.progress[selectedStudent.progress.length - 1]}%
             </p>
-            <p className="text-xs text-gray-600 mt-1">Último rendimiento</p>
+            <p className="text-xs text-[#F3F4F6] mt-1">Último rendimiento</p>
           </div>
-          <div className="bg-blue-50 rounded-lg p-4 text-center">
-            <p className="text-3xl font-bold text-secondary">
+          <div className="bg-[#111827] rounded-lg p-4 text-center">
+            <p className="text-3xl font-bold text-[#00BFFF]">
               {Math.round(selectedStudent.progress.reduce((a, b) => a + b, 0) / selectedStudent.progress.length)}%
             </p>
-            <p className="text-xs text-gray-600 mt-1">Promedio</p>
+            <p className="text-xs text-[#F3F4F6] mt-1">Promedio</p>
           </div>
-          <div className="bg-green-50 rounded-lg p-4 text-center col-span-2 md:col-span-1">
-            <p className="text-3xl font-bold text-green-600">
+          <div className="bg-[#1E40AF] rounded-lg p-4 text-center col-span-2 md:col-span-1">
+            <p className="text-3xl font-bold text-[#00BFFF]">
               {selectedStudent.routineHistory.filter((r) => r.completed).length}
             </p>
-            <p className="text-xs text-gray-600 mt-1">Rutinas completadas</p>
+            <p className="text-xs text-[#F3F4F6] mt-1">Rutinas completadas</p>
           </div>
         </div>
       </div>
 
-      {/* Historial de rutinas */}
-      <div className="bg-white rounded-xl shadow-lg p-6">
+      {/* Asignar nueva rutina */}
+      <div className="bg-[#1E40AF] rounded-xl shadow-lg p-6">
         <div className="flex items-center space-x-2 mb-4">
-          <Calendar className="text-primary" size={20} />
-          <h4 className="text-lg font-semibold text-gray-800">Historial de Rutinas</h4>
+          <Plus className="text-[#00BFFF]" size={20} />
+          <h4 className="text-lg font-semibold text-[#F3F4F6]">Asignar Nueva Rutina</h4>
+        </div>
+
+        {showAssignSuccess && (
+          <div className="bg-[#1E40AF] border-2 border-[#00BFFF] text-[#00BFFF] px-6 py-4 rounded-lg mb-4 animate-pulse">
+            <p className="font-semibold">✓ Rutina asignada exitosamente</p>
+          </div>
+        )}
+
+        {savedRoutines.length === 0 ? (
+          <p className="text-[#F3F4F6] text-center py-8">No hay rutinas guardadas. Crea una rutina en la sección "Rutinas".</p>
+        ) : (
+          <div className="flex flex-col md:flex-row gap-3">
+            <select
+              value={selectedRoutineId}
+              onChange={(e) => setSelectedRoutineId(e.target.value)}
+              className="flex-1 px-4 py-3 border-2 border-[#111827] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg bg-[#111827] text-[#F3F4F6]"
+            >
+              <option value="">Selecciona una rutina...</option>
+              {savedRoutines.map((routine) => (
+                <option key={routine.id} value={routine.id}>
+                  {routine.name} ({routine.exercises.length} ejercicios)
+                </option>
+              ))}
+            </select>
+            <button
+              onClick={handleAssignRoutine}
+              className="px-6 py-3 bg-[#00BFFF] text-[#111827] rounded-lg hover:bg-[#1E40AF] hover:text-[#00BFFF] active:scale-95 transition-all font-bold"
+            >
+              Asignar
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Historial de rutinas */}
+      <div className="bg-[#1E40AF] rounded-xl shadow-lg p-6">
+        <div className="flex items-center space-x-2 mb-4">
+          <Calendar className="text-[#00BFFF]" size={20} />
+          <h4 className="text-lg font-semibold text-[#F3F4F6]">Historial de Rutinas</h4>
         </div>
 
         {selectedStudent.routineHistory.length === 0 ? (
-          <p className="text-gray-500 text-center py-8">No hay rutinas asignadas aún</p>
+          <p className="text-[#F3F4F6] text-center py-8">No hay rutinas asignadas aún</p>
         ) : (
           <div className="space-y-3">
             {selectedStudent.routineHistory.map((routine) => (
               <div
                 key={routine.id}
-                className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border-2 border-gray-200 hover:border-primary transition-colors"
+                className="flex items-center justify-between p-4 bg-[#111827] rounded-lg border-2 border-[#1E40AF] hover:border-[#00BFFF] transition-colors"
               >
                 <div className="flex-1">
-                  <h5 className="font-semibold text-gray-900">{routine.name}</h5>
-                  <p className="text-sm text-gray-600 mt-1">{routine.date}</p>
-                </div>
-                <div>
-                  {routine.completed ? (
-                    <CheckCircle2 className="text-green-600" size={28} strokeWidth={2.5} />
-                  ) : (
-                    <XCircle className="text-gray-400" size={28} strokeWidth={2.5} />
+                  <h5 className="font-semibold text-[#F3F4F6]">{routine.name}</h5>
+                  <p className="text-sm text-[#00BFFF] mt-1">{routine.date}</p>
+                  {routine.exercises && (
+                    <p className="text-xs text-[#F3F4F6] mt-1">{routine.exercises.length} ejercicios</p>
                   )}
+                </div>
+                <div className="flex items-center space-x-2">
+                  {routine.exercises && (
+                    <button
+                      onClick={() => handleSendWhatsApp(routine)}
+                      className="p-2 bg-[#00BFFF] text-[#111827] rounded-lg hover:bg-[#1E40AF] hover:text-[#00BFFF] active:scale-95 transition-all"
+                      title="Enviar por WhatsApp"
+                    >
+                      <Send size={20} strokeWidth={2.5} />
+                    </button>
+                  )}
+                  <div>
+                    {routine.completed ? (
+                      <CheckCircle2 className="text-green-600" size={28} strokeWidth={2.5} />
+                    ) : (
+                      <XCircle className="text-gray-400" size={28} strokeWidth={2.5} />
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
