@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #FF5722;
+  --color-secondary: #2196F3;
+}
+
+/* Estilos base para optimizar uso en pista */
+body {
+  @apply bg-gray-50 text-gray-900 antialiased;
+}
+
+button:active {
+  @apply scale-95 transition-transform;
+}
