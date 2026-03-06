@@ -18,7 +18,10 @@ export default function Sidebar() {
   return (
     <aside className="hidden md:flex flex-col w-64 bg-[#111827] border-r border-[#1E40AF] shadow-sm h-screen fixed left-0 top-0">
       <div className="p-6 border-b border-[#1E40AF]">
-        <h1 className="text-2xl font-bold text-[#00BFFF]">Adrenalina Extrema</h1>
+        <div className="flex items-center space-x-3 mb-2">
+          <img src="/src/public/logo-png.png" alt="Adrenalina Extrema Logo" className="w-12 h-12 object-contain" />
+          <h1 className="text-2xl font-bold text-[#00BFFF]">Adrenalina Extrema</h1>
+        </div>
         <p className="text-sm text-[#F3F4F6] mt-1">Dashboard Coach</p>
       </div>
 
