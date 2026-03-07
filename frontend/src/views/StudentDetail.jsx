@@ -70,7 +70,7 @@ export default function StudentDetail() {
   }))
 
   return (
-    <div className="p-4 space-y-6 pb-24 md:pb-6 animate-fade-in">
+    <div className="p-4 space-y-6 pb-32 md:pb-6 animate-fade-in">
       {/* Header */}
       <div className="flex items-center space-x-4 animate-slide-in-left">
         <button

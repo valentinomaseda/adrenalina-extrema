@@ -35,7 +35,7 @@ export default function StudentList() {
   }
 
   return (
-    <div className="space-y-4 p-4 animate-fade-in relative">
+    <div className="space-y-4 p-4 pb-32 md:pb-6 animate-fade-in relative">
       <div className="flex flex-col md:flex-row gap-3 animate-slide-in-left">
         {/* Buscador */}
         <div className="flex-1 relative">
@@ -115,11 +115,11 @@ export default function StudentList() {
       {/* Botón flotante para añadir alumno */}
       <button
         onClick={() => setCurrentView('addStudent')}
-        className="fixed bottom-20 md:bottom-8 right-8 bg-gradient-to-r from-[#00BFFF] to-[#1E40AF] text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-all z-50 flex items-center gap-2 group"
+        className="fixed bottom-20 md:bottom-8 right-8 bg-gradient-to-r from-[#00BFFF] to-[#1E40AF] text-white px-4 py-3 rounded-full shadow-2xl hover:scale-110 transition-all z-50 flex items-center gap-2"
         title="Agregar Alumno"
       >
-        <UserPlus size={24} />
-        <span className="hidden group-hover:inline-block text-sm font-semibold mr-2">
+        <UserPlus size={20} />
+        <span className="text-sm font-semibold">
           Agregar Alumno
         </span>
       </button>

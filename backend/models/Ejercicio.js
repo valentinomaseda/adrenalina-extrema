@@ -20,10 +20,10 @@ export class Ejercicio {
   }
 
   static async create(ejercicioData) {
-    const { idEjercicio, nombre, cantSets, contador } = ejercicioData;
+    const { idEjercicio, nombre, tipoContador } = ejercicioData;
     const [result] = await pool.query(
-      'INSERT INTO ejercicio (idEjercicio, nombre, cantSets, contador) VALUES (?, ?, ?, ?)',
-      [idEjercicio, nombre, cantSets, contador]
+      'INSERT INTO ejercicio (idEjercicio, nombre, tipoContador) VALUES (?, ?, ?)',
+      [idEjercicio, nombre, tipoContador || 'reps']
     );
     return result;
   }

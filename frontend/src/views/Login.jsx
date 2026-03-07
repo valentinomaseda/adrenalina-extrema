@@ -29,7 +29,7 @@ export default function Login() {
         {/* Logo y Título */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[#00BFFF] to-[#1E40AF] rounded-full mb-4 shadow-2xl">
-            <span className="text-4xl font-black text-white">AE</span>
+            <img src="../public/logo-png.png" alt="Logo" className="w-full h-full object-contain" />
           </div>
           <h1 className="text-4xl font-black text-[#F3F4F6] mb-2">
             Adrenalina Extrema

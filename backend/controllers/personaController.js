@@ -88,5 +88,27 @@ export const personaController = {
       console.error('Error al eliminar persona:', error);
       res.status(500).json({ error: 'Error al eliminar persona' });
     }
+  },
+
+  // POST /api/personas/login - Autenticación con contraseña hasheada
+  async login(req, res) {
+    try {
+      const { email, password } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ error: 'Email y contraseña son requeridos' });
+      }
+
+      const persona = await Persona.authenticate(email, password);
+      
+      if (!persona) {
+        return res.status(401).json({ error: 'Credenciales inválidas' });
+      }
+
+      res.json(persona);
+    } catch (error) {
+      console.error('Error en login:', error);
+      res.status(500).json({ error: 'Error al iniciar sesión' });
+    }
   }
 };

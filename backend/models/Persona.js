@@ -1,4 +1,7 @@
 import { pool } from '../config/database.js';
+import bcrypt from 'bcrypt';
+
+const SALT_ROUNDS = 10;
 
 export class Persona {
   static async findAll() {
@@ -23,10 +26,14 @@ export class Persona {
 
   static async create(personaData) {
     const { idPersona, nombre, mail, tel, rol, cantAlumnos, direccion, fechaNac, peso, altura, password } = personaData;
+    
+    // Hashear la contraseña antes de guardarla
+    const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+    
     const [result] = await pool.query(
       `INSERT INTO persona (idPersona, nombre, mail, tel, rol, cantAlumnos, direccion, fechaNac, peso, altura, password) 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [idPersona, nombre, mail, tel, rol, cantAlumnos, direccion, fechaNac, peso, altura, password]
+      [idPersona, nombre, mail, tel, rol, cantAlumnos, direccion, fechaNac, peso, altura, hashedPassword]
     );
     return result;
   }
@@ -41,6 +48,15 @@ export class Persona {
         values.push(personaData[key]);
       }
     });
+    
+    // Si se está actualizando la contraseña, hashearla
+    if (personaData.password) {
+      const passwordIndex = fields.indexOf('password = ?');
+      if (passwordIndex !== -1) {
+        const hashedPassword = await bcrypt.hash(personaData.password, SALT_ROUNDS);
+        values[passwordIndex] = hashedPassword;
+      }
+    }
     
     values.push(id);
     const [result] = await pool.query(
@@ -74,5 +90,25 @@ export class Persona {
       `SELECT * FROM persona WHERE rol = 'alumno'`
     );
     return rows;
+  }
+
+  // Método de autenticación con bcrypt
+  static async authenticate(email, password) {
+    const persona = await this.findByEmail(email);
+    
+    if (!persona) {
+      return null;
+    }
+
+    // Verificar la contraseña hasheada
+    const isValid = await bcrypt.compare(password, persona.password);
+    
+    if (!isValid) {
+      return null;
+    }
+
+    // Retornar persona sin el password
+    const { password: _, ...personaSinPassword } = persona;
+    return personaSinPassword;
   }
 }

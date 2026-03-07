@@ -79,8 +79,8 @@ export const rutinaController = {
   // POST /api/rutinas/:id/ejercicios
   async addEjercicio(req, res) {
     try {
-      const { idEjercicio } = req.body;
-      await Rutina.addEjercicio(req.params.id, idEjercicio);
+      const ejercicioData = req.body;
+      await Rutina.addEjercicio(req.params.id, ejercicioData);
       res.status(201).json({ message: 'Ejercicio agregado a la rutina' });
     } catch (error) {
       console.error('Error al agregar ejercicio:', error);

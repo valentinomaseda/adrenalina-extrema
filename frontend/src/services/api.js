@@ -56,16 +56,12 @@ export const personasAPI = {
     method: 'DELETE',
   }),
 
-  // Login (buscar por email y password)
+  // Login (autenticación con contraseñas hasheadas)
   login: async (email, password) => {
-    const personas = await fetchAPI('/personas')
-    const persona = personas.find(p => p.mail === email && p.password === password)
-    
-    if (!persona) {
-      throw new Error('Credenciales inválidas')
-    }
-    
-    return persona
+    return fetchAPI('/personas/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    });
   }
 }
 
@@ -144,9 +140,9 @@ export const rutinasAPI = {
   }),
 
   // Agregar ejercicio a rutina
-  addEjercicio: (rutinaId, ejercicioId) => fetchAPI(`/rutinas/${rutinaId}/ejercicios`, {
+  addEjercicio: (rutinaId, ejercicioData) => fetchAPI(`/rutinas/${rutinaId}/ejercicios`, {
     method: 'POST',
-    body: JSON.stringify({ idEjercicio: ejercicioId }),
+    body: JSON.stringify(ejercicioData),
   }),
 
   // Eliminar ejercicio de rutina

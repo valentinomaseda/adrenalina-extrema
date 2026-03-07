@@ -33,9 +33,7 @@ const transformEjercicioToExercise = (ejercicio) => {
   return {
     id: ejercicio.idEjercicio,
     name: ejercicio.nombre,
-    defaultType: ejercicio.contador?.includes('reps') ? 'reps' : 'segundos',
-    cantSets: ejercicio.cantSets,
-    contador: ejercicio.contador
+    defaultType: ejercicio.tipoContador || 'reps'
   }
 }
 
@@ -45,19 +43,14 @@ const transformRutinaToRoutine = (rutina, ejercicios = []) => {
     name: rutina.nombre,
     createdAt: rutina.fechaHoraCreacion,
     exercises: ejercicios.map(ej => {
-      // Extraer sets y valor del contador (ej: "3 sets x 10 reps")
-      const sets = ej.cantSets || 3
-      const contadorMatch = ej.contador?.match(/(\d+)\s*(reps?|seg|segundos)/i)
-      const value = contadorMatch ? parseInt(contadorMatch[1]) : 10
-      const type = ej.contador?.includes('rep') ? 'reps' : 'segundos'
-      
+      // Los datos de sets y cantidad ahora vienen de rutina_ejercicio
       return {
         exerciseId: ej.idEjercicio,
         id: ej.idEjercicio,
         name: ej.nombre,
-        sets: sets,
-        value: value,
-        type: type
+        sets: ej.cantSets || 3,
+        value: ej.cantidad || 10,
+        type: ej.tipoContador || 'reps'
       }
     })
   }
@@ -98,7 +91,56 @@ export const AppProvider = ({ children }) => {
     try {
       // Cargar alumnos
       const alumnos = await personasAPI.getByRol('alumno')
-      setStudents(alumnos.map(transformPersonaToStudent))
+      
+      // Cargar rutinas asignadas de cada alumno
+      const alumnosConRutinas = await Promise.all(
+        alumnos.map(async (alumno) => {
+          try {
+            const rutinasAsignadas = await personasAPI.getRutinas(alumno.idPersona)
+            const studentData = transformPersonaToStudent(alumno)
+            
+            // Transformar rutinas asignadas al formato del frontend con ejercicios
+            studentData.routineHistory = await Promise.all(
+              rutinasAsignadas.map(async (ra) => {
+                try {
+                  // Cargar ejercicios de esta rutina
+                  const ejercicios = await rutinasAPI.getEjercicios(ra.idRutina)
+                  
+                  return {
+                    id: ra.idRutina,
+                    name: ra.nombre,
+                    date: ra.fechaAsignacion ? new Date(ra.fechaAsignacion).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+                    completed: ra.estado === 'completada',
+                    exercises: ejercicios.map(ej => ({
+                      exerciseId: ej.idEjercicio,
+                      id: ej.idEjercicio,
+                      name: ej.nombre,
+                      sets: ej.cantSets || 3,
+                      value: ej.cantidad || 10,
+                      type: ej.tipoContador || 'reps'
+                    }))
+                  }
+                } catch (error) {
+                  console.error(`Error loading exercises for routine ${ra.idRutina}:`, error)
+                  return {
+                    id: ra.idRutina,
+                    name: ra.nombre,
+                    date: ra.fechaAsignacion ? new Date(ra.fechaAsignacion).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+                    completed: ra.estado === 'completada',
+                    exercises: []
+                  }
+                }
+              })
+            )
+            
+            return studentData
+          } catch (error) {
+            console.error(`Error loading routines for student ${alumno.idPersona}:`, error)
+            return transformPersonaToStudent(alumno)
+          }
+        })
+      )
+      setStudents(alumnosConRutinas)
 
       // Cargar ejercicios
       const ejercicios = await ejerciciosAPI.getAll()
@@ -158,7 +200,56 @@ export const AppProvider = ({ children }) => {
   const refreshStudents = async () => {
     try {
       const alumnos = await personasAPI.getByRol('alumno')
-      setStudents(alumnos.map(transformPersonaToStudent))
+      
+      // Cargar rutinas asignadas de cada alumno
+      const alumnosConRutinas = await Promise.all(
+        alumnos.map(async (alumno) => {
+          try {
+            const rutinasAsignadas = await personasAPI.getRutinas(alumno.idPersona)
+            const studentData = transformPersonaToStudent(alumno)
+            
+            // Transformar rutinas asignadas al formato del frontend con ejercicios
+            studentData.routineHistory = await Promise.all(
+              rutinasAsignadas.map(async (ra) => {
+                try {
+                  // Cargar ejercicios de esta rutina
+                  const ejercicios = await rutinasAPI.getEjercicios(ra.idRutina)
+                  
+                  return {
+                    id: ra.idRutina,
+                    name: ra.nombre,
+                    date: ra.fechaAsignacion ? new Date(ra.fechaAsignacion).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+                    completed: ra.estado === 'completada',
+                    exercises: ejercicios.map(ej => ({
+                      exerciseId: ej.idEjercicio,
+                      id: ej.idEjercicio,
+                      name: ej.nombre,
+                      sets: ej.cantSets || 3,
+                      value: ej.cantidad || 10,
+                      type: ej.tipoContador || 'reps'
+                    }))
+                  }
+                } catch (error) {
+                  console.error(`Error loading exercises for routine ${ra.idRutina}:`, error)
+                  return {
+                    id: ra.idRutina,
+                    name: ra.nombre,
+                    date: ra.fechaAsignacion ? new Date(ra.fechaAsignacion).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+                    completed: ra.estado === 'completada',
+                    exercises: []
+                  }
+                }
+              })
+            )
+            
+            return studentData
+          } catch (error) {
+            console.error(`Error loading routines for student ${alumno.idPersona}:`, error)
+            return transformPersonaToStudent(alumno)
+          }
+        })
+      )
+      setStudents(alumnosConRutinas)
     } catch (error) {
       console.error('Error refreshing students:', error)
       throw error
@@ -214,8 +305,7 @@ export const AppProvider = ({ children }) => {
       const ejercicioData = {
         idEjercicio: newId,
         nombre: exerciseData.name,
-        cantSets: parseInt(exerciseData.cantSets) || 3,
-        contador: exerciseData.contador || '10 reps'
+        tipoContador: exerciseData.tipoContador || 'reps'
       }
 
       await ejerciciosAPI.create(ejercicioData)
@@ -242,11 +332,17 @@ export const AppProvider = ({ children }) => {
 
       await rutinasAPI.create(rutinaData)
       
-      // Agregar ejercicios a la rutina si los hay
+      // Agregar ejercicios a la rutina con sus sets y cantidad
       if (routine.exercises && routine.exercises.length > 0) {
         for (let i = 0; i < routine.exercises.length; i++) {
           const exercise = routine.exercises[i]
-          await rutinasAPI.addEjercicio(newId, exercise.exerciseId || exercise.id)
+          const ejercicioData = {
+            idEjercicio: exercise.exerciseId || exercise.id,
+            cantSets: exercise.sets || 3,
+            cantidad: exercise.value || 10,
+            orden: i + 1
+          }
+          await rutinasAPI.addEjercicio(newId, ejercicioData)
         }
       }
 
@@ -277,25 +373,8 @@ export const AppProvider = ({ children }) => {
     try {
       await rutinasAPI.assignToPersona(routine.idRutina || routine.id, studentId)
       
-      // Actualizar el estado local
-      setStudents(students.map(student => {
-        if (student.id === studentId) {
-          return {
-            ...student,
-            routineHistory: [
-              {
-                id: Date.now(),
-                name: routine.name,
-                date: new Date().toISOString().split('T')[0],
-                completed: false,
-                exercises: routine.exercises
-              },
-              ...student.routineHistory
-            ]
-          }
-        }
-        return student
-      }))
+      // Recargar los estudiantes con sus rutinas actualizadas desde la base de datos
+      await refreshStudents()
     } catch (error) {
       console.error('Error assigning routine:', error)
       throw error

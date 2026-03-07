@@ -78,7 +78,7 @@ export default function RoutineBuilder() {
   }
 
   return (
-    <div className="p-4 space-y-6 pb-24 md:pb-6 animate-fade-in">
+    <div className="p-4 space-y-6 pb-32 md:pb-6 animate-fade-in">
       <div className="flex items-center space-x-3 animate-slide-in-left">
         <Dumbbell className="text-[#00BFFF]" size={28} strokeWidth={2.5} />
         <h2 className="text-2xl font-bold text-[#1E40AF]">Constructor de Rutinas</h2>
@@ -273,11 +273,11 @@ export default function RoutineBuilder() {
       {/* Botón flotante para añadir ejercicio */}
       <button
         onClick={() => setCurrentView('addExercise')}
-        className="fixed bottom-20 md:bottom-8 right-8 bg-gradient-to-r from-[#00BFFF] to-[#1E40AF] text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-all z-50 flex items-center gap-2 group"
+        className="fixed bottom-20 md:bottom-8 right-8 bg-gradient-to-r from-[#00BFFF] to-[#1E40AF] text-white px-4 py-3 rounded-full shadow-2xl hover:scale-110 transition-all z-50 flex items-center gap-2"
         title="Agregar Ejercicio"
       >
-        <Plus size={24} />
-        <span className="hidden group-hover:inline-block text-sm font-semibold mr-2">
+        <Plus size={20} />
+        <span className="text-sm font-semibold">
           Agregar Ejercicio
         </span>
       </button>

@@ -47,19 +47,23 @@ export class Rutina {
   // Obtener ejercicios de una rutina
   static async getEjercicios(idRutina) {
     const [rows] = await pool.query(
-      `SELECT e.* FROM ejercicio e
+      `SELECT e.idEjercicio, e.nombre, e.tipoContador, 
+              re.cantSets, re.cantidad, re.orden
+       FROM ejercicio e
        INNER JOIN rutina_ejercicio re ON e.idEjercicio = re.idEjercicio
-       WHERE re.idRutina = ?`,
+       WHERE re.idRutina = ?
+       ORDER BY re.orden`,
       [idRutina]
     );
     return rows;
   }
 
   // Agregar ejercicio a rutina
-  static async addEjercicio(idRutina, idEjercicio) {
+  static async addEjercicio(idRutina, ejercicioData) {
+    const { idEjercicio, cantSets, cantidad, orden } = ejercicioData;
     const [result] = await pool.query(
-      'INSERT INTO rutina_ejercicio (idRutina, idEjercicio) VALUES (?, ?)',
-      [idRutina, idEjercicio]
+      'INSERT INTO rutina_ejercicio (idRutina, idEjercicio, cantSets, cantidad, orden) VALUES (?, ?, ?, ?, ?)',
+      [idRutina, idEjercicio, cantSets || 3, cantidad || 10, orden || null]
     );
     return result;
   }

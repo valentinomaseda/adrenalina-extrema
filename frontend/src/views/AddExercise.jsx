@@ -10,35 +10,15 @@ export default function AddExercise() {
   
   const [formData, setFormData] = useState({
     name: '',
-    cantSets: '3',
-    contador: '10 reps',
-    counterType: 'reps'
+    tipoContador: 'reps'
   })
 
   const handleChange = (e) => {
     const { name, value } = e.target
-    
-    if (name === 'counterType') {
-      // Actualizar el formato del contador según el tipo
-      const number = formData.contador.match(/\d+/)?.[0] || '10'
-      setFormData({
-        ...formData,
-        counterType: value,
-        contador: value === 'reps' ? `${number} reps` : `${number} segundos`
-      })
-    } else if (name === 'counterValue') {
-      // Actualizar solo el número en el contador
-      setFormData({
-        ...formData,
-        contador: formData.counterType === 'reps' ? `${value} reps` : `${value} segundos`
-      })
-    } else {
-      setFormData({
-        ...formData,
-        [name]: value
-      })
-    }
-    
+    setFormData({
+      ...formData,
+      [name]: value
+    })
     setError('')
   }
 
@@ -76,11 +56,8 @@ export default function AddExercise() {
     )
   }
 
-  // Extraer el valor numérico del contador
-  const counterValue = formData.contador.match(/\d+/)?.[0] || '10'
-
   return (
-    <div className="min-h-screen bg-gray-50 p-4 animate-fade-in">
+    <div className="min-h-screen bg-gray-50 p-4 pb-32 md:pb-6 animate-fade-in">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="mb-6">
@@ -123,38 +100,18 @@ export default function AddExercise() {
               />
             </div>
 
-            {/* Cantidad de Sets */}
-            <div>
-              <label htmlFor="cantSets" className="block text-sm font-semibold text-gray-700 mb-2">
-                Cantidad de Sets *
-              </label>
-              <input
-                id="cantSets"
-                name="cantSets"
-                type="number"
-                min="1"
-                max="20"
-                value={formData.cantSets}
-                onChange={handleChange}
-                required
-                className="text-gray-700 px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg"
-                placeholder="3"
-              />
-              <p className="text-sm text-gray-500 mt-1">Número de series del ejercicio</p>
-            </div>
-
             {/* Tipo de Contador */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Tipo de Contador *
+                ¿Cómo se mide este ejercicio? *
               </label>
               <div className="flex gap-4">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="radio"
-                    name="counterType"
+                    name="tipoContador"
                     value="reps"
-                    checked={formData.counterType === 'reps'}
+                    checked={formData.tipoContador === 'reps'}
                     onChange={handleChange}
                     className="w-5 h-5 text-[#00BFFF] focus:ring-[#00BFFF]"
                   />
@@ -163,37 +120,17 @@ export default function AddExercise() {
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="radio"
-                    name="counterType"
+                    name="tipoContador"
                     value="segundos"
-                    checked={formData.counterType === 'segundos'}
+                    checked={formData.tipoContador === 'segundos'}
                     onChange={handleChange}
                     className="w-5 h-5 text-[#00BFFF] focus:ring-[#00BFFF]"
                   />
                   <span className="text-gray-700 text-lg">Tiempo (segundos)</span>
                 </label>
               </div>
-            </div>
-
-            {/* Valor del Contador */}
-            <div>
-              <label htmlFor="counterValue" className="block text-sm font-semibold text-gray-700 mb-2">
-                {formData.counterType === 'reps' ? 'Repeticiones por Set' : 'Segundos por Set'} *
-              </label>
-              <input
-                id="counterValue"
-                name="counterValue"
-                type="number"
-                min="1"
-                value={counterValue}
-                onChange={handleChange}
-                required
-                className="text-gray-900 w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg"
-                placeholder="10"
-              />
-              <p className="text-sm text-gray-500 mt-1">
-                {formData.counterType === 'reps' 
-                  ? 'Número de repeticiones por serie' 
-                  : 'Duración en segundos por serie'}
+              <p className="text-sm text-gray-500 mt-2">
+                Las cantidades específicas (sets, reps/segundos) se asignarán al agregar el ejercicio a una rutina.
               </p>
             </div>
 
@@ -205,7 +142,9 @@ export default function AddExercise() {
                   {formData.name || 'Nombre del Ejercicio'}
                 </p>
                 <p className="text-lg text-gray-300">
-                  <span className="font-semibold text-[#00BFFF]">{formData.cantSets}</span> sets × <span className="font-semibold text-[#00BFFF]">{formData.contador}</span>
+                  Se mide en: <span className="font-semibold text-[#00BFFF]">
+                    {formData.tipoContador === 'reps' ? 'Repeticiones' : 'Segundos'}
+                  </span>
                 </p>
               </div>
             </div>
