@@ -67,25 +67,94 @@ Producción:
 npm start
 ```
 
-## API Endpoints
+El servidor se iniciará en `http://localhost:3000` y probará automáticamente la conexión a MySQL.
 
-### Estudiantes
-- `GET /api/students` - Listar todos los estudiantes
-- `GET /api/students/:id` - Obtener un estudiante
-- `POST /api/students` - Crear estudiante
-- `PUT /api/students/:id` - Actualizar estudiante
-- `DELETE /api/students/:id` - Eliminar estudiante
+## 📂 Estructura de Archivos
 
-### Rutinas
-- `GET /api/routines` - Listar todas las rutinas
-- `GET /api/routines/:id` - Obtener una rutina
-- `POST /api/routines` - Crear rutina
-- `PUT /api/routines/:id` - Actualizar rutina
-- `DELETE /api/routines/:id` - Eliminar rutina
+```
+backend/
+├── server.js                 # Servidor Express principal
+├── package.json             # Dependencias
+├── adrenalina_extrema.sql   # Schema de base de datos
+├── API_DOCS.md             # Documentación completa de API
+├── .env.example            # Variables de entorno
+│
+├── config/
+│   └── database.js         # Pool de conexiones MySQL
+│
+├── models/                 # Modelos de datos
+│   ├── Persona.js
+│   ├── Ejercicio.js
+│   ├── TipoEjercicio.js
+│   └── Rutina.js
+│
+├── controllers/            # Lógica de negocio
+│   ├── personaController.js
+│   ├── ejercicioController.js
+│   ├── tipoEjercicioController.js
+│   └── rutinaController.js
+│
+├── routes/                # Rutas de API
+│   ├── personas.js
+│   ├── ejercicios.js
+│   ├── tiposEjercicio.js
+│   └── rutinas.js
+│
+├── middleware/            # Middleware personalizado
+│   ├── validation.js      # Validaciones
+│   └── common.js         # Utilidades comunes
+│
+└── utils/                # Funciones utilitarias
+    └── helpers.js        # Helpers generales
+```
 
-### Ejercicios
-- `GET /api/exercises` - Listar todos los ejercicios
-- `GET /api/exercises/:id` - Obtener un ejercicio
-- `POST /api/exercises` - Crear ejercicio
-- `PUT /api/exercises/:id` - Actualizar ejercicio
-- `DELETE /api/exercises/:id` - Eliminar ejercicio
+## 🗄️ Modelo de Base de Datos
+
+### Tablas principales:
+- **persona** - Usuarios (alumnos y entrenadores)
+- **ejercicio** - Catálogo de ejercicios
+- **tipo_ejercicio** - Categorías de ejercicios
+- **rutina** - Rutinas de entrenamiento
+- **rutina_ejercicio** - Relación N:M entre rutinas y ejercicios
+- **alumno_rutina** - Asignación de rutinas a alumnos
+
+## 🔌 API Endpoints
+
+Ver la documentación completa en [API_DOCS.md](API_DOCS.md)
+
+### Recursos principales:
+- **`/api/personas`** - Gestión de usuarios (alumnos/entrenadores)
+- **`/api/ejercicios`** - Catálogo de ejercicios
+- **`/api/rutinas`** - Gestión de rutinas
+- **`/api/tipos-ejercicio`** - Categorías de ejercicios
+
+Cada recurso soporta operaciones CRUD completas (GET, POST, PUT, DELETE).
+
+## 🧪 Testing
+
+### Test de conexión
+El servidor prueba automáticamente la conexión MySQL al iniciar:
+```bash
+npm run dev
+```
+
+### Test manual de endpoints
+```bash
+# Health check
+curl http://localhost:3000/api/health
+
+# Listar personas
+curl http://localhost:3000/api/personas
+
+# Crear persona (ejemplo)
+curl -X POST http://localhost:3000/api/personas \
+  -H "Content-Type: application/json" \
+  -d '{"idPersona":1,"nombre":"Test User","password":"123456"}'
+```
+
+## 🚀 Próximos pasos
+
+1. **Autenticación**: Implementar JWT para autenticación de usuarios
+2. **Validaciones**: Agregar validaciones más robustas
+3. **Testing**: Agregar tests unitarios e integración
+4. **Documentación**: Swagger/OpenAPI para documentación interactiva

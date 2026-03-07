@@ -1,9 +1,9 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+dotenv.config();
 import { testConnection } from './config/database.js';
 
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -22,15 +22,17 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Importar rutas (descomentar cuando las crees)
-// import studentRoutes from './routes/students.js';
-// import routineRoutes from './routes/routines.js';
-// import exerciseRoutes from './routes/exercises.js';
+// Importar rutas
+import personasRoutes from './routes/personas.js';
+import ejerciciosRoutes from './routes/ejercicios.js';
+import rutinasRoutes from './routes/rutinas.js';
+import tiposEjercicioRoutes from './routes/tiposEjercicio.js';
 
-// Usar rutas (descomentar cuando las crees)
-// app.use('/api/students', studentRoutes);
-// app.use('/api/routines', routineRoutes);
-// app.use('/api/exercises', exerciseRoutes);
+// Usar rutas
+app.use('/api/personas', personasRoutes);
+app.use('/api/ejercicios', ejerciciosRoutes);
+app.use('/api/rutinas', rutinasRoutes);
+app.use('/api/tipos-ejercicio', tiposEjercicioRoutes);
 
 // Manejo de errores
 app.use((err, req, res, next) => {

@@ -1,0 +1,153 @@
+import { Rutina } from '../models/Rutina.js';
+
+export const rutinaController = {
+  // GET /api/rutinas
+  async getAll(req, res) {
+    try {
+      const rutinas = await Rutina.findAll();
+      res.json(rutinas);
+    } catch (error) {
+      console.error('Error al obtener rutinas:', error);
+      res.status(500).json({ error: 'Error al obtener rutinas' });
+    }
+  },
+
+  // GET /api/rutinas/:id
+  async getById(req, res) {
+    try {
+      const rutina = await Rutina.findById(req.params.id);
+      if (!rutina) {
+        return res.status(404).json({ error: 'Rutina no encontrada' });
+      }
+      res.json(rutina);
+    } catch (error) {
+      console.error('Error al obtener rutina:', error);
+      res.status(500).json({ error: 'Error al obtener rutina' });
+    }
+  },
+
+  // GET /api/rutinas/:id/full (con ejercicios incluidos)
+  async getFullRutina(req, res) {
+    try {
+      const rutina = await Rutina.getFullRutina(req.params.id);
+      if (!rutina) {
+        return res.status(404).json({ error: 'Rutina no encontrada' });
+      }
+      res.json(rutina);
+    } catch (error) {
+      console.error('Error al obtener rutina completa:', error);
+      res.status(500).json({ error: 'Error al obtener rutina' });
+    }
+  },
+
+  // GET /api/rutinas/:id/ejercicios
+  async getEjercicios(req, res) {
+    try {
+      const ejercicios = await Rutina.getEjercicios(req.params.id);
+      res.json(ejercicios);
+    } catch (error) {
+      console.error('Error al obtener ejercicios:', error);
+      res.status(500).json({ error: 'Error al obtener ejercicios' });
+    }
+  },
+
+  // GET /api/rutinas/:id/alumnos
+  async getAlumnos(req, res) {
+    try {
+      const alumnos = await Rutina.getAlumnos(req.params.id);
+      res.json(alumnos);
+    } catch (error) {
+      console.error('Error al obtener alumnos:', error);
+      res.status(500).json({ error: 'Error al obtener alumnos' });
+    }
+  },
+
+  // POST /api/rutinas
+  async create(req, res) {
+    try {
+      const result = await Rutina.create(req.body);
+      res.status(201).json({ 
+        message: 'Rutina creada exitosamente',
+        id: req.body.idRutina 
+      });
+    } catch (error) {
+      console.error('Error al crear rutina:', error);
+      res.status(500).json({ error: 'Error al crear rutina' });
+    }
+  },
+
+  // POST /api/rutinas/:id/ejercicios
+  async addEjercicio(req, res) {
+    try {
+      const { idEjercicio } = req.body;
+      await Rutina.addEjercicio(req.params.id, idEjercicio);
+      res.status(201).json({ message: 'Ejercicio agregado a la rutina' });
+    } catch (error) {
+      console.error('Error al agregar ejercicio:', error);
+      res.status(500).json({ error: 'Error al agregar ejercicio' });
+    }
+  },
+
+  // DELETE /api/rutinas/:id/ejercicios/:idEjercicio
+  async removeEjercicio(req, res) {
+    try {
+      await Rutina.removeEjercicio(req.params.id, req.params.idEjercicio);
+      res.json({ message: 'Ejercicio removido de la rutina' });
+    } catch (error) {
+      console.error('Error al remover ejercicio:', error);
+      res.status(500).json({ error: 'Error al remover ejercicio' });
+    }
+  },
+
+  // POST /api/rutinas/:id/asignar
+  async assignToAlumno(req, res) {
+    try {
+      const { idPersona, estado } = req.body;
+      await Rutina.assignToAlumno(req.params.id, idPersona, estado);
+      res.status(201).json({ message: 'Rutina asignada al alumno' });
+    } catch (error) {
+      console.error('Error al asignar rutina:', error);
+      res.status(500).json({ error: 'Error al asignar rutina' });
+    }
+  },
+
+  // PUT /api/rutinas/:id/estado
+  async updateEstado(req, res) {
+    try {
+      const { idPersona, estado } = req.body;
+      await Rutina.updateEstadoAsignacion(req.params.id, idPersona, estado);
+      res.json({ message: 'Estado de rutina actualizado' });
+    } catch (error) {
+      console.error('Error al actualizar estado:', error);
+      res.status(500).json({ error: 'Error al actualizar estado' });
+    }
+  },
+
+  // PUT /api/rutinas/:id
+  async update(req, res) {
+    try {
+      const result = await Rutina.update(req.params.id, req.body);
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: 'Rutina no encontrada' });
+      }
+      res.json({ message: 'Rutina actualizada exitosamente' });
+    } catch (error) {
+      console.error('Error al actualizar rutina:', error);
+      res.status(500).json({ error: 'Error al actualizar rutina' });
+    }
+  },
+
+  // DELETE /api/rutinas/:id
+  async delete(req, res) {
+    try {
+      const result = await Rutina.delete(req.params.id);
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: 'Rutina no encontrada' });
+      }
+      res.json({ message: 'Rutina eliminada exitosamente' });
+    } catch (error) {
+      console.error('Error al eliminar rutina:', error);
+      res.status(500).json({ error: 'Error al eliminar rutina' });
+    }
+  }
+};

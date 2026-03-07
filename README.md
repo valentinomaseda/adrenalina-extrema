@@ -22,19 +22,38 @@ adrenalina-extrema/
 
 ## Inicio Rápido
 
-### Frontend
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
 ### Backend
 ```bash
 cd backend
+
+# Instalar dependencias
 npm install
+
+# Configurar variables de entorno
+# Copia .env.example a .env y configura tu base de datos MySQL
+cp .env.example .env
+
+# Importar schema de base de datos
+mysql -u root -p < adrenalina_extrema.sql
+
+# Iniciar servidor de desarrollo
 npm run dev
 ```
+
+El backend estará disponible en `http://localhost:3000`
+
+### Frontend
+```bash
+cd frontend
+
+# Instalar dependencias
+npm install
+
+# Iniciar servidor de desarrollo
+npm run dev
+```
+
+El frontend estará disponible en `http://localhost:5173`
 
 ## Documentación
 
