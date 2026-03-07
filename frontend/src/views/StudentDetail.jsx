@@ -61,7 +61,7 @@ export default function StudentDetail() {
   // Función para eliminar rutina
   const handleDeleteRoutine = async () => {
     if (routineToDelete) {
-      await removeRoutineFromStudent(selectedStudent.id, routineToDelete.id)
+      await removeRoutineFromStudent(selectedStudent.id, routineToDelete.id, routineToDelete.fechaAsignacion)
       setShowDeleteModal(false)
       setRoutineToDelete(null)
     }
@@ -90,10 +90,10 @@ export default function StudentDetail() {
   }
 
   // Función para actualizar estado de rutina
-  const handleUpdateRoutineStatus = async (routineId, newStatus) => {
+  const handleUpdateRoutineStatus = async (routineId, newStatus, fechaAsignacion) => {
     setUpdatingRoutineStatus(routineId)
     try {
-      const updatedStudents = await updateStudentRoutineStatus(selectedStudent.id, routineId, newStatus)
+      const updatedStudents = await updateStudentRoutineStatus(selectedStudent.id, routineId, newStatus, fechaAsignacion)
       
       // Actualizar el selectedStudent con los datos actualizados
       if (updatedStudents) {
@@ -419,7 +419,7 @@ export default function StudentDetail() {
                   {/* Botones de estado */}
                   <div className="grid grid-cols-3 gap-2">
                     <button
-                      onClick={() => handleUpdateRoutineStatus(routine.id, 'completada')}
+                      onClick={() => handleUpdateRoutineStatus(routine.id, 'completada', routine.fechaAsignacion)}
                       disabled={updatingRoutineStatus === routine.id || routine.status === 'completada'}
                       className={`px-2 py-2 rounded-lg font-semibold text-xs transition-all active:scale-95 ${
                         routine.status === 'completada'
@@ -430,7 +430,7 @@ export default function StudentDetail() {
                       ✓ Completada
                     </button>
                     <button
-                      onClick={() => handleUpdateRoutineStatus(routine.id, 'incompleta')}
+                      onClick={() => handleUpdateRoutineStatus(routine.id, 'incompleta', routine.fechaAsignacion)}
                       disabled={updatingRoutineStatus === routine.id || routine.status === 'incompleta'}
                       className={`px-2 py-2 rounded-lg font-semibold text-xs transition-all active:scale-95 ${
                         routine.status === 'incompleta'
@@ -441,7 +441,7 @@ export default function StudentDetail() {
                       ◐ Incompleta
                     </button>
                     <button
-                      onClick={() => handleUpdateRoutineStatus(routine.id, 'activa')}
+                      onClick={() => handleUpdateRoutineStatus(routine.id, 'activa', routine.fechaAsignacion)}
                       disabled={updatingRoutineStatus === routine.id || routine.status === 'activa'}
                       className={`px-2 py-2 rounded-lg font-semibold text-xs transition-all active:scale-95 ${
                         routine.status === 'activa'

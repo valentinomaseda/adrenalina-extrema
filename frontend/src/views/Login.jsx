@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Lock, Mail, AlertCircle, Loader2 } from 'lucide-react'
+import { Lock, Mail, AlertCircle, Loader2, Eye, EyeOff } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
 
 export default function Login() {
@@ -8,6 +8,7 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -80,14 +81,22 @@ export default function Login() {
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#00BFFF]" size={20} />
                 <input
                   id="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
                   disabled={loading}
-                  className="w-full pl-10 pr-4 py-3 border-2 border-[#111827] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg bg-[#111827] text-[#F3F4F6] placeholder-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  className="w-full pl-10 pr-12 py-3 border-2 border-[#111827] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg bg-[#111827] text-[#F3F4F6] placeholder-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-[#00BFFF] transition"
+                  disabled={loading}
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
               </div>
             </div>
 

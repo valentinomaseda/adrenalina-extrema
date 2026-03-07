@@ -79,34 +79,74 @@ export class Rutina {
 
   // Asignar rutina a alumno
   static async assignToAlumno(idRutina, idPersona, estado = 'activa') {
-    // Usar INSERT ... ON DUPLICATE KEY UPDATE para evitar duplicados
-    // Si ya existe, actualiza el estado y la fecha
+    // Permite asignar la misma rutina múltiples veces con diferentes fechas
+    // La PK incluye fechaAsignacion, por lo que NOW() garantiza unicidad
     const [result] = await pool.query(
       `INSERT INTO alumno_rutina (idPersona, idRutina, estado, fechaAsignacion) 
-       VALUES (?, ?, ?, NOW())
-       ON DUPLICATE KEY UPDATE 
-       estado = VALUES(estado), 
-       fechaAsignacion = NOW()`,
+       VALUES (?, ?, ?, NOW())`,
       [idPersona, idRutina, estado]
     );
     return result;
   }
 
   // Desasignar rutina de alumno
-  static async removeFromAlumno(idRutina, idPersona) {
-    const [result] = await pool.query(
-      'DELETE FROM alumno_rutina WHERE idRutina = ? AND idPersona = ?',
-      [idRutina, idPersona]
-    );
+  static async removeFromAlumno(idRutina, idPersona, fechaAsignacion = null) {
+    // Si se especifica fechaAsignacion, elimina solo esa asignación
+    // Si no, elimina la asignación más reciente
+    let query, params;
+    
+    if (fechaAsignacion) {
+      // Convertir fecha ISO a UNIX timestamp
+      const fecha = new Date(fechaAsignacion);
+      const unixTimestamp = Math.floor(fecha.getTime() / 1000);
+      
+      query = 'DELETE FROM alumno_rutina WHERE idRutina = ? AND idPersona = ? AND UNIX_TIMESTAMP(fechaAsignacion) = ?';
+      params = [idRutina, idPersona, unixTimestamp];
+    } else {
+      query = `DELETE FROM alumno_rutina 
+               WHERE idRutina = ? AND idPersona = ? 
+               AND fechaAsignacion = (
+                 SELECT fechaAsignacion FROM (
+                   SELECT fechaAsignacion FROM alumno_rutina 
+                   WHERE idRutina = ? AND idPersona = ?
+                   ORDER BY fechaAsignacion DESC LIMIT 1
+                 ) AS temp
+               )`;
+      params = [idRutina, idPersona, idRutina, idPersona];
+    }
+    
+    const [result] = await pool.query(query, params);
     return result;
   }
 
   // Actualizar estado de rutina asignada
-  static async updateEstadoAsignacion(idRutina, idPersona, estado) {
-    const [result] = await pool.query(
-      'UPDATE alumno_rutina SET estado = ? WHERE idRutina = ? AND idPersona = ?',
-      [estado, idRutina, idPersona]
-    );
+  static async updateEstadoAsignacion(idRutina, idPersona, estado, fechaAsignacion = null) {
+    // Si se especifica fechaAsignacion, actualiza solo esa asignación
+    // Si no, actualiza la asignación más reciente
+    let query, params;
+    
+    if (fechaAsignacion) {
+      // Convertir fecha ISO a objeto Date y luego a UNIX timestamp
+      const fecha = new Date(fechaAsignacion);
+      const unixTimestamp = Math.floor(fecha.getTime() / 1000);
+      
+      // Usar UNIX_TIMESTAMP para comparación exacta
+      query = 'UPDATE alumno_rutina SET estado = ? WHERE idRutina = ? AND idPersona = ? AND UNIX_TIMESTAMP(fechaAsignacion) = ?';
+      params = [estado, idRutina, idPersona, unixTimestamp];
+    } else {
+      query = `UPDATE alumno_rutina SET estado = ? 
+               WHERE idRutina = ? AND idPersona = ? 
+               AND fechaAsignacion = (
+                 SELECT fechaAsignacion FROM (
+                   SELECT fechaAsignacion FROM alumno_rutina 
+                   WHERE idRutina = ? AND idPersona = ?
+                   ORDER BY fechaAsignacion DESC LIMIT 1
+                 ) AS temp
+               )`;
+      params = [estado, idRutina, idPersona, idRutina, idPersona];
+    }
+    
+    const [result] = await pool.query(query, params);
     return result;
   }
 

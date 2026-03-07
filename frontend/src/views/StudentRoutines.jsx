@@ -14,10 +14,10 @@ export default function StudentRoutines() {
     }
   }, [user])
 
-  const handleStatusUpdate = async (routineId, newStatus) => {
+  const handleStatusUpdate = async (routineId, newStatus, fechaAsignacion) => {
     setUpdatingStatus(routineId)
     try {
-      await updateRoutineStatus(routineId, newStatus)
+      await updateRoutineStatus(routineId, newStatus, fechaAsignacion)
     } catch (error) {
       console.error('Error updating routine status:', error)
       alert('Error al actualizar el estado de la rutina')
@@ -154,7 +154,7 @@ export default function StudentRoutines() {
                 {/* Botones de estado */}
                 <div className="grid grid-cols-3 gap-2">
                   <button
-                    onClick={() => handleStatusUpdate(routine.id, 'completada')}
+                    onClick={() => handleStatusUpdate(routine.id, 'completada', routine.fechaAsignacion)}
                     disabled={updatingStatus === routine.id || routine.status === 'completada'}
                     className={`px-3 py-2 rounded-lg font-semibold text-sm transition-all active:scale-95 ${
                       routine.status === 'completada'
@@ -165,7 +165,7 @@ export default function StudentRoutines() {
                     ✓ Completada
                   </button>
                   <button
-                    onClick={() => handleStatusUpdate(routine.id, 'incompleta')}
+                    onClick={() => handleStatusUpdate(routine.id, 'incompleta', routine.fechaAsignacion)}
                     disabled={updatingStatus === routine.id || routine.status === 'incompleta'}
                     className={`px-3 py-2 rounded-lg font-semibold text-sm transition-all active:scale-95 ${
                       routine.status === 'incompleta'
@@ -176,7 +176,7 @@ export default function StudentRoutines() {
                     ◐ Incompleta
                   </button>
                   <button
-                    onClick={() => handleStatusUpdate(routine.id, 'activa')}
+                    onClick={() => handleStatusUpdate(routine.id, 'activa', routine.fechaAsignacion)}
                     disabled={updatingStatus === routine.id || routine.status === 'activa'}
                     className={`px-3 py-2 rounded-lg font-semibold text-sm transition-all active:scale-95 ${
                       routine.status === 'activa'

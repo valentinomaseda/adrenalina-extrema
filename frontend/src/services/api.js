@@ -140,15 +140,15 @@ export const rutinasAPI = {
   }),
 
   // Desasignar rutina de persona
-  removeFromPersona: (rutinaId, personaId) => fetchAPI(`/rutinas/${rutinaId}/desasignar`, {
+  removeFromPersona: (rutinaId, personaId, fechaAsignacion) => fetchAPI(`/rutinas/${rutinaId}/desasignar`, {
     method: 'POST',
-    body: JSON.stringify({ idPersona: personaId }),
+    body: JSON.stringify({ idPersona: personaId, fechaAsignacion }),
   }),
 
   // Actualizar estado de asignación de rutina
-  updateEstado: (rutinaId, personaId, estado) => fetchAPI(`/rutinas/${rutinaId}/estado`, {
+  updateEstado: (rutinaId, personaId, estado, fechaAsignacion) => fetchAPI(`/rutinas/${rutinaId}/estado`, {
     method: 'PUT',
-    body: JSON.stringify({ idPersona: personaId, estado }),
+    body: JSON.stringify({ idPersona: personaId, estado, fechaAsignacion }),
   }),
 
   // Agregar ejercicio a rutina

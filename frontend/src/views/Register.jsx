@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { UserPlus, ArrowLeft, Loader2, CheckCircle, Mail, Lock, User, Phone, Calendar, MapPin } from 'lucide-react'
+import { UserPlus, ArrowLeft, Loader2, CheckCircle, Mail, Lock, User, Phone, Calendar, MapPin, Eye, EyeOff } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
 
 export default function Register() {
@@ -7,6 +7,8 @@ export default function Register() {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   
   const [formData, setFormData] = useState({
     name: '',
@@ -171,17 +173,27 @@ export default function Register() {
                   <Lock className="inline mr-2" size={16} />
                   Contraseña *
                 </label>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                  disabled={loading}
-                  className="w-full px-4 py-3 border-2 border-[#111827] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent bg-[#111827] text-[#F3F4F6] placeholder-gray-500 disabled:opacity-50"
-                  placeholder="••••••••"
-                />
+                <div className="relative">
+                  <input
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    value={formData.password}
+                    onChange={handleChange}
+                    required
+                    disabled={loading}
+                    className="w-full px-4 pr-12 py-3 border-2 border-[#111827] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent bg-[#111827] text-[#F3F4F6] placeholder-gray-500 disabled:opacity-50"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-[#00BFFF] transition"
+                    disabled={loading}
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
               </div>
 
               <div>
@@ -189,17 +201,27 @@ export default function Register() {
                   <Lock className="inline mr-2" size={16} />
                   Confirmar Contraseña *
                 </label>
-                <input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type="password"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  required
-                  disabled={loading}
-                  className="w-full px-4 py-3 border-2 border-[#111827] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent bg-[#111827] text-[#F3F4F6] placeholder-gray-500 disabled:opacity-50"
-                  placeholder="••••••••"
-                />
+                <div className="relative">
+                  <input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    required
+                    disabled={loading}
+                    className="w-full px-4 pr-12 py-3 border-2 border-[#111827] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent bg-[#111827] text-[#F3F4F6] placeholder-gray-500 disabled:opacity-50"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-[#00BFFF] transition"
+                    disabled={loading}
+                  >
+                    {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
               </div>
             </div>
 

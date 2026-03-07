@@ -13,21 +13,13 @@ export const useAppContext = () => {
 
 // Helper para transformar datos del backend al formato del frontend
 const transformPersonaToStudent = (persona) => {
-  // Generar avatar basado en ID (para que sea consistente) y género
-  // Asegurar que siempre haya un género válido
+  // Generar avatar basado en género usando siluetas simples
   const genero = persona.genero && (persona.genero === 'femenino' || persona.genero === 'masculino') 
     ? persona.genero 
     : 'masculino'
   
-  // Usar diferentes estilos y seeds para cada género para mayor diferenciación
-  let avatarUrl
-  if (genero === 'femenino') {
-    // Para mujeres: usar estilo lorelei que es claramente femenino
-    avatarUrl = `https://api.dicebear.com/7.x/lorelei/svg?seed=female-${persona.idPersona}`
-  } else {
-    // Para hombres: usar estilo avataaars con características masculinas
-    avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=male-${persona.idPersona}&gender=male`
-  }
+  // Usar imágenes reales para los avatares
+  const avatarUrl = genero === 'femenino' ? '/avatar-fem.jpg' : '/avatar-masc.jpg'
   
   return {
     id: persona.idPersona,
@@ -53,14 +45,8 @@ const generateAvatarUrl = (idPersona, genero) => {
     ? genero 
     : 'masculino'
   
-  // Usar diferentes estilos para hacer más clara la diferencia de género
-  if (validGenero === 'femenino') {
-    // Para mujeres: usar estilo lorelei que es claramente femenino
-    return `https://api.dicebear.com/7.x/lorelei/svg?seed=female-${idPersona}`
-  } else {
-    // Para hombres: usar estilo avataaars con características masculinas
-    return `https://api.dicebear.com/7.x/avataaars/svg?seed=male-${idPersona}&gender=male`
-  }
+  // Usar imágenes reales para los avatares
+  return validGenero === 'femenino' ? '/avatar-fem.jpg' : '/avatar-masc.jpg'
 }
 
 // Helper para agregar avatar a un usuario
@@ -169,6 +155,7 @@ export const AppProvider = ({ children }) => {
                     id: ra.idRutina,
                     name: ra.nombre,
                     date: ra.fechaAsignacion ? new Date(ra.fechaAsignacion).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+                    fechaAsignacion: ra.fechaAsignacion,
                     status: ra.estado || 'activa',
                     completed: ra.estado === 'completada',
                     exercises: ejercicios.map(ej => ({
@@ -186,6 +173,7 @@ export const AppProvider = ({ children }) => {
                     id: ra.idRutina,
                     name: ra.nombre,
                     date: ra.fechaAsignacion ? new Date(ra.fechaAsignacion).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+                    fechaAsignacion: ra.fechaAsignacion,
                     status: ra.estado || 'activa',
                     completed: ra.estado === 'completada',
                     exercises: []
@@ -283,6 +271,7 @@ export const AppProvider = ({ children }) => {
                     id: ra.idRutina,
                     name: ra.nombre,
                     date: ra.fechaAsignacion ? new Date(ra.fechaAsignacion).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+                    fechaAsignacion: ra.fechaAsignacion,
                     status: ra.estado || 'activa',
                     completed: ra.estado === 'completada',
                     exercises: ejercicios.map(ej => ({
@@ -300,6 +289,7 @@ export const AppProvider = ({ children }) => {
                     id: ra.idRutina,
                     name: ra.nombre,
                     date: ra.fechaAsignacion ? new Date(ra.fechaAsignacion).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+                    fechaAsignacion: ra.fechaAsignacion,
                     status: ra.estado || 'activa',
                     completed: ra.estado === 'completada',
                     exercises: []
@@ -459,9 +449,9 @@ export const AppProvider = ({ children }) => {
   }
 
   // Función para eliminar rutina de alumno
-  const removeRoutineFromStudent = async (studentId, routineId) => {
+  const removeRoutineFromStudent = async (studentId, routineId, fechaAsignacion = null) => {
     try {
-      await rutinasAPI.removeFromPersona(routineId, studentId)
+      await rutinasAPI.removeFromPersona(routineId, studentId, fechaAsignacion)
       
       // Recargar los estudiantes con sus rutinas actualizadas desde la base de datos
       const alumnosActualizados = await refreshStudents()
@@ -590,6 +580,7 @@ export const AppProvider = ({ children }) => {
               name: rutina.nombre,
               createdAt: rutina.fechaHoraCreacion,
               date: rutina.fechaAsignacion ? new Date(rutina.fechaAsignacion).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+              fechaAsignacion: rutina.fechaAsignacion,
               status: rutina.estado || 'activa',
               exercises: ejercicios.map(ej => ({
                 id: ej.idEjercicio,
@@ -606,6 +597,7 @@ export const AppProvider = ({ children }) => {
               name: rutina.nombre,
               createdAt: rutina.fechaHoraCreacion,
               date: rutina.fechaAsignacion ? new Date(rutina.fechaAsignacion).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+              fechaAsignacion: rutina.fechaAsignacion,
               status: rutina.estado || 'activa',
               exercises: []
             }
@@ -623,11 +615,11 @@ export const AppProvider = ({ children }) => {
   }
 
   // Función para actualizar estado de una rutina (para alumno)
-  const updateRoutineStatus = async (routineId, newStatus) => {
+  const updateRoutineStatus = async (routineId, newStatus, fechaAsignacion) => {
     try {
       if (!user || user.rol !== 'alumno') return
       
-      await rutinasAPI.updateEstado(routineId, user.idPersona, newStatus)
+      await rutinasAPI.updateEstado(routineId, user.idPersona, newStatus, fechaAsignacion)
       
       // Recargar rutinas pasando el usuario explícitamente
       await loadMyRoutines(user)
@@ -638,9 +630,9 @@ export const AppProvider = ({ children }) => {
   }
 
   // Función para actualizar estado de una rutina de un alumno (para profesor)
-  const updateStudentRoutineStatus = async (studentId, routineId, newStatus) => {
+  const updateStudentRoutineStatus = async (studentId, routineId, newStatus, fechaAsignacion) => {
     try {
-      await rutinasAPI.updateEstado(routineId, studentId, newStatus)
+      await rutinasAPI.updateEstado(routineId, studentId, newStatus, fechaAsignacion)
       
       // Recargar datos de estudiantes y devolver la lista actualizada
       const updatedStudents = await refreshStudents()
