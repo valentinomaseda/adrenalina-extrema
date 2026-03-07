@@ -59,13 +59,18 @@ export default function Profile() {
 
       <div className="bg-gradient-to-br from-[#1E40AF] to-[#152e6b] rounded-xl shadow-lg p-6 space-y-6 animate-slide-in-up delay-100 border border-[#00BFFF]/20">
         <div className="flex flex-col items-center animate-scale-in delay-200">
-          <div className="w-32 h-32 bg-[#00BFFF] rounded-full flex items-center justify-center mb-4">
-            <UserCircle size={80} className="text-[#111827]" strokeWidth={2} />
+          <div className="w-32 h-32 bg-[#00BFFF] rounded-full flex items-center justify-center mb-4 overflow-hidden">
+            {user?.photo ? (
+              <img src={user.photo} alt={user.nombre} className="w-full h-full object-cover" />
+            ) : (
+              <UserCircle size={80} className="text-[#111827]" strokeWidth={2} />
+            )}
           </div>
           <h3 className="text-2xl font-bold text-[#F3F4F6]">{user?.nombre || 'Coach Admin'}</h3>
           <p className="text-[#00BFFF] mt-1">
             {user?.rol === 'entrenador' ? 'Entrenador Principal' : 
-             user?.rol === 'admin' ? 'Administrador' : 'Usuario'}
+             user?.rol === 'admin' ? 'Administrador' : 
+             user?.rol === 'alumno' ? 'Alumno' : 'Usuario'}
           </p>
         </div>
 
@@ -86,13 +91,15 @@ export default function Profile() {
             </div>
           </div>
 
-          <div className="flex items-center space-x-3 p-4 bg-[#111827] rounded-lg animate-slide-in-right delay-500">
-            <Award className="text-[#00BFFF]" size={24} />
-            <div>
-              <p className="text-xs text-[#00BFFF]">Alumnos Activos</p>
-              <p className="font-semibold text-[#F3F4F6]">{students?.length || 0} atletas</p>
+          {user?.rol !== 'alumno' && (
+            <div className="flex items-center space-x-3 p-4 bg-[#111827] rounded-lg animate-slide-in-right delay-500">
+              <Award className="text-[#00BFFF]" size={24} />
+              <div>
+                <p className="text-xs text-[#00BFFF]">Alumnos Activos</p>
+                <p className="font-semibold text-[#F3F4F6]">{students?.length || 0} atletas</p>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         <div className="space-y-3">

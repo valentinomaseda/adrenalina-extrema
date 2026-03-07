@@ -3,7 +3,7 @@ import { Lock, Mail, AlertCircle, Loader2 } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
 
 export default function Login() {
-  const { login } = useAppContext()
+  const { login, setShowRegister } = useAppContext()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -107,6 +107,19 @@ export default function Login() {
               )}
             </button>
           </form>
+
+          {/* Link de registro */}
+          <div className="mt-4 text-center">
+            <p className="text-sm text-gray-300">
+              ¿No tienes cuenta?{' '}
+              <button
+                onClick={() => setShowRegister(true)}
+                className="text-[#00BFFF] hover:text-[#1E40AF] font-semibold transition-colors"
+              >
+                Regístrate aquí
+              </button>
+            </p>
+          </div>
 
           {/* Info adicional */}
           <div className="mt-6 pt-6 border-t border-[#111827]">

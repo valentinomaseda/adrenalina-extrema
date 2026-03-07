@@ -1,19 +1,29 @@
-import { Users, ClipboardList, UserCircle } from 'lucide-react'
+import { Users, ClipboardList, UserCircle, Activity, TrendingUp } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
 
 export default function BottomNavbar() {
-  const { currentView, setCurrentView, setSelectedStudent } = useAppContext()
+  const { currentView, setCurrentView, setSelectedStudent, user } = useAppContext()
 
   const handleNavigation = (view) => {
     setCurrentView(view)
     setSelectedStudent(null)
   }
 
-  const navItems = [
+  // Opciones de navegación para alumnos
+  const studentNavItems = [
+    { id: 'studentRoutines', label: 'Rutinas', icon: ClipboardList },
+    { id: 'studentProgress', label: 'Progreso', icon: TrendingUp },
+    { id: 'profile', label: 'Perfil', icon: UserCircle },
+  ]
+
+  // Opciones de navegación para coaches
+  const coachNavItems = [
     { id: 'students', label: 'Alumnos', icon: Users },
     { id: 'routines', label: 'Rutinas', icon: ClipboardList },
     { id: 'profile', label: 'Perfil', icon: UserCircle },
   ]
+
+  const navItems = user?.rol === 'alumno' ? studentNavItems : coachNavItems
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#111827] border-t border-[#1E40AF] shadow-lg z-50 animate-slide-in-up">

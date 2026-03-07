@@ -59,9 +59,9 @@ CREATE TABLE `rutina_ejercicio` (
 CREATE TABLE `alumno_rutina` (
   `idPersona` int unsigned NOT NULL,
   `idRutina` int unsigned NOT NULL,
-  `estado` varchar(45) DEFAULT NULL,
+  `estado` varchar(45) DEFAULT 'activa',
   `fechaAsignacion` datetime NOT NULL,
-  PRIMARY KEY (`idPersona`,`idRutina`,`fechaAsignacion`),
+  PRIMARY KEY (`idPersona`,`idRutina`),
   KEY `fk_alumno_rutina_rutina_idx` (`idRutina`),
   CONSTRAINT `fk_alumno_rutina_alumno` FOREIGN KEY (`idPersona`) REFERENCES `persona` (`idPersona`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_alumno_rutina_rutina` FOREIGN KEY (`idRutina`) REFERENCES `rutina` (`idRutina`) ON DELETE RESTRICT ON UPDATE CASCADE

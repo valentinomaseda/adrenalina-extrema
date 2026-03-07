@@ -14,16 +14,27 @@ export const useAppContext = () => {
 // Helper para transformar datos del backend al formato del frontend
 const transformPersonaToStudent = (persona) => {
   // Generar avatar basado en ID (para que sea consistente) y género
-  const avatarStyle = persona.genero === 'femenino' ? 'avataaars' : 'avataaars'
-  const avatarSeed = `user-${persona.idPersona}`
-  const genderParam = persona.genero === 'femenino' ? '&gender=female' : '&gender=male'
+  // Asegurar que siempre haya un género válido
+  const genero = persona.genero && (persona.genero === 'femenino' || persona.genero === 'masculino') 
+    ? persona.genero 
+    : 'masculino'
+  
+  // Usar diferentes estilos y seeds para cada género para mayor diferenciación
+  let avatarUrl
+  if (genero === 'femenino') {
+    // Para mujeres: usar estilo lorelei que es claramente femenino
+    avatarUrl = `https://api.dicebear.com/7.x/lorelei/svg?seed=female-${persona.idPersona}`
+  } else {
+    // Para hombres: usar estilo avataaars con características masculinas
+    avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=male-${persona.idPersona}&gender=male`
+  }
   
   return {
     id: persona.idPersona,
     name: persona.nombre,
-    photo: `https://api.dicebear.com/7.x/${avatarStyle}/svg?seed=${avatarSeed}${genderParam}`,
+    photo: avatarUrl,
     level: persona.nivel || 'Intermedio',
-    gender: persona.genero || 'masculino',
+    gender: genero,
     phone: persona.tel?.toString() || '',
     email: persona.mail,
     weight: persona.peso,
@@ -32,6 +43,32 @@ const transformPersonaToStudent = (persona) => {
     birthDate: persona.fechaNac ? new Date(persona.fechaNac).toISOString().split('T')[0] : '',
     progress: [],
     routineHistory: []
+  }
+}
+
+// Helper para generar URL de avatar basado en ID y género
+const generateAvatarUrl = (idPersona, genero) => {
+  // Asegurar que siempre haya un género válido
+  const validGenero = genero && (genero === 'femenino' || genero === 'masculino') 
+    ? genero 
+    : 'masculino'
+  
+  // Usar diferentes estilos para hacer más clara la diferencia de género
+  if (validGenero === 'femenino') {
+    // Para mujeres: usar estilo lorelei que es claramente femenino
+    return `https://api.dicebear.com/7.x/lorelei/svg?seed=female-${idPersona}`
+  } else {
+    // Para hombres: usar estilo avataaars con características masculinas
+    return `https://api.dicebear.com/7.x/avataaars/svg?seed=male-${idPersona}&gender=male`
+  }
+}
+
+// Helper para agregar avatar a un usuario
+const addAvatarToUser = (user) => {
+  if (!user) return null
+  return {
+    ...user,
+    photo: generateAvatarUrl(user.idPersona, user.genero || 'masculino')
   }
 }
 
@@ -74,6 +111,10 @@ export const AppProvider = ({ children }) => {
   const [selectedStudent, setSelectedStudent] = useState(null)
   const [savedRoutines, setSavedRoutines] = useState([])
   const [loading, setLoading] = useState(false)
+  
+  // Estados para alumno
+  const [myRoutines, setMyRoutines] = useState([])
+  const [showRegister, setShowRegister] = useState(false)
 
   // Cargar datos del usuario desde localStorage al iniciar
   useEffect(() => {
@@ -81,9 +122,10 @@ export const AppProvider = ({ children }) => {
     if (storedUser) {
       try {
         const userData = JSON.parse(storedUser)
-        setUser(userData)
+        const userWithAvatar = addAvatarToUser(userData)
+        setUser(userWithAvatar)
         setIsAuthenticated(true)
-        loadData()
+        loadData(userWithAvatar)
       } catch (error) {
         console.error('Error loading user from localStorage:', error)
         localStorage.removeItem('user')
@@ -92,9 +134,20 @@ export const AppProvider = ({ children }) => {
   }, [])
 
   // Cargar datos del backend
-  const loadData = async () => {
+  const loadData = async (currentUser = null) => {
     setLoading(true)
     try {
+      // Usar el usuario proporcionado o el del estado
+      const userData = currentUser || user
+      
+      // Si es alumno, solo cargar sus rutinas
+      if (userData && userData.rol === 'alumno') {
+        await loadMyRoutines(userData)
+        setLoading(false)
+        return
+      }
+      
+      // Si es coach, cargar todos los datos
       // Cargar alumnos
       const alumnos = await personasAPI.getByRol('alumno')
       
@@ -116,6 +169,7 @@ export const AppProvider = ({ children }) => {
                     id: ra.idRutina,
                     name: ra.nombre,
                     date: ra.fechaAsignacion ? new Date(ra.fechaAsignacion).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+                    status: ra.estado || 'activa',
                     completed: ra.estado === 'completada',
                     exercises: ejercicios.map(ej => ({
                       exerciseId: ej.idEjercicio,
@@ -132,6 +186,7 @@ export const AppProvider = ({ children }) => {
                     id: ra.idRutina,
                     name: ra.nombre,
                     date: ra.fechaAsignacion ? new Date(ra.fechaAsignacion).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+                    status: ra.estado || 'activa',
                     completed: ra.estado === 'completada',
                     exercises: []
                   }
@@ -178,13 +233,16 @@ export const AppProvider = ({ children }) => {
     try {
       const persona = await personasAPI.login(email, password)
       
-      // Guardar usuario en estado y localStorage
-      setUser(persona)
-      setIsAuthenticated(true)
-      localStorage.setItem('user', JSON.stringify(persona))
+      // Agregar avatar al usuario
+      const userWithAvatar = addAvatarToUser(persona)
       
-      // Cargar datos
-      await loadData()
+      // Guardar usuario en estado y localStorage
+      setUser(userWithAvatar)
+      setIsAuthenticated(true)
+      localStorage.setItem('user', JSON.stringify(userWithAvatar))
+      
+      // Cargar datos pasando el usuario explícitamente
+      await loadData(userWithAvatar)
     } catch (error) {
       throw error
     }
@@ -225,6 +283,7 @@ export const AppProvider = ({ children }) => {
                     id: ra.idRutina,
                     name: ra.nombre,
                     date: ra.fechaAsignacion ? new Date(ra.fechaAsignacion).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+                    status: ra.estado || 'activa',
                     completed: ra.estado === 'completada',
                     exercises: ejercicios.map(ej => ({
                       exerciseId: ej.idEjercicio,
@@ -241,6 +300,7 @@ export const AppProvider = ({ children }) => {
                     id: ra.idRutina,
                     name: ra.nombre,
                     date: ra.fechaAsignacion ? new Date(ra.fechaAsignacion).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+                    status: ra.estado || 'activa',
                     completed: ra.estado === 'completada',
                     exercises: []
                   }
@@ -464,12 +524,129 @@ export const AppProvider = ({ children }) => {
       
       await personasAPI.update(user.idPersona, dataToUpdate)
       
-      // Recargar datos del usuario
+      // Recargar datos del usuario y agregar avatar
       const updatedUser = await personasAPI.getById(user.idPersona)
-      setUser(updatedUser)
-      localStorage.setItem('user', JSON.stringify(updatedUser))
+      const userWithAvatar = addAvatarToUser(updatedUser)
+      setUser(userWithAvatar)
+      localStorage.setItem('user', JSON.stringify(userWithAvatar))
     } catch (error) {
       console.error('Error updating profile:', error)
+      throw error
+    }
+  }
+
+  // Función para registrar un nuevo alumno
+  const register = async (studentData) => {
+    try {
+      setLoading(true)
+      
+      // Obtener todas las personas para generar un ID único
+      const todasPersonas = await personasAPI.getAll()
+      const newId = Math.max(0, ...todasPersonas.map(p => p.idPersona)) + 1
+      
+      const personaData = {
+        idPersona: newId,
+        nombre: studentData.name,
+        mail: studentData.email,
+        tel: studentData.phone || '',
+        rol: 'alumno',
+        nivel: 'Intermedio',
+        genero: studentData.gender || 'masculino',
+        direccion: studentData.address || '',
+        fechaNac: studentData.birthDate || null,
+        peso: parseFloat(studentData.weight) || null,
+        altura: parseFloat(studentData.height) || null,
+        password: studentData.password
+      }
+      
+      await personasAPI.create(personaData)
+      
+      setLoading(false)
+      return true
+    } catch (error) {
+      console.error('Error registering student:', error)
+      setLoading(false)
+      throw error
+    }
+  }
+
+  // Función para cargar rutinas del alumno logueado
+  const loadMyRoutines = async (currentUser = null) => {
+    try {
+      // Usar el usuario proporcionado o el del estado
+      const userData = currentUser || user
+      if (!userData || userData.rol !== 'alumno') return
+      
+      setLoading(true)
+      const rutinas = await personasAPI.getRutinas(userData.idPersona)
+      
+      // Transformar rutinas con sus ejercicios
+      const rutinasCompletas = await Promise.all(
+        rutinas.map(async (rutina) => {
+          try {
+            const ejercicios = await rutinasAPI.getEjercicios(rutina.idRutina)
+            return {
+              id: rutina.idRutina,
+              name: rutina.nombre,
+              createdAt: rutina.fechaHoraCreacion,
+              date: rutina.fechaAsignacion ? new Date(rutina.fechaAsignacion).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+              status: rutina.estado || 'activa',
+              exercises: ejercicios.map(ej => ({
+                id: ej.idEjercicio,
+                name: ej.nombre,
+                sets: ej.cantSets || 3,
+                value: ej.cantidad || 10,
+                type: ej.tipoContador || 'reps'
+              }))
+            }
+          } catch (error) {
+            console.error(`Error loading exercises for routine ${rutina.idRutina}:`, error)
+            return {
+              id: rutina.idRutina,
+              name: rutina.nombre,
+              createdAt: rutina.fechaHoraCreacion,
+              date: rutina.fechaAsignacion ? new Date(rutina.fechaAsignacion).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+              status: rutina.estado || 'activa',
+              exercises: []
+            }
+          }
+        })
+      )
+      
+      setMyRoutines(rutinasCompletas)
+      setLoading(false)
+    } catch (error) {
+      console.error('Error loading my routines:', error)
+      setLoading(false)
+      throw error
+    }
+  }
+
+  // Función para actualizar estado de una rutina (para alumno)
+  const updateRoutineStatus = async (routineId, newStatus) => {
+    try {
+      if (!user || user.rol !== 'alumno') return
+      
+      await rutinasAPI.updateEstado(routineId, user.idPersona, newStatus)
+      
+      // Recargar rutinas pasando el usuario explícitamente
+      await loadMyRoutines(user)
+    } catch (error) {
+      console.error('Error updating routine status:', error)
+      throw error
+    }
+  }
+
+  // Función para actualizar estado de una rutina de un alumno (para profesor)
+  const updateStudentRoutineStatus = async (studentId, routineId, newStatus) => {
+    try {
+      await rutinasAPI.updateEstado(routineId, studentId, newStatus)
+      
+      // Recargar datos de estudiantes y devolver la lista actualizada
+      const updatedStudents = await refreshStudents()
+      return updatedStudents
+    } catch (error) {
+      console.error('Error updating student routine status:', error)
       throw error
     }
   }
@@ -492,12 +669,21 @@ export const AppProvider = ({ children }) => {
     savedRoutines,
     loading,
     
+    // Alumno
+    myRoutines,
+    showRegister,
+    setShowRegister,
+    
     // Funciones
     saveRoutine,
     assignRoutineToStudent,
     removeRoutineFromStudent,
     updateStudent,
     updateProfile,
+    register,
+    loadMyRoutines,
+    updateRoutineStatus,
+    updateStudentRoutineStatus,
     addStudent,
     addExercise,
     refreshStudents,

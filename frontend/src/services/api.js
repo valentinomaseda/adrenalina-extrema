@@ -145,6 +145,12 @@ export const rutinasAPI = {
     body: JSON.stringify({ idPersona: personaId }),
   }),
 
+  // Actualizar estado de asignación de rutina
+  updateEstado: (rutinaId, personaId, estado) => fetchAPI(`/rutinas/${rutinaId}/estado`, {
+    method: 'PUT',
+    body: JSON.stringify({ idPersona: personaId, estado }),
+  }),
+
   // Agregar ejercicio a rutina
   addEjercicio: (rutinaId, ejercicioData) => fetchAPI(`/rutinas/${rutinaId}/ejercicios`, {
     method: 'POST',

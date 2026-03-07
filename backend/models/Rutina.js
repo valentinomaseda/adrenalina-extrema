@@ -79,9 +79,15 @@ export class Rutina {
 
   // Asignar rutina a alumno
   static async assignToAlumno(idRutina, idPersona, estado = 'activa') {
+    // Usar INSERT ... ON DUPLICATE KEY UPDATE para evitar duplicados
+    // Si ya existe, actualiza el estado y la fecha
     const [result] = await pool.query(
-      'INSERT INTO alumno_rutina (idPersona, idRutina, estado, fechaAsignacion) VALUES (?, ?, ?, ?)',
-      [idPersona, idRutina, estado, new Date()]
+      `INSERT INTO alumno_rutina (idPersona, idRutina, estado, fechaAsignacion) 
+       VALUES (?, ?, ?, NOW())
+       ON DUPLICATE KEY UPDATE 
+       estado = VALUES(estado), 
+       fechaAsignacion = NOW()`,
+      [idPersona, idRutina, estado]
     );
     return result;
   }

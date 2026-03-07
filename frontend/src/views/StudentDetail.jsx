@@ -4,7 +4,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { useAppContext } from '../context/AppContext'
 
 export default function StudentDetail() {
-  const { selectedStudent, setCurrentView, setSelectedStudent, savedRoutines, assignRoutineToStudent, removeRoutineFromStudent, updateStudent } = useAppContext()
+  const { selectedStudent, setCurrentView, setSelectedStudent, savedRoutines, assignRoutineToStudent, removeRoutineFromStudent, updateStudent, updateStudentRoutineStatus } = useAppContext()
   const [selectedRoutineId, setSelectedRoutineId] = useState('')
   const [showAssignSuccess, setShowAssignSuccess] = useState(false)
   const [showProgress, setShowProgress] = useState(false)
@@ -16,6 +16,7 @@ export default function StudentDetail() {
   const [showEditSuccess, setShowEditSuccess] = useState(false)
   const [showEditError, setShowEditError] = useState(false)
   const [editErrorMessage, setEditErrorMessage] = useState('')
+  const [updatingRoutineStatus, setUpdatingRoutineStatus] = useState(null)
 
   // Función para formatear rutina como texto plano para WhatsApp
   const formatRoutineForWhatsApp = (routine) => {
@@ -85,6 +86,39 @@ export default function StudentDetail() {
       setTimeout(() => {
         setShowEditError(false)
       }, 5000)
+    }
+  }
+
+  // Función para actualizar estado de rutina
+  const handleUpdateRoutineStatus = async (routineId, newStatus) => {
+    setUpdatingRoutineStatus(routineId)
+    try {
+      const updatedStudents = await updateStudentRoutineStatus(selectedStudent.id, routineId, newStatus)
+      
+      // Actualizar el selectedStudent con los datos actualizados
+      if (updatedStudents) {
+        const updatedStudent = updatedStudents.find(s => s.id === selectedStudent.id)
+        if (updatedStudent) {
+          setSelectedStudent(updatedStudent)
+        }
+      }
+    } catch (error) {
+      console.error('Error updating routine status:', error)
+      alert('Error al actualizar el estado de la rutina')
+    } finally {
+      setUpdatingRoutineStatus(null)
+    }
+  }
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'completada':
+        return 'border-green-400'
+      case 'incompleta':
+        return 'border-yellow-400'
+      case 'activa':
+      default:
+        return 'border-[#1E40AF]'
     }
   }
 
@@ -330,44 +364,93 @@ export default function StudentDetail() {
           <p className="text-[#F3F4F6] text-center py-8">No hay rutinas asignadas aún</p>
         ) : (
           <div className="space-y-3">
-            {selectedStudent.routineHistory.map((routine) => (
+            {selectedStudent.routineHistory.map((routine, index) => (
               <div
-                key={routine.id}
-                className="flex items-center justify-between p-4 bg-[#111827] rounded-lg border-2 border-[#1E40AF] hover:border-[#00BFFF] transition-colors"
+                key={`${routine.id}-${routine.date}-${index}`}
+                className={`bg-[#111827] rounded-lg border-2 ${getStatusColor(routine.status)} hover:border-[#00BFFF] transition-colors overflow-hidden`}
               >
-                <div className="flex-1">
-                  <h5 className="font-semibold text-[#F3F4F6]">{routine.name}</h5>
-                  <p className="text-sm text-[#00BFFF] mt-1">{routine.date}</p>
-                  {routine.exercises && (
-                    <p className="text-xs text-[#F3F4F6] mt-1">{routine.exercises.length} ejercicios</p>
-                  )}
-                </div>
-                <div className="flex items-center space-x-2">
-                  {routine.exercises && (
+                {/* Header de la rutina */}
+                <div className="p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex-1">
+                      <h5 className="font-semibold text-[#F3F4F6]">{routine.name}</h5>
+                      <p className="text-sm text-[#00BFFF] mt-1">{routine.date}</p>
+                      {routine.exercises && (
+                        <p className="text-xs text-[#F3F4F6] mt-1">{routine.exercises.length} ejercicios</p>
+                      )}
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      {routine.exercises && (
+                        <button
+                          onClick={() => handleSendWhatsApp(routine)}
+                          className="p-2 bg-[#00BFFF] text-[#111827] rounded-lg hover:bg-[#1E40AF] hover:text-[#00BFFF] active:scale-95 transition-all"
+                          title="Enviar por WhatsApp"
+                        >
+                          <Send size={20} strokeWidth={2.5} />
+                        </button>
+                      )}
+                      <button
+                        onClick={() => {
+                          setRoutineToDelete(routine)
+                          setShowDeleteModal(true)
+                        }}
+                        className="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 active:scale-95 transition-all"
+                        title="Eliminar rutina"
+                      >
+                        <Trash2 size={20} strokeWidth={2.5} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Estado actual */}
+                  <div className="flex items-center justify-between p-2 bg-[#0a0f1a] rounded-lg mb-3">
+                    <span className="text-[#F3F4F6] font-semibold text-sm">Estado:</span>
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                      routine.status === 'completada' ? 'bg-green-600 text-white' :
+                      routine.status === 'incompleta' ? 'bg-yellow-600 text-white' :
+                      'bg-gray-600 text-white'
+                    }`}>
+                      {routine.status === 'completada' ? 'Completada' :
+                       routine.status === 'incompleta' ? 'Incompleta' :
+                       'Pendiente'}
+                    </span>
+                  </div>
+
+                  {/* Botones de estado */}
+                  <div className="grid grid-cols-3 gap-2">
                     <button
-                      onClick={() => handleSendWhatsApp(routine)}
-                      className="p-2 bg-[#00BFFF] text-[#111827] rounded-lg hover:bg-[#1E40AF] hover:text-[#00BFFF] active:scale-95 transition-all"
-                      title="Enviar por WhatsApp"
+                      onClick={() => handleUpdateRoutineStatus(routine.id, 'completada')}
+                      disabled={updatingRoutineStatus === routine.id || routine.status === 'completada'}
+                      className={`px-2 py-2 rounded-lg font-semibold text-xs transition-all active:scale-95 ${
+                        routine.status === 'completada'
+                          ? 'bg-green-600 text-white'
+                          : 'bg-[#0a0f1a] text-[#F3F4F6] hover:bg-green-600 hover:text-white'
+                      } disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
-                      <Send size={20} strokeWidth={2.5} />
+                      ✓ Completada
                     </button>
-                  )}
-                  <button
-                    onClick={() => {
-                      setRoutineToDelete(routine)
-                      setShowDeleteModal(true)
-                    }}
-                    className="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 active:scale-95 transition-all"
-                    title="Eliminar rutina"
-                  >
-                    <Trash2 size={20} strokeWidth={2.5} />
-                  </button>
-                  <div>
-                    {routine.completed ? (
-                      <CheckCircle2 className="text-green-600" size={28} strokeWidth={2.5} />
-                    ) : (
-                      <XCircle className="text-gray-400" size={28} strokeWidth={2.5} />
-                    )}
+                    <button
+                      onClick={() => handleUpdateRoutineStatus(routine.id, 'incompleta')}
+                      disabled={updatingRoutineStatus === routine.id || routine.status === 'incompleta'}
+                      className={`px-2 py-2 rounded-lg font-semibold text-xs transition-all active:scale-95 ${
+                        routine.status === 'incompleta'
+                          ? 'bg-yellow-600 text-white'
+                          : 'bg-[#0a0f1a] text-[#F3F4F6] hover:bg-yellow-600 hover:text-white'
+                      } disabled:opacity-50 disabled:cursor-not-allowed`}
+                    >
+                      ◐ Incompleta
+                    </button>
+                    <button
+                      onClick={() => handleUpdateRoutineStatus(routine.id, 'activa')}
+                      disabled={updatingRoutineStatus === routine.id || routine.status === 'activa'}
+                      className={`px-2 py-2 rounded-lg font-semibold text-xs transition-all active:scale-95 ${
+                        routine.status === 'activa'
+                          ? 'bg-gray-600 text-white'
+                          : 'bg-[#0a0f1a] text-[#F3F4F6] hover:bg-gray-600 hover:text-white'
+                      } disabled:opacity-50 disabled:cursor-not-allowed`}
+                    >
+                      ○ Pendiente
+                    </button>
                   </div>
                 </div>
               </div>
