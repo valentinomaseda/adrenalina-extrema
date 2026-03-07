@@ -118,7 +118,7 @@ export default function AddExercise() {
                 value={formData.name}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg"
+                className="text-gray-700 w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg"
                 placeholder="Ej: Burpees, Sentadillas, Plancha..."
               />
             </div>
@@ -137,7 +137,7 @@ export default function AddExercise() {
                 value={formData.cantSets}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg"
+                className="text-gray-700 px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg"
                 placeholder="3"
               />
               <p className="text-sm text-gray-500 mt-1">Número de series del ejercicio</p>
@@ -158,7 +158,7 @@ export default function AddExercise() {
                     onChange={handleChange}
                     className="w-5 h-5 text-[#00BFFF] focus:ring-[#00BFFF]"
                   />
-                  <span className="text-lg">Repeticiones</span>
+                  <span className="text-gray-700 text-lg">Repeticiones</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
@@ -169,7 +169,7 @@ export default function AddExercise() {
                     onChange={handleChange}
                     className="w-5 h-5 text-[#00BFFF] focus:ring-[#00BFFF]"
                   />
-                  <span className="text-lg">Tiempo (segundos)</span>
+                  <span className="text-gray-700 text-lg">Tiempo (segundos)</span>
                 </label>
               </div>
             </div>
@@ -187,7 +187,7 @@ export default function AddExercise() {
                 value={counterValue}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg"
+                className="text-gray-700 w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg"
                 placeholder="10"
               />
               <p className="text-sm text-gray-500 mt-1">

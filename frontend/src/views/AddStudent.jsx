@@ -100,7 +100,7 @@ export default function AddStudent() {
                 value={formData.name}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg"
+                className="text-gray-700 w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg"
                 placeholder="Juan Pérez"
               />
             </div>
@@ -117,7 +117,7 @@ export default function AddStudent() {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg"
+                className="text-gray-700 w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg"
                 placeholder="juan@email.com"
               />
             </div>
@@ -133,7 +133,7 @@ export default function AddStudent() {
                 type="password"
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg"
+                className="text-gray-700 w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg"
                 placeholder="Dejar vacío para usar contraseña por defecto"
               />
               <p className="text-sm text-gray-500 mt-1">Si no se especifica, se usará "123456"</p>
@@ -150,7 +150,7 @@ export default function AddStudent() {
                 type="tel"
                 value={formData.phone}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg"
+                className="text-gray-700 w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg"
                 placeholder="+54 9 11 1234-5678"
               />
             </div>
@@ -168,7 +168,7 @@ export default function AddStudent() {
                   step="0.1"
                   value={formData.weight}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg"
+                  className="text-gray-700 w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg"
                   placeholder="70"
                 />
               </div>
@@ -183,7 +183,7 @@ export default function AddStudent() {
                   type="number"
                   value={formData.height}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg"
+                  className="text-gray-700 w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg"
                   placeholder="175"
                 />
               </div>
@@ -200,7 +200,7 @@ export default function AddStudent() {
                 type="date"
                 value={formData.birthDate}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg"
+                className="text-gray-700 w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg"
               />
             </div>
 
@@ -215,7 +215,7 @@ export default function AddStudent() {
                 type="text"
                 value={formData.address}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg"
+                className="text-gray-700 w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg"
                 placeholder="Av. Corrientes 1234, CABA"
               />
             </div>
