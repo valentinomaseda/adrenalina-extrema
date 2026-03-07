@@ -25,15 +25,15 @@ export class Persona {
   }
 
   static async create(personaData) {
-    const { idPersona, nombre, mail, tel, rol, cantAlumnos, direccion, fechaNac, peso, altura, password } = personaData;
+    const { idPersona, nombre, mail, tel, rol, cantAlumnos, direccion, fechaNac, peso, altura, password, nivel, genero } = personaData;
     
     // Hashear la contraseña antes de guardarla
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
     
     const [result] = await pool.query(
-      `INSERT INTO persona (idPersona, nombre, mail, tel, rol, cantAlumnos, direccion, fechaNac, peso, altura, password) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [idPersona, nombre, mail, tel, rol, cantAlumnos, direccion, fechaNac, peso, altura, hashedPassword]
+      `INSERT INTO persona (idPersona, nombre, mail, tel, rol, cantAlumnos, direccion, fechaNac, peso, altura, password, nivel, genero) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [idPersona, nombre, mail, tel, rol, cantAlumnos, direccion, fechaNac, peso, altura, hashedPassword, nivel || 'Intermedio', genero || 'masculino']
     );
     return result;
   }

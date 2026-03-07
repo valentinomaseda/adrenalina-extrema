@@ -139,6 +139,12 @@ export const rutinasAPI = {
     body: JSON.stringify({ idPersona: personaId }),
   }),
 
+  // Desasignar rutina de persona
+  removeFromPersona: (rutinaId, personaId) => fetchAPI(`/rutinas/${rutinaId}/desasignar`, {
+    method: 'POST',
+    body: JSON.stringify({ idPersona: personaId }),
+  }),
+
   // Agregar ejercicio a rutina
   addEjercicio: (rutinaId, ejercicioData) => fetchAPI(`/rutinas/${rutinaId}/ejercicios`, {
     method: 'POST',

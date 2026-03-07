@@ -111,6 +111,18 @@ export const rutinaController = {
     }
   },
 
+  // POST /api/rutinas/:id/desasignar
+  async removeFromAlumno(req, res) {
+    try {
+      const { idPersona } = req.body;
+      await Rutina.removeFromAlumno(req.params.id, idPersona);
+      res.json({ message: 'Rutina desasignada del alumno' });
+    } catch (error) {
+      console.error('Error al desasignar rutina:', error);
+      res.status(500).json({ error: 'Error al desasignar rutina' });
+    }
+  },
+
   // PUT /api/rutinas/:id/estado
   async updateEstado(req, res) {
     try {

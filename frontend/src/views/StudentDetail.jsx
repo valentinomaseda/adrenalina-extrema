@@ -1,14 +1,21 @@
 import { useState } from 'react'
-import { ArrowLeft, TrendingUp, Calendar, CheckCircle2, XCircle, Send, Plus, ChevronDown, ChevronUp, Info, X, Phone, Mail, Weight, Ruler, MapPin, Cake } from 'lucide-react'
+import { ArrowLeft, TrendingUp, Calendar, CheckCircle2, XCircle, Send, Plus, ChevronDown, ChevronUp, Info, X, Phone, Mail, Weight, Ruler, MapPin, Cake, Trash2, Edit } from 'lucide-react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { useAppContext } from '../context/AppContext'
 
 export default function StudentDetail() {
-  const { selectedStudent, setCurrentView, setSelectedStudent, savedRoutines, assignRoutineToStudent } = useAppContext()
+  const { selectedStudent, setCurrentView, setSelectedStudent, savedRoutines, assignRoutineToStudent, removeRoutineFromStudent, updateStudent } = useAppContext()
   const [selectedRoutineId, setSelectedRoutineId] = useState('')
   const [showAssignSuccess, setShowAssignSuccess] = useState(false)
   const [showProgress, setShowProgress] = useState(false)
   const [showInfoModal, setShowInfoModal] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [routineToDelete, setRoutineToDelete] = useState(null)
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [editFormData, setEditFormData] = useState({})
+  const [showEditSuccess, setShowEditSuccess] = useState(false)
+  const [showEditError, setShowEditError] = useState(false)
+  const [editErrorMessage, setEditErrorMessage] = useState('')
 
   // Función para formatear rutina como texto plano para WhatsApp
   const formatRoutineForWhatsApp = (routine) => {
@@ -50,6 +57,37 @@ export default function StudentDetail() {
     }
   }
 
+  // Función para eliminar rutina
+  const handleDeleteRoutine = async () => {
+    if (routineToDelete) {
+      await removeRoutineFromStudent(selectedStudent.id, routineToDelete.id)
+      setShowDeleteModal(false)
+      setRoutineToDelete(null)
+    }
+  }
+
+  // Función para editar alumno
+  const handleEditStudent = async (e) => {
+    e.preventDefault()
+    setEditErrorMessage('')
+    setShowEditError(false)
+    
+    try {
+      await updateStudent(selectedStudent.id, editFormData)
+      setShowEditModal(false)
+      setShowEditSuccess(true)
+      setTimeout(() => {
+        setShowEditSuccess(false)
+      }, 3000)
+    } catch (error) {
+      setEditErrorMessage(error.message || 'Error al actualizar el alumno')
+      setShowEditError(true)
+      setTimeout(() => {
+        setShowEditError(false)
+      }, 5000)
+    }
+  }
+
   if (!selectedStudent) {
     return (
       <div className="p-4">
@@ -82,6 +120,19 @@ export default function StudentDetail() {
         <h2 className="text-2xl font-bold text-[#1E40AF]">Detalle del Alumno</h2>
       </div>
 
+      {/* Notificaciones de edición */}
+      {showEditSuccess && (
+        <div className="bg-green-600 border-2 border-green-400 text-white px-6 py-4 rounded-lg animate-scale-in mb-4">
+          <p className="font-semibold">✓ Alumno actualizado exitosamente</p>
+        </div>
+      )}
+
+      {showEditError && (
+        <div className="bg-red-600 border-2 border-red-400 text-white px-6 py-4 rounded-lg animate-shake mb-4">
+          <p className="font-semibold">✗ {editErrorMessage}</p>
+        </div>
+      )}
+
       {/* Card del alumno */}
       <div className="bg-gradient-to-br from-[#1a2942] to-[#0f1729] rounded-xl shadow-lg p-6 animate-slide-in-up delay-100 border border-[#1E40AF]">
         <div className="flex items-center space-x-4">
@@ -99,6 +150,26 @@ export default function StudentDetail() {
                 title="Ver información completa"
               >
                 <Info size={20} strokeWidth={2.5} />
+              </button>
+              <button
+                onClick={() => {
+                  setEditFormData({
+                    nombre: selectedStudent.name,
+                    telefono: selectedStudent.phone || '',
+                    email: selectedStudent.email || '',
+                    peso: selectedStudent.weight || '',
+                    altura: selectedStudent.height || '',
+                    domicilio: selectedStudent.address || '',
+                    fechaNacimiento: selectedStudent.birthDate || '',
+                    nivel: selectedStudent.level || 'Intermedio',
+                    genero: selectedStudent.gender || 'masculino'
+                  })
+                  setShowEditModal(true)
+                }}
+                className="p-2 bg-green-600 text-white rounded-full hover:bg-green-700 active:scale-95 transition-all"
+                title="Editar alumno"
+              >
+                <Edit size={20} strokeWidth={2.5} />
               </button>
             </div>
             <p className="text-sm text-gray-600 mt-1">
@@ -281,6 +352,16 @@ export default function StudentDetail() {
                       <Send size={20} strokeWidth={2.5} />
                     </button>
                   )}
+                  <button
+                    onClick={() => {
+                      setRoutineToDelete(routine)
+                      setShowDeleteModal(true)
+                    }}
+                    className="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 active:scale-95 transition-all"
+                    title="Eliminar rutina"
+                  >
+                    <Trash2 size={20} strokeWidth={2.5} />
+                  </button>
                   <div>
                     {routine.completed ? (
                       <CheckCircle2 className="text-green-600" size={28} strokeWidth={2.5} />
@@ -355,6 +436,192 @@ export default function StudentDetail() {
           </div>
         )}
       </div>
+
+      {/* Modal de confirmación de eliminación */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 animate-fade-in">
+          <div className="bg-gradient-to-br from-[#1a2942] to-[#0f1729] rounded-xl shadow-2xl max-w-md w-full animate-scale-in border border-red-600">
+            <div className="sticky top-0 bg-red-600 text-white p-6 flex items-center justify-between rounded-t-xl">
+              <h3 className="text-xl font-bold">Confirmar Eliminación</h3>
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false)
+                  setRoutineToDelete(null)
+                }}
+                className="p-2 hover:bg-red-700 rounded-full active:scale-95 transition-all"
+              >
+                <X size={24} strokeWidth={2.5} />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <p className="text-[#F3F4F6]">
+                ¿Estás seguro que deseas eliminar la rutina <strong className="text-[#00BFFF]">{routineToDelete?.name}</strong>?
+              </p>
+              <p className="text-sm text-gray-400">Esta acción no se puede deshacer.</p>
+              
+              <div className="flex space-x-3 mt-6">
+                <button
+                  onClick={() => {
+                    setShowDeleteModal(false)
+                    setRoutineToDelete(null)
+                  }}
+                  className="flex-1 px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 active:scale-95 transition-all font-semibold"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleDeleteRoutine}
+                  className="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 active:scale-95 transition-all font-semibold"
+                >
+                  Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de edición de alumno */}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 animate-fade-in overflow-y-auto">
+          <div className="bg-gradient-to-br from-[#1a2942] to-[#0f1729] rounded-xl shadow-2xl max-w-md w-full my-8 animate-scale-in border border-[#00BFFF]">
+            <div className="sticky top-0 bg-[#1E40AF] text-white p-6 flex items-center justify-between rounded-t-xl">
+              <h3 className="text-xl font-bold">Editar Alumno</h3>
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="p-2 hover:bg-[#00BFFF] rounded-full active:scale-95 transition-all"
+              >
+                <X size={24} strokeWidth={2.5} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleEditStudent} className="p-6 space-y-4">
+              {showEditError && (
+                <div className="bg-red-600 border-2 border-red-400 text-white px-4 py-3 rounded-lg animate-shake mb-4">
+                  <p className="font-semibold text-sm">✗ {editErrorMessage}</p>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-[#00BFFF] font-semibold mb-2">Nombre</label>
+                <input
+                  type="text"
+                  value={editFormData.nombre || ''}
+                  onChange={(e) => setEditFormData({...editFormData, nombre: e.target.value})}
+                  className="w-full px-4 py-3 bg-[#111827] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:border-[#00BFFF] focus:outline-none"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-[#00BFFF] font-semibold mb-2">Nivel</label>
+                <select
+                  value={editFormData.nivel || 'Intermedio'}
+                  onChange={(e) => setEditFormData({...editFormData, nivel: e.target.value})}
+                  className="w-full px-4 py-3 bg-[#111827] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:border-[#00BFFF] focus:outline-none"
+                >
+                  <option value="Principiante">Principiante</option>
+                  <option value="Intermedio">Intermedio</option>
+                  <option value="Avanzado">Avanzado</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[#00BFFF] font-semibold mb-2">Género</label>
+                <select
+                  value={editFormData.genero || 'masculino'}
+                  onChange={(e) => setEditFormData({...editFormData, genero: e.target.value})}
+                  className="w-full px-4 py-3 bg-[#111827] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:border-[#00BFFF] focus:outline-none"
+                >
+                  <option value="masculino">Masculino</option>
+                  <option value="femenino">Femenino</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[#00BFFF] font-semibold mb-2">Teléfono</label>
+                <input
+                  type="tel"
+                  value={editFormData.telefono || ''}
+                  onChange={(e) => setEditFormData({...editFormData, telefono: e.target.value})}
+                  className="w-full px-4 py-3 bg-[#111827] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:border-[#00BFFF] focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[#00BFFF] font-semibold mb-2">Email</label>
+                <input
+                  type="email"
+                  value={editFormData.email || ''}
+                  onChange={(e) => setEditFormData({...editFormData, email: e.target.value})}
+                  className="w-full px-4 py-3 bg-[#111827] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:border-[#00BFFF] focus:outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[#00BFFF] font-semibold mb-2">Peso (kg)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={editFormData.peso || ''}
+                    onChange={(e) => setEditFormData({...editFormData, peso: e.target.value})}
+                    className="w-full px-4 py-3 bg-[#111827] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:border-[#00BFFF] focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[#00BFFF] font-semibold mb-2">Altura (cm)</label>
+                  <input
+                    type="number"
+                    value={editFormData.altura || ''}
+                    onChange={(e) => setEditFormData({...editFormData, altura: e.target.value})}
+                    className="w-full px-4 py-3 bg-[#111827] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:border-[#00BFFF] focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[#00BFFF] font-semibold mb-2">Domicilio</label>
+                <input
+                  type="text"
+                  value={editFormData.domicilio || ''}
+                  onChange={(e) => setEditFormData({...editFormData, domicilio: e.target.value})}
+                  className="w-full px-4 py-3 bg-[#111827] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:border-[#00BFFF] focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[#00BFFF] font-semibold mb-2">Fecha de Nacimiento</label>
+                <input
+                  type="date"
+                  value={editFormData.fechaNacimiento || ''}
+                  onChange={(e) => setEditFormData({...editFormData, fechaNacimiento: e.target.value})}
+                  className="w-full px-4 py-3 bg-[#111827] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:border-[#00BFFF] focus:outline-none"
+                />
+              </div>
+
+              <div className="flex space-x-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  className="flex-1 px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 active:scale-95 transition-all font-semibold"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-3 bg-[#00BFFF] text-[#111827] rounded-lg hover:bg-[#1E40AF] hover:text-[#00BFFF] active:scale-95 transition-all font-semibold"
+                >
+                  Guardar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
+

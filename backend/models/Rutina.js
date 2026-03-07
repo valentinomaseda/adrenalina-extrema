@@ -86,6 +86,15 @@ export class Rutina {
     return result;
   }
 
+  // Desasignar rutina de alumno
+  static async removeFromAlumno(idRutina, idPersona) {
+    const [result] = await pool.query(
+      'DELETE FROM alumno_rutina WHERE idRutina = ? AND idPersona = ?',
+      [idRutina, idPersona]
+    );
+    return result;
+  }
+
   // Actualizar estado de rutina asignada
   static async updateEstadoAsignacion(idRutina, idPersona, estado) {
     const [result] = await pool.query(

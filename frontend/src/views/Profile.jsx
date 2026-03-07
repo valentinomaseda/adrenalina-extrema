@@ -1,12 +1,39 @@
-import { UserCircle, Mail, Phone, Award, LogOut } from 'lucide-react'
+import { useState } from 'react'
+import { UserCircle, Mail, Phone, Award, LogOut, X, Edit } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
 
 export default function Profile() {
-  const { user, students, logout } = useAppContext()
+  const { user, students, logout, updateProfile } = useAppContext()
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [showEditSuccess, setShowEditSuccess] = useState(false)
+  const [showEditError, setShowEditError] = useState(false)
+  const [editErrorMessage, setEditErrorMessage] = useState('')
+  const [editFormData, setEditFormData] = useState({})
 
   const handleLogout = () => {
     if (confirm('¿Estás seguro que deseas cerrar sesión?')) {
       logout()
+    }
+  }
+
+  const handleEditProfile = async (e) => {
+    e.preventDefault()
+    setEditErrorMessage('')
+    setShowEditError(false)
+    
+    try {
+      await updateProfile(editFormData)
+      setShowEditModal(false)
+      setShowEditSuccess(true)
+      setTimeout(() => {
+        setShowEditSuccess(false)
+      }, 3000)
+    } catch (error) {
+      setEditErrorMessage(error.message || 'Error al actualizar el perfil')
+      setShowEditError(true)
+      setTimeout(() => {
+        setShowEditError(false)
+      }, 5000)
     }
   }
 
@@ -16,6 +43,19 @@ export default function Profile() {
         <UserCircle className="text-[#00BFFF]" size={28} strokeWidth={2.5} />
         <h2 className="text-2xl font-bold text-[#1E40AF]">Mi Perfil</h2>
       </div>
+
+      {/* Notificaciones de edición */}
+      {showEditSuccess && (
+        <div className="bg-green-600 border-2 border-green-400 text-white px-6 py-4 rounded-lg animate-scale-in">
+          <p className="font-semibold">✓ Perfil actualizado exitosamente</p>
+        </div>
+      )}
+
+      {showEditError && (
+        <div className="bg-red-600 border-2 border-red-400 text-white px-6 py-4 rounded-lg animate-shake">
+          <p className="font-semibold">✗ {editErrorMessage}</p>
+        </div>
+      )}
 
       <div className="bg-gradient-to-br from-[#1E40AF] to-[#152e6b] rounded-xl shadow-lg p-6 space-y-6 animate-slide-in-up delay-100 border border-[#00BFFF]/20">
         <div className="flex flex-col items-center animate-scale-in delay-200">
@@ -56,7 +96,19 @@ export default function Profile() {
         </div>
 
         <div className="space-y-3">
-          <button className="w-full px-6 py-3 bg-[#00BFFF] text-[#111827] rounded-lg hover:bg-[#1E40AF] hover:text-[#00BFFF] active:scale-95 transition-all font-semibold animate-fade-in delay-500">
+          <button 
+            onClick={() => {
+              setEditFormData({
+                nombre: user?.nombre || '',
+                mail: user?.mail || '',
+                tel: user?.tel || '',
+                password: ''
+              })
+              setShowEditModal(true)
+            }}
+            className="w-full px-6 py-3 bg-[#00BFFF] text-[#111827] rounded-lg hover:bg-[#1E40AF] hover:text-[#00BFFF] active:scale-95 transition-all font-semibold animate-fade-in delay-500 flex items-center justify-center gap-2"
+          >
+            <Edit size={20} />
             Editar Perfil
           </button>
           
@@ -69,6 +121,91 @@ export default function Profile() {
           </button>
         </div>
       </div>
+
+      {/* Modal de edición de perfil */}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 animate-fade-in overflow-y-auto">
+          <div className="bg-gradient-to-br from-[#1a2942] to-[#0f1729] rounded-xl shadow-2xl max-w-md w-full my-8 animate-scale-in border border-[#00BFFF]">
+            <div className="sticky top-0 bg-[#1E40AF] text-white p-6 flex items-center justify-between rounded-t-xl">
+              <h3 className="text-xl font-bold">Editar Perfil</h3>
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="p-2 hover:bg-[#00BFFF] rounded-full active:scale-95 transition-all"
+              >
+                <X size={24} strokeWidth={2.5} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleEditProfile} className="p-6 space-y-4">
+              {showEditError && (
+                <div className="bg-red-600 border-2 border-red-400 text-white px-4 py-3 rounded-lg animate-shake mb-4">
+                  <p className="font-semibold text-sm">✗ {editErrorMessage}</p>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-[#00BFFF] font-semibold mb-2">Nombre</label>
+                <input
+                  type="text"
+                  value={editFormData.nombre || ''}
+                  onChange={(e) => setEditFormData({...editFormData, nombre: e.target.value})}
+                  className="w-full px-4 py-3 bg-[#111827] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:border-[#00BFFF] focus:outline-none"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-[#00BFFF] font-semibold mb-2">Email</label>
+                <input
+                  type="email"
+                  value={editFormData.mail || ''}
+                  onChange={(e) => setEditFormData({...editFormData, mail: e.target.value})}
+                  className="w-full px-4 py-3 bg-[#111827] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:border-[#00BFFF] focus:outline-none"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-[#00BFFF] font-semibold mb-2">Teléfono</label>
+                <input
+                  type="tel"
+                  value={editFormData.tel || ''}
+                  onChange={(e) => setEditFormData({...editFormData, tel: e.target.value})}
+                  className="w-full px-4 py-3 bg-[#111827] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:border-[#00BFFF] focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[#00BFFF] font-semibold mb-2">Nueva Contraseña</label>
+                <input
+                  type="password"
+                  value={editFormData.password || ''}
+                  onChange={(e) => setEditFormData({...editFormData, password: e.target.value})}
+                  className="w-full px-4 py-3 bg-[#111827] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:border-[#00BFFF] focus:outline-none"
+                  placeholder="Dejar vacío para no cambiar"
+                />
+                <p className="text-xs text-gray-400 mt-1">Solo completa este campo si deseas cambiar tu contraseña</p>
+              </div>
+
+              <div className="flex space-x-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  className="flex-1 px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 active:scale-95 transition-all font-semibold"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-3 bg-[#00BFFF] text-[#111827] rounded-lg hover:bg-[#1E40AF] hover:text-[#00BFFF] active:scale-95 transition-all font-semibold"
+                >
+                  Guardar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

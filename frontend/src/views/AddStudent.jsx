@@ -11,6 +11,7 @@ export default function AddStudent() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    gender: 'masculino',
     phone: '',
     weight: '',
     height: '',
@@ -62,7 +63,7 @@ export default function AddStudent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 animate-fade-in">
+    <div className="min-h-screen bg-gray-50 p-4 pb-40 md:pb-6 animate-fade-in">
       <div className="max-w-3xl mx-auto">
         {/* Header */}
         <div className="mb-6">
@@ -120,6 +121,24 @@ export default function AddStudent() {
                 className="text-gray-900 w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg"
                 placeholder="juan@email.com"
               />
+            </div>
+
+            {/* Género */}
+            <div>
+              <label htmlFor="gender" className="block text-sm font-semibold text-gray-700 mb-2">
+                Género *
+              </label>
+              <select
+                id="gender"
+                name="gender"
+                value={formData.gender}
+                onChange={handleChange}
+                required
+                className="text-gray-900 w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg"
+              >
+                <option value="masculino">Masculino</option>
+                <option value="femenino">Femenino</option>
+              </select>
             </div>
 
             {/* Contraseña */}

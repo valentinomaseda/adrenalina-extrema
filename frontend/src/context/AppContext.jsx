@@ -13,11 +13,17 @@ export const useAppContext = () => {
 
 // Helper para transformar datos del backend al formato del frontend
 const transformPersonaToStudent = (persona) => {
+  // Generar avatar basado en ID (para que sea consistente) y género
+  const avatarStyle = persona.genero === 'femenino' ? 'avataaars' : 'avataaars'
+  const avatarSeed = `user-${persona.idPersona}`
+  const genderParam = persona.genero === 'femenino' ? '&gender=female' : '&gender=male'
+  
   return {
     id: persona.idPersona,
     name: persona.nombre,
-    photo: `https://api.dicebear.com/7.x/avataaars/svg?seed=${persona.nombre}`,
-    level: persona.nivel || 'Intermedio', // Puedes ajustar esto según tu lógica
+    photo: `https://api.dicebear.com/7.x/${avatarStyle}/svg?seed=${avatarSeed}${genderParam}`,
+    level: persona.nivel || 'Intermedio',
+    gender: persona.genero || 'masculino',
     phone: persona.tel?.toString() || '',
     email: persona.mail,
     weight: persona.peso,
@@ -250,6 +256,7 @@ export const AppProvider = ({ children }) => {
         })
       )
       setStudents(alumnosConRutinas)
+      return alumnosConRutinas
     } catch (error) {
       console.error('Error refreshing students:', error)
       throw error
@@ -280,6 +287,8 @@ export const AppProvider = ({ children }) => {
         mail: studentData.email,
         tel: studentData.phone || '',  // Enviar como string, no como número
         rol: 'alumno',
+        nivel: studentData.level || 'Intermedio',
+        genero: studentData.gender || 'masculino',
         direccion: studentData.address || '',
         fechaNac: studentData.birthDate || null,
         peso: parseFloat(studentData.weight) || null,
@@ -374,9 +383,93 @@ export const AppProvider = ({ children }) => {
       await rutinasAPI.assignToPersona(routine.idRutina || routine.id, studentId)
       
       // Recargar los estudiantes con sus rutinas actualizadas desde la base de datos
-      await refreshStudents()
+      const alumnosActualizados = await refreshStudents()
+      
+      // Actualizar selectedStudent si existe
+      if (selectedStudent && selectedStudent.id === studentId) {
+        const estudianteActualizado = alumnosActualizados.find(s => s.id === studentId)
+        if (estudianteActualizado) {
+          setSelectedStudent(estudianteActualizado)
+        }
+      }
     } catch (error) {
       console.error('Error assigning routine:', error)
+      throw error
+    }
+  }
+
+  // Función para eliminar rutina de alumno
+  const removeRoutineFromStudent = async (studentId, routineId) => {
+    try {
+      await rutinasAPI.removeFromPersona(routineId, studentId)
+      
+      // Recargar los estudiantes con sus rutinas actualizadas desde la base de datos
+      const alumnosActualizados = await refreshStudents()
+      
+      // Actualizar selectedStudent si existe
+      if (selectedStudent && selectedStudent.id === studentId) {
+        const estudianteActualizado = alumnosActualizados.find(s => s.id === studentId)
+        if (estudianteActualizado) {
+          setSelectedStudent(estudianteActualizado)
+        }
+      }
+    } catch (error) {
+      console.error('Error removing routine:', error)
+      throw error
+    }
+  }
+
+  // Función para actualizar alumno
+  const updateStudent = async (studentId, studentData) => {
+    try {
+      // Mapear campos del frontend a campos de la base de datos
+      const personaData = {
+        nombre: studentData.nombre,
+        mail: studentData.email,
+        tel: studentData.telefono || '',
+        nivel: studentData.nivel,
+        genero: studentData.genero,
+        direccion: studentData.domicilio || '',
+        fechaNac: studentData.fechaNacimiento || null,
+        peso: parseFloat(studentData.peso) || null,
+        altura: parseFloat(studentData.altura) || null
+      }
+      
+      await personasAPI.update(studentId, personaData)
+      
+      // Recargar los estudiantes con los datos actualizados desde la base de datos
+      const alumnosActualizados = await refreshStudents()
+      
+      // Actualizar selectedStudent si existe
+      if (selectedStudent && selectedStudent.id === studentId) {
+        const estudianteActualizado = alumnosActualizados.find(s => s.id === studentId)
+        if (estudianteActualizado) {
+          setSelectedStudent(estudianteActualizado)
+        }
+      }
+    } catch (error) {
+      console.error('Error updating student:', error)
+      throw error
+    }
+  }
+
+  // Función para actualizar perfil del usuario
+  const updateProfile = async (profileData) => {
+    try {
+      // Filtrar password si está vacío
+      const dataToUpdate = { ...profileData }
+      if (!dataToUpdate.password || dataToUpdate.password.trim() === '') {
+        delete dataToUpdate.password
+      }
+      
+      await personasAPI.update(user.idPersona, dataToUpdate)
+      
+      // Recargar datos del usuario
+      const updatedUser = await personasAPI.getById(user.idPersona)
+      setUser(updatedUser)
+      localStorage.setItem('user', JSON.stringify(updatedUser))
+    } catch (error) {
+      console.error('Error updating profile:', error)
       throw error
     }
   }
@@ -402,6 +495,9 @@ export const AppProvider = ({ children }) => {
     // Funciones
     saveRoutine,
     assignRoutineToStudent,
+    removeRoutineFromStudent,
+    updateStudent,
+    updateProfile,
     addStudent,
     addExercise,
     refreshStudents,

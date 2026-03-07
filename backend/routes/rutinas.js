@@ -12,6 +12,7 @@ router.get('/:id/alumnos', rutinaController.getAlumnos);
 router.post('/', rutinaController.create);
 router.post('/:id/ejercicios', rutinaController.addEjercicio);
 router.post('/:id/asignar', rutinaController.assignToAlumno);
+router.post('/:id/desasignar', rutinaController.removeFromAlumno);
 router.put('/:id', rutinaController.update);
 router.put('/:id/estado', rutinaController.updateEstado);
 router.delete('/:id', rutinaController.delete);
