@@ -2,15 +2,23 @@
 
 Backend API para el sistema de gestión de entrenamiento Adrenalina Extrema.
 
+## Tecnologías
+
+- **Node.js** + **Express** - Servidor API REST
+- **MySQL** - Base de datos relacional
+- **mysql2** - Driver MySQL con soporte para promesas
+
 ## Estructura del Proyecto
 
 ```
 backend/
 ├── server.js           # Punto de entrada del servidor
 ├── package.json        # Dependencias del proyecto
+├── schema.sql         # Esquema de la base de datos MySQL
 ├── .env.example        # Variables de entorno (template)
 ├── .gitignore         # Archivos ignorados por git
 ├── config/            # Configuración (DB, etc)
+│   └── database.js    # Pool de conexiones MySQL
 ├── controllers/       # Lógica de negocio
 ├── models/           # Modelos de datos
 ├── routes/           # Rutas de la API
@@ -27,12 +35,29 @@ npm install
 
 ## Configuración
 
-1. Copia `.env.example` a `.env`
-2. Configura las variables de entorno según tu entorno
+1. Copia `.env.example` a `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Configura las variables de entorno en `.env`:
+   ```env
+   PORT=3000
+   DB_HOST=localhost
+   DB_PORT=3306
+   DB_NAME=adrenalina_extrema
+   DB_USER=root
+   DB_PASSWORD=tu_password
+   ```
+
+3. Crea la base de datos MySQL:
+   ```bash
+   mysql -u root -p < schema.sql
+   ```
 
 ## Uso
 
-Desarrollo:
+Desarrollo (con auto-reload):
 ```bash
 npm run dev
 ```

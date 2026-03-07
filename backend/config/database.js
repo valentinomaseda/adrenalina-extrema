@@ -1,23 +1,29 @@
-// Aquí irá la configuración de la base de datos
-// Por ejemplo, para PostgreSQL con pg o Sequelize
-// O para MongoDB con Mongoose
+// Configuración de conexión a MySQL
+import mysql from 'mysql2/promise';
 
 export const dbConfig = {
   host: process.env.DB_HOST || 'localhost',
-  port: process.env.DB_PORT || 5432,
+  port: process.env.DB_PORT || 3306,
   database: process.env.DB_NAME || 'adrenalina_extrema',
-  user: process.env.DB_USER || 'postgres',
+  user: process.env.DB_USER || 'root',
   password: process.env.DB_PASSWORD || '',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
 };
 
-// Ejemplo de conexión (descomentar según tu elección de DB)
-/*
-import pg from 'pg';
-const { Pool } = pg;
+// Pool de conexiones MySQL
+export const pool = mysql.createPool(dbConfig);
 
-export const pool = new Pool(dbConfig);
-
-pool.on('connect', () => {
-  console.log('Conectado a la base de datos');
-});
-*/
+// Función para probar la conexión
+export const testConnection = async () => {
+  try {
+    const connection = await pool.getConnection();
+    console.log('✓ Conectado a MySQL exitosamente');
+    connection.release();
+    return true;
+  } catch (error) {
+    console.error('✗ Error conectando a MySQL:', error.message);
+    return false;
+  }
+};
