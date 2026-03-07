@@ -5,9 +5,17 @@ import StudentList from './views/StudentList'
 import StudentDetail from './views/StudentDetail'
 import RoutineBuilder from './views/RoutineBuilder'
 import Profile from './views/Profile'
+import Login from './views/Login'
+import AddStudent from './views/AddStudent'
+import AddExercise from './views/AddExercise'
 
 function AppContent() {
-  const { currentView } = useAppContext()
+  const { currentView, isAuthenticated } = useAppContext()
+
+  // Si no está autenticado, mostrar login
+  if (!isAuthenticated) {
+    return <Login />
+  }
 
   const renderView = () => {
     switch (currentView) {
@@ -19,6 +27,10 @@ function AppContent() {
         return <RoutineBuilder />
       case 'profile':
         return <Profile />
+      case 'addStudent':
+        return <AddStudent />
+      case 'addExercise':
+        return <AddExercise />
       default:
         return <StudentList />
     }

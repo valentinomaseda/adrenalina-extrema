@@ -1,12 +1,18 @@
-import { Users, ClipboardList, UserCircle } from 'lucide-react'
+import { Users, ClipboardList, UserCircle, LogOut } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
 
 export default function Sidebar() {
-  const { currentView, setCurrentView, setSelectedStudent } = useAppContext()
+  const { currentView, setCurrentView, setSelectedStudent, logout, user } = useAppContext()
 
   const handleNavigation = (view) => {
     setCurrentView(view)
     setSelectedStudent(null)
+  }
+
+  const handleLogout = () => {
+    if (confirm('¿Estás seguro que deseas cerrar sesión?')) {
+      logout()
+    }
   }
 
   const navItems = [
@@ -43,14 +49,22 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      <div className="p-4 border-t border-[#1E40AF]">
+      <div className="p-4 border-t border-[#1E40AF] space-y-3">
         <div className="flex items-center space-x-3 p-3 bg-[#1E40AF] rounded-lg">
           <UserCircle size={32} className="text-[#00BFFF]" strokeWidth={2} />
-          <div>
-            <p className="font-semibold text-sm text-[#F3F4F6]">Coach Admin</p>
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-sm text-[#F3F4F6] truncate">{user?.nombre || 'Coach Admin'}</p>
             <p className="text-xs text-[#00BFFF]">Sesión activa</p>
           </div>
         </div>
+        
+        <button
+          onClick={handleLogout}
+          className="flex items-center space-x-2 w-full px-4 py-2 rounded-lg text-red-400 hover:bg-red-500/20 transition-all"
+        >
+          <LogOut size={20} />
+          <span className="font-semibold text-sm">Cerrar Sesión</span>
+        </button>
       </div>
     </aside>
   )

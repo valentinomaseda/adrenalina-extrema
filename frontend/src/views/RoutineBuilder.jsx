@@ -3,7 +3,7 @@ import { Plus, Trash2, Save, Dumbbell, List } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
 
 export default function RoutineBuilder() {
-  const { exercises, saveRoutine, savedRoutines } = useAppContext()
+  const { exercises, saveRoutine, savedRoutines, setCurrentView } = useAppContext()
   const [routineName, setRoutineName] = useState('')
   const [exerciseInstances, setExerciseInstances] = useState([])
   const [showSuccess, setShowSuccess] = useState(false)
@@ -264,6 +264,18 @@ export default function RoutineBuilder() {
           </div>
         </div>
       )}
+
+      {/* Botón flotante para añadir ejercicio */}
+      <button
+        onClick={() => setCurrentView('addExercise')}
+        className="fixed bottom-20 md:bottom-8 right-8 bg-gradient-to-r from-[#00BFFF] to-[#1E40AF] text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-all z-50 flex items-center gap-2 group"
+        title="Agregar Ejercicio"
+      >
+        <Plus size={24} />
+        <span className="hidden group-hover:inline-block text-sm font-semibold mr-2">
+          Agregar Ejercicio
+        </span>
+      </button>
     </div>
   )
 }

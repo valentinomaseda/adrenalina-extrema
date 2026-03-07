@@ -1,4 +1,5 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useState, useEffect } from 'react'
+import { personasAPI, ejerciciosAPI, rutinasAPI } from '../services/api'
 
 const AppContext = createContext()
 
@@ -10,145 +11,256 @@ export const useAppContext = () => {
   return context
 }
 
-// Mock Data
-const MOCK_STUDENTS = [
-  {
-    id: 1,
-    name: 'Juan Pérez',
-    photo: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Juan',
-    level: 'Avanzado',
-    phone: '+54 9 11 2345-6789',
-    email: 'juan.perez@email.com',
-    weight: 75,
-    height: 178,
-    address: 'Av. Corrientes 1234, CABA',
-    birthDate: '1995-05-15',
-    progress: [85, 72, 90, 88, 95],
-    routineHistory: [
-      { id: 1, name: 'Cardio Intenso', date: '2026-03-01', completed: true },
-      { id: 2, name: 'Fuerza + Resis', date: '2026-02-28', completed: true },
-    ]
-  },
-  {
-    id: 2,
-    name: 'María López',
-    photo: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Maria',
-    level: 'Intermedio',
-    phone: '+54 9 11 3456-7890',
-    email: 'maria.lopez@email.com',
-    weight: 62,
-    height: 165,
-    address: 'Av. Santa Fe 2345, CABA',
-    birthDate: '1998-08-22',
-    progress: [60, 65, 70, 68, 75],
-    routineHistory: [
-      { id: 3, name: 'Iniciación Sprint', date: '2026-03-02', completed: true },
-    ]
-  },
-  {
-    id: 3,
-    name: 'Carlos Ruiz',
-    photo: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Carlos',
-    level: 'Principiante',
-    phone: '+54 9 11 4567-8901',
-    email: 'carlos.ruiz@email.com',
-    weight: 82,
-    height: 180,
-    address: 'Av. Rivadavia 3456, CABA',
-    birthDate: '2000-03-10',
-    progress: [45, 50, 52, 55, 60],
+// Helper para transformar datos del backend al formato del frontend
+const transformPersonaToStudent = (persona) => {
+  return {
+    id: persona.idPersona,
+    name: persona.nombre,
+    photo: `https://api.dicebear.com/7.x/avataaars/svg?seed=${persona.nombre}`,
+    level: persona.nivel || 'Intermedio', // Puedes ajustar esto según tu lógica
+    phone: persona.tel?.toString() || '',
+    email: persona.mail,
+    weight: persona.peso,
+    height: persona.altura,
+    address: persona.direccion || '',
+    birthDate: persona.fechaNac ? new Date(persona.fechaNac).toISOString().split('T')[0] : '',
+    progress: [],
     routineHistory: []
-  },
-  {
-    id: 4,
-    name: 'Ana García',
-    photo: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Ana',
-    level: 'Avanzado',
-    phone: '+54 9 11 5678-9012',
-    email: 'ana.garcia@email.com',
-    weight: 58,
-    height: 168,
-    address: 'Av. Cabildo 4567, CABA',
-    birthDate: '1994-11-30',
-    progress: [80, 82, 85, 83, 90],
-    routineHistory: [
-      { id: 4, name: 'HIIT Avanzado', date: '2026-03-03', completed: false },
-    ]
-  },
-  {
-    id: 5,
-    name: 'Luis Fernández',
-    photo: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Luis',
-    level: 'Intermedio',
-    phone: '+54 9 11 6789-0123',
-    email: 'luis.fernandez@email.com',
-    weight: 70,
-    height: 175,
-    address: 'Av. Callao 5678, CABA',
-    birthDate: '1997-07-18',
-    progress: [55, 58, 62, 65, 70],
-    routineHistory: [
-      { id: 5, name: 'Resistencia Base', date: '2026-03-04', completed: true },
-      { id: 6, name: 'Velocidad Sprint', date: '2026-03-05', completed: false },
-    ]
-  },
-]
+  }
+}
 
-const MOCK_EXERCISES = [
-  { id: 1, name: 'Burpees', defaultType: 'reps' },
-  { id: 2, name: 'Estocadas', defaultType: 'reps' },
-  { id: 3, name: 'Trote Suave', defaultType: 'segundos' },
-  { id: 4, name: 'Sprint 100m', defaultType: 'segundos' },
-  { id: 5, name: 'Mountain Climbers', defaultType: 'reps' },
-  { id: 6, name: 'Plancha', defaultType: 'segundos' },
-  { id: 7, name: 'Jumping Jacks', defaultType: 'reps' },
-  { id: 8, name: 'Sentadillas', defaultType: 'reps' },
-  { id: 9, name: 'Desplazamientos Laterales', defaultType: 'reps' },
-  { id: 10, name: 'Skipping Alto', defaultType: 'reps' },
-]
+const transformEjercicioToExercise = (ejercicio) => {
+  return {
+    id: ejercicio.idEjercicio,
+    name: ejercicio.nombre,
+    defaultType: ejercicio.contador?.includes('reps') ? 'reps' : 'segundos',
+    cantSets: ejercicio.cantSets,
+    contador: ejercicio.contador
+  }
+}
 
 export const AppProvider = ({ children }) => {
-  const [userRole] = useState('coach')
-  const [students, setStudents] = useState(MOCK_STUDENTS)
-  const [exercises] = useState(MOCK_EXERCISES)
+  // Estado de autenticación
+  const [user, setUser] = useState(null)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  
+  // Estados de datos
+  const [students, setStudents] = useState([])
+  const [exercises, setExercises] = useState([])
   const [currentView, setCurrentView] = useState('students')
   const [selectedStudent, setSelectedStudent] = useState(null)
   const [savedRoutines, setSavedRoutines] = useState([])
+  const [loading, setLoading] = useState(false)
+
+  // Cargar datos del usuario desde localStorage al iniciar
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user')
+    if (storedUser) {
+      try {
+        const userData = JSON.parse(storedUser)
+        setUser(userData)
+        setIsAuthenticated(true)
+        loadData()
+      } catch (error) {
+        console.error('Error loading user from localStorage:', error)
+        localStorage.removeItem('user')
+      }
+    }
+  }, [])
+
+  // Cargar datos del backend
+  const loadData = async () => {
+    setLoading(true)
+    try {
+      // Cargar alumnos
+      const alumnos = await personasAPI.getByRol('alumno')
+      setStudents(alumnos.map(transformPersonaToStudent))
+
+      // Cargar ejercicios
+      const ejercicios = await ejerciciosAPI.getAll()
+      setExercises(ejercicios.map(transformEjercicioToExercise))
+
+      // Cargar rutinas
+      const rutinas = await rutinasAPI.getAll()
+      setSavedRoutines(rutinas)
+    } catch (error) {
+      console.error('Error loading data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Función de login
+  const login = async (email, password) => {
+    try {
+      const persona = await personasAPI.login(email, password)
+      
+      // Guardar usuario en estado y localStorage
+      setUser(persona)
+      setIsAuthenticated(true)
+      localStorage.setItem('user', JSON.stringify(persona))
+      
+      // Cargar datos
+      await loadData()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  // Función de logout
+  const logout = () => {
+    setUser(null)
+    setIsAuthenticated(false)
+    localStorage.removeItem('user')
+    setStudents([])
+    setExercises([])
+    setSavedRoutines([])
+    setCurrentView('students')
+    setSelectedStudent(null)
+  }
+
+  // Función para refrescar alumnos
+  const refreshStudents = async () => {
+    try {
+      const alumnos = await personasAPI.getByRol('alumno')
+      setStudents(alumnos.map(transformPersonaToStudent))
+    } catch (error) {
+      console.error('Error refreshing students:', error)
+      throw error
+    }
+  }
+
+  // Función para refrescar ejercicios
+  const refreshExercises = async () => {
+    try {
+      const ejercicios = await ejerciciosAPI.getAll()
+      setExercises(ejercicios.map(transformEjercicioToExercise))
+    } catch (error) {
+      console.error('Error refreshing exercises:', error)
+      throw error
+    }
+  }
+
+  // Función para añadir nuevo alumno
+  const addStudent = async (studentData) => {
+    try {
+      // Generar un ID único (en producción, el backend lo generaría)
+      const newId = Math.max(0, ...students.map(s => s.id)) + 1
+      
+      const personaData = {
+        idPersona: newId,
+        nombre: studentData.name,
+        mail: studentData.email,
+        tel: parseInt(studentData.phone) || 0,
+        rol: 'alumno',
+        direccion: studentData.address || '',
+        fechaNac: studentData.birthDate || null,
+        peso: parseFloat(studentData.weight) || null,
+        altura: parseFloat(studentData.height) || null,
+        password: studentData.password || '123456' // Password por defecto
+      }
+
+      await personasAPI.create(personaData)
+      await refreshStudents()
+    } catch (error) {
+      console.error('Error adding student:', error)
+      throw error
+    }
+  }
+
+  // Función para añadir nuevo ejercicio
+  const addExercise = async (exerciseData) => {
+    try {
+      // Generar un ID único
+      const newId = Math.max(0, ...exercises.map(e => e.id)) + 1
+      
+      const ejercicioData = {
+        idEjercicio: newId,
+        nombre: exerciseData.name,
+        cantSets: parseInt(exerciseData.cantSets) || 3,
+        contador: exerciseData.contador || '10 reps'
+      }
+
+      await ejerciciosAPI.create(ejercicioData)
+      await refreshExercises()
+    } catch (error) {
+      console.error('Error adding exercise:', error)
+      throw error
+    }
+  }
 
   // Función para guardar rutina
-  const saveRoutine = (routine) => {
-    const newRoutine = {
-      ...routine,
-      id: Date.now(),
+  const saveRoutine = async (routine) => {
+    try {
+      const newId = Math.max(0, ...savedRoutines.map(r => r.idRutina || r.id)) + 1
+      
+      const rutinaData = {
+        idRutina: newId,
+        nombre: routine.name,
+        descripcion: routine.description || '',
+        nivel: routine.level || 'Intermedio'
+      }
+
+      const createdRutina = await rutinasAPI.create(rutinaData)
+      
+      // Agregar ejercicios a la rutina si los hay
+      if (routine.exercises && routine.exercises.length > 0) {
+        for (let i = 0; i < routine.exercises.length; i++) {
+          const exercise = routine.exercises[i]
+          await rutinasAPI.addEjercicio({
+            idRutina: newId,
+            idEjercicio: exercise.id,
+            orden: i + 1
+          })
+        }
+      }
+
+      setSavedRoutines([...savedRoutines, createdRutina])
+      return createdRutina
+    } catch (error) {
+      console.error('Error saving routine:', error)
+      throw error
     }
-    setSavedRoutines([...savedRoutines, newRoutine])
-    return newRoutine
   }
 
   // Función para asignar rutina a alumno
-  const assignRoutineToStudent = (studentId, routine) => {
-    setStudents(students.map(student => {
-      if (student.id === studentId) {
-        return {
-          ...student,
-          routineHistory: [
-            {
-              id: Date.now(),
-              name: routine.name,
-              date: new Date().toISOString().split('T')[0],
-              completed: false,
-              exercises: routine.exercises
-            },
-            ...student.routineHistory
-          ]
+  const assignRoutineToStudent = async (studentId, routine) => {
+    try {
+      await rutinasAPI.assignToPersona(routine.id, studentId)
+      
+      // Actualizar el estado local
+      setStudents(students.map(student => {
+        if (student.id === studentId) {
+          return {
+            ...student,
+            routineHistory: [
+              {
+                id: Date.now(),
+                name: routine.name,
+                date: new Date().toISOString().split('T')[0],
+                completed: false,
+                exercises: routine.exercises
+              },
+              ...student.routineHistory
+            ]
+          }
         }
-      }
-      return student
-    }))
+        return student
+      }))
+    } catch (error) {
+      console.error('Error assigning routine:', error)
+      throw error
+    }
   }
 
   const value = {
-    userRole,
+    // Autenticación
+    user,
+    isAuthenticated,
+    login,
+    logout,
+    
+    // Datos
     students,
     setStudents,
     exercises,
@@ -157,8 +269,18 @@ export const AppProvider = ({ children }) => {
     selectedStudent,
     setSelectedStudent,
     savedRoutines,
+    loading,
+    
+    // Funciones
     saveRoutine,
     assignRoutineToStudent,
+    addStudent,
+    addExercise,
+    refreshStudents,
+    refreshExercises,
+    
+    // Role (para compatibilidad)
+    userRole: user?.rol || 'coach',
   }
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
