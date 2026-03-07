@@ -1,22 +1,23 @@
 -- Script para crear usuarios de prueba en Adrenalina Extrema
 -- Ejecutar después de crear la base de datos con adrenalina_extrema.sql
+-- Y después de ejecutar fix_telefono.sql para actualizar el campo tel a VARCHAR
 
 USE adrenalina_extrema;
 
 -- Insertar un entrenador/coach para hacer login
-INSERT INTO personas (nombre, mail, password, rol, tel, direccion, fechaNac, peso, altura)
+INSERT INTO persona (nombre, mail, password, rol, tel, direccion, fechaNac, peso, altura)
 VALUES 
-('Coach Admin', 'admin@adrenalina.com', 'admin123', 'entrenador', 1122334455, 'Av. Corrientes 1234, CABA', '1985-03-15', 80, 182),
-('Valentina Coach', 'vale@adrenalina.com', '123456', 'entrenador', 1155667788, 'Av. Santa Fe 5678, CABA', '1990-07-20', 62, 170);
+('Coach Admin', 'admin@adrenalina.com', 'admin123', 'entrenador', '1122334455', 'Av. Corrientes 1234, CABA', '1985-03-15', 80, 182),
+('Valentina Coach', 'vale@adrenalina.com', '123456', 'entrenador', '1155667788', 'Av. Santa Fe 5678, CABA', '1990-07-20', 62, 170);
 
 -- Insertar algunos alumnos de ejemplo
-INSERT INTO personas (nombre, mail, password, rol, tel, direccion, fechaNac, peso, altura)
+INSERT INTO persona (nombre, mail, password, rol, tel, direccion, fechaNac, peso, altura)
 VALUES 
-('Juan Pérez', 'juan.perez@email.com', '123456', 'alumno', 1123456789, 'Av. Corrientes 1234, CABA', '1995-05-15', 75, 178),
-('María López', 'maria.lopez@email.com', '123456', 'alumno', 1134567890, 'Av. Santa Fe 2345, CABA', '1998-08-22', 62, 165),
-('Carlos Ruiz', 'carlos.ruiz@email.com', '123456', 'alumno', 1145678901, 'Av. Rivadavia 3456, CABA', '2000-03-10', 82, 180),
-('Ana García', 'ana.garcia@email.com', '123456', 'alumno', 1156789012, 'Av. Cabildo 4567, CABA', '1994-11-30', 58, 168),
-('Luis Fernández', 'luis.fernandez@email.com', '123456', 'alumno', 1167890123, 'Av. Callao 5678, CABA', '1997-07-18', 70, 175);
+('Juan Pérez', 'juan.perez@email.com', '123456', 'alumno', '1123456789', 'Av. Corrientes 1234, CABA', '1995-05-15', 75, 178),
+('María López', 'maria.lopez@email.com', '123456', 'alumno', '1134567890', 'Av. Santa Fe 2345, CABA', '1998-08-22', 62, 165),
+('Carlos Ruiz', 'carlos.ruiz@email.com', '123456', 'alumno', '1145678901', 'Av. Rivadavia 3456, CABA', '2000-03-10', 82, 180),
+('Ana García', 'ana.garcia@email.com', '123456', 'alumno', '1156789012', 'Av. Cabildo 4567, CABA', '1994-11-30', 58, 168),
+('Luis Fernández', 'luis.fernandez@email.com', '123456', 'alumno', '1167890123', 'Av. Callao 5678, CABA', '1997-07-18', 70, 175);
 
 -- Insertar algunos ejercicios de ejemplo
 INSERT INTO ejercicio (nombre, cantSets, contador)
@@ -90,7 +91,7 @@ VALUES
 (5, 2, '2026-03-03', 1);
 
 -- Verificar que todo se insertó correctamente
-SELECT 'Personas insertadas:' as Info, COUNT(*) as Cantidad FROM personas
+SELECT 'Personas insertadas:' as Info, COUNT(*) as Cantidad FROM persona
 UNION ALL
 SELECT 'Ejercicios insertados:', COUNT(*) FROM ejercicio
 UNION ALL
@@ -107,5 +108,5 @@ SELECT
     mail as Email,
     password as Password,
     rol as Rol
-FROM personas
+FROM persona
 WHERE rol = 'entrenador';

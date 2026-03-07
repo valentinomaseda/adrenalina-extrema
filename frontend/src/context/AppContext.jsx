@@ -39,6 +39,30 @@ const transformEjercicioToExercise = (ejercicio) => {
   }
 }
 
+const transformRutinaToRoutine = (rutina, ejercicios = []) => {
+  return {
+    id: rutina.idRutina,
+    name: rutina.nombre,
+    createdAt: rutina.fechaHoraCreacion,
+    exercises: ejercicios.map(ej => {
+      // Extraer sets y valor del contador (ej: "3 sets x 10 reps")
+      const sets = ej.cantSets || 3
+      const contadorMatch = ej.contador?.match(/(\d+)\s*(reps?|seg|segundos)/i)
+      const value = contadorMatch ? parseInt(contadorMatch[1]) : 10
+      const type = ej.contador?.includes('rep') ? 'reps' : 'segundos'
+      
+      return {
+        exerciseId: ej.idEjercicio,
+        id: ej.idEjercicio,
+        name: ej.nombre,
+        sets: sets,
+        value: value,
+        type: type
+      }
+    })
+  }
+}
+
 export const AppProvider = ({ children }) => {
   // Estado de autenticación
   const [user, setUser] = useState(null)
@@ -80,9 +104,20 @@ export const AppProvider = ({ children }) => {
       const ejercicios = await ejerciciosAPI.getAll()
       setExercises(ejercicios.map(transformEjercicioToExercise))
 
-      // Cargar rutinas
+      // Cargar rutinas con sus ejercicios
       const rutinas = await rutinasAPI.getAll()
-      setSavedRoutines(rutinas)
+      const rutinasConEjercicios = await Promise.all(
+        rutinas.map(async (rutina) => {
+          try {
+            const ejercicios = await rutinasAPI.getEjercicios(rutina.idRutina)
+            return transformRutinaToRoutine(rutina, ejercicios)
+          } catch (error) {
+            console.error(`Error loading exercises for routine ${rutina.idRutina}:`, error)
+            return transformRutinaToRoutine(rutina, [])
+          }
+        })
+      )
+      setSavedRoutines(rutinasConEjercicios)
     } catch (error) {
       console.error('Error loading data:', error)
     } finally {
@@ -144,14 +179,15 @@ export const AppProvider = ({ children }) => {
   // Función para añadir nuevo alumno
   const addStudent = async (studentData) => {
     try {
-      // Generar un ID único (en producción, el backend lo generaría)
-      const newId = Math.max(0, ...students.map(s => s.id)) + 1
+      // Obtener todas las personas para generar un ID único que no colisione
+      const todasPersonas = await personasAPI.getAll()
+      const newId = Math.max(0, ...todasPersonas.map(p => p.idPersona)) + 1
       
       const personaData = {
         idPersona: newId,
         nombre: studentData.name,
         mail: studentData.email,
-        tel: parseInt(studentData.phone) || 0,
+        tel: studentData.phone || '',  // Enviar como string, no como número
         rol: 'alumno',
         direccion: studentData.address || '',
         fechaNac: studentData.birthDate || null,
@@ -171,8 +207,9 @@ export const AppProvider = ({ children }) => {
   // Función para añadir nuevo ejercicio
   const addExercise = async (exerciseData) => {
     try {
-      // Generar un ID único
-      const newId = Math.max(0, ...exercises.map(e => e.id)) + 1
+      // Obtener todos los ejercicios para generar un ID único
+      const todosEjercicios = await ejerciciosAPI.getAll()
+      const newId = Math.max(0, ...todosEjercicios.map(e => e.idEjercicio)) + 1
       
       const ejercicioData = {
         idEjercicio: newId,
@@ -192,7 +229,9 @@ export const AppProvider = ({ children }) => {
   // Función para guardar rutina
   const saveRoutine = async (routine) => {
     try {
-      const newId = Math.max(0, ...savedRoutines.map(r => r.idRutina || r.id)) + 1
+      // Obtener todas las rutinas para generar un ID único
+      const todasRutinas = await rutinasAPI.getAll()
+      const newId = Math.max(0, ...todasRutinas.map(r => r.idRutina)) + 1
       
       const rutinaData = {
         idRutina: newId,
@@ -201,22 +240,32 @@ export const AppProvider = ({ children }) => {
         nivel: routine.level || 'Intermedio'
       }
 
-      const createdRutina = await rutinasAPI.create(rutinaData)
+      await rutinasAPI.create(rutinaData)
       
       // Agregar ejercicios a la rutina si los hay
       if (routine.exercises && routine.exercises.length > 0) {
         for (let i = 0; i < routine.exercises.length; i++) {
           const exercise = routine.exercises[i]
-          await rutinasAPI.addEjercicio({
-            idRutina: newId,
-            idEjercicio: exercise.id,
-            orden: i + 1
-          })
+          await rutinasAPI.addEjercicio(newId, exercise.exerciseId || exercise.id)
         }
       }
 
-      setSavedRoutines([...savedRoutines, createdRutina])
-      return createdRutina
+      // Recargar todas las rutinas desde el backend con ejercicios
+      const rutinas = await rutinasAPI.getAll()
+      const rutinasConEjercicios = await Promise.all(
+        rutinas.map(async (rutina) => {
+          try {
+            const ejercicios = await rutinasAPI.getEjercicios(rutina.idRutina)
+            return transformRutinaToRoutine(rutina, ejercicios)
+          } catch (error) {
+            console.error(`Error loading exercises for routine ${rutina.idRutina}:`, error)
+            return transformRutinaToRoutine(rutina, [])
+          }
+        })
+      )
+      setSavedRoutines(rutinasConEjercicios)
+      
+      return { id: newId, ...rutinaData }
     } catch (error) {
       console.error('Error saving routine:', error)
       throw error
@@ -226,7 +275,7 @@ export const AppProvider = ({ children }) => {
   // Función para asignar rutina a alumno
   const assignRoutineToStudent = async (studentId, routine) => {
     try {
-      await rutinasAPI.assignToPersona(routine.id, studentId)
+      await rutinasAPI.assignToPersona(routine.idRutina || routine.id, studentId)
       
       // Actualizar el estado local
       setStudents(students.map(student => {

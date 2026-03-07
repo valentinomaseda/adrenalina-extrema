@@ -118,7 +118,7 @@ export default function AddExercise() {
                 value={formData.name}
                 onChange={handleChange}
                 required
-                className="text-gray-700 w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg"
+                className="text-gray-900 w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg"
                 placeholder="Ej: Burpees, Sentadillas, Plancha..."
               />
             </div>
@@ -187,7 +187,7 @@ export default function AddExercise() {
                 value={counterValue}
                 onChange={handleChange}
                 required
-                className="text-gray-700 w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg"
+                className="text-gray-900 w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg"
                 placeholder="10"
               />
               <p className="text-sm text-gray-500 mt-1">

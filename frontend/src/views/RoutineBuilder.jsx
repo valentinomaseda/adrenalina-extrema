@@ -44,7 +44,7 @@ export default function RoutineBuilder() {
     )
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!routineName.trim()) {
       alert('Por favor ingresa un nombre para la rutina')
       return
@@ -54,22 +54,27 @@ export default function RoutineBuilder() {
       return
     }
 
-    const routine = {
-      name: routineName,
-      exercises: exerciseInstances.map(({ id, ...rest }) => rest), // Remove temp IDs
-      createdAt: new Date().toISOString(),
-    }
+    try {
+      const routine = {
+        name: routineName,
+        exercises: exerciseInstances.map(({ id, ...rest }) => rest), // Remove temp IDs
+        createdAt: new Date().toISOString(),
+      }
 
-    // Guardar en contexto global
-    saveRoutine(routine)
-    console.log('Rutina guardada:', routine)
-    
-    setShowSuccess(true)
-    setTimeout(() => setShowSuccess(false), 3000)
-    
-    // Reset form
-    setRoutineName('')
-    setExerciseInstances([])
+      // Guardar en contexto global
+      await saveRoutine(routine)
+      console.log('Rutina guardada:', routine)
+      
+      setShowSuccess(true)
+      setTimeout(() => setShowSuccess(false), 3000)
+      
+      // Reset form
+      setRoutineName('')
+      setExerciseInstances([])
+    } catch (error) {
+      console.error('Error al guardar rutina:', error)
+      alert('Error al guardar la rutina: ' + (error.message || 'Error desconocido'))
+    }
   }
 
   return (
