@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { Trophy, Flame, Target, Zap, Award, Star, TrendingUp, Medal } from 'lucide-react'
+import AchievementModal from './AchievementModal'
 
 const achievements = [
   {
@@ -68,6 +70,9 @@ const achievements = [
 ]
 
 export default function AchievementBadges({ stats = {} }) {
+  const [selectedAchievement, setSelectedAchievement] = useState(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
   const unlockedAchievements = achievements.filter(achievement => 
     achievement.requirement(stats)
   )
@@ -75,6 +80,19 @@ export default function AchievementBadges({ stats = {} }) {
   const lockedAchievements = achievements.filter(achievement => 
     !achievement.requirement(stats)
   )
+
+  const handleAchievementClick = (achievement) => {
+    setSelectedAchievement(achievement)
+    setIsModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+    // Esperar a que termine la animación antes de limpiar el logro
+    setTimeout(() => {
+      setSelectedAchievement(null)
+    }, 300)
+  }
 
   return (
     <div className="space-y-4">
@@ -93,11 +111,11 @@ export default function AchievementBadges({ stats = {} }) {
           {unlockedAchievements.map((achievement) => {
             const Icon = achievement.icon
             return (
-              <div
+              <button
                 key={achievement.id}
-                className="bg-gradient-to-br from-[#1a2942] to-[#0f1729] p-4 rounded-xl border-2 animate-scale-in hover:scale-105 transition-transform cursor-pointer"
+                onClick={() => handleAchievementClick(achievement)}
+                className="bg-gradient-to-br from-[#1a2942] to-[#0f1729] p-4 rounded-xl border-2 animate-scale-in hover:scale-105 active:scale-95 transition-all cursor-pointer"
                 style={{ borderColor: achievement.color }}
-                title={achievement.description}
               >
                 <Icon
                   size={32}
@@ -108,7 +126,7 @@ export default function AchievementBadges({ stats = {} }) {
                 <p className="text-xs font-bold text-center text-[#F3F4F6] leading-tight">
                   {achievement.name}
                 </p>
-              </div>
+              </button>
             )
           })}
         </div>
@@ -124,8 +142,8 @@ export default function AchievementBadges({ stats = {} }) {
               return (
                 <div
                   key={achievement.id}
-                  className="bg-[#111827] p-4 rounded-xl border-2 border-gray-700 opacity-50 hover:opacity-70 transition-opacity cursor-help"
-                  title={achievement.description}
+                  className="bg-[#111827] p-4 rounded-xl border-2 border-gray-700 opacity-50 hover:opacity-70 transition-opacity cursor-not-allowed"
+                  title={`🔒 ${achievement.description}`}
                 >
                   <Icon
                     size={32}
@@ -141,6 +159,13 @@ export default function AchievementBadges({ stats = {} }) {
           </div>
         </div>
       )}
+
+      {/* Modal de logro */}
+      <AchievementModal
+        achievement={selectedAchievement}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+      />
     </div>
   )
 }
