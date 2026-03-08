@@ -51,6 +51,12 @@ export const personaController = {
   // POST /api/personas
   async create(req, res) {
     try {
+      // Validar que el email no esté duplicado
+      const existingPersona = await Persona.findByEmail(req.body.mail);
+      if (existingPersona) {
+        return res.status(400).json({ error: 'Ya existe una persona con ese email' });
+      }
+
       const result = await Persona.create(req.body);
       res.status(201).json({ 
         message: 'Persona creada exitosamente',
@@ -87,6 +93,67 @@ export const personaController = {
     } catch (error) {
       console.error('Error al eliminar persona:', error);
       res.status(500).json({ error: 'Error al eliminar persona' });
+    }
+  },
+
+  // POST /api/personas/register - Auto-registro de alumno con reclamación de cuenta
+  async register(req, res) {
+    try {
+      const { email, password, name, gender, phone, weight, height, address, birthDate } = req.body;
+      
+      if (!email || !password || !name) {
+        return res.status(400).json({ error: 'Email, contraseña y nombre son requeridos' });
+      }
+
+      // Verificar si ya existe una persona con ese email
+      const existingPersona = await Persona.findByEmail(email);
+      
+      if (existingPersona) {
+        // Si existe pero NO tiene contraseña, permitir "reclamar" la cuenta
+        if (!existingPersona.password) {
+          const claimedPersona = await Persona.claimAccount(email, password);
+          return res.status(200).json({ 
+            message: 'Cuenta reclamada exitosamente',
+            persona: claimedPersona
+          });
+        } else {
+          // Si ya tiene contraseña, es un duplicado
+          return res.status(400).json({ error: 'Ya existe una cuenta con ese email. Por favor, inicia sesión.' });
+        }
+      }
+
+      // Si no existe, crear nueva persona
+      const todasPersonas = await Persona.findAll();
+      const newId = Math.max(0, ...todasPersonas.map(p => p.idPersona)) + 1;
+
+      const personaData = {
+        idPersona: newId,
+        nombre: name,
+        mail: email,
+        tel: phone || '',
+        rol: 'alumno',
+        nivel: 'Intermedio',
+        genero: gender || 'masculino',
+        direccion: address || '',
+        fechaNac: birthDate || null,
+        peso: parseFloat(weight) || null,
+        altura: parseFloat(height) || null,
+        password: password,
+        activo: true
+      };
+
+      await Persona.create(personaData);
+      
+      // Autenticar automáticamente después del registro
+      const persona = await Persona.authenticate(email, password);
+      
+      res.status(201).json({ 
+        message: 'Registro exitoso',
+        persona
+      });
+    } catch (error) {
+      console.error('Error en registro:', error);
+      res.status(500).json({ error: 'Error al registrarse' });
     }
   },
 

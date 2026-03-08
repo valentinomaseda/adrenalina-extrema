@@ -5,6 +5,7 @@ const router = express.Router();
 
 // Rutas de personas
 router.post('/login', personaController.login);  // Login debe ir primero
+router.post('/register', personaController.register);  // Auto-registro de alumnos
 router.get('/', personaController.getAll);
 router.get('/:id', personaController.getById);
 router.get('/rol/:rol', personaController.getByRole);

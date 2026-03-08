@@ -62,6 +62,14 @@ export const personasAPI = {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });
+  },
+
+  // Registro de alumno (con reclamación de cuenta si existe sin password)
+  register: async (data) => {
+    return fetchAPI('/personas/register', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
   }
 }
 

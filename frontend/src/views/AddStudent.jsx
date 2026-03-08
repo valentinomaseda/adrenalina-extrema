@@ -16,8 +16,7 @@ export default function AddStudent() {
     weight: '',
     height: '',
     address: '',
-    birthDate: '',
-    password: ''
+    birthDate: ''
   })
 
   const handleChange = (e) => {
@@ -139,23 +138,6 @@ export default function AddStudent() {
                 <option value="masculino">Masculino</option>
                 <option value="femenino">Femenino</option>
               </select>
-            </div>
-
-            {/* Contraseña */}
-            <div>
-              <label htmlFor="password" className="block text-sm font-semibold text-[#F3F4F6] mb-2">
-                Contraseña
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                value={formData.password}
-                onChange={handleChange}
-                className="text-[#F3F4F6] bg-[#0f1729] w-full px-4 py-3 border-2 border-[#1E40AF] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg"
-                placeholder="Dejar vacío para usar contraseña por defecto"
-              />
-              <p className="text-sm text-[#9CA3AF] mt-1">Si no se especifica, se usará "123456"</p>
             </div>
 
             {/* Teléfono */}

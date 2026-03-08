@@ -454,7 +454,7 @@ export const AppProvider = ({ children }) => {
         fechaNac: studentData.birthDate || null,
         peso: parseFloat(studentData.weight) || null,
         altura: parseFloat(studentData.height) || null,
-        password: studentData.password || '123456', // Password por defecto
+        // No se envía password - el profesor registra alumnos sin contraseña
         activo: true // Por defecto todos los alumnos nuevos están activos
       }
 
@@ -642,28 +642,31 @@ export const AppProvider = ({ children }) => {
     try {
       setLoading(true)
       
-      // Obtener todas las personas para generar un ID único
-      const todasPersonas = await personasAPI.getAll()
-      const newId = Math.max(0, ...todasPersonas.map(p => p.idPersona)) + 1
-      
-      const personaData = {
-        idPersona: newId,
-        nombre: studentData.name,
-        mail: studentData.email,
-        tel: studentData.phone || '',
-        rol: 'alumno',
-        nivel: 'Intermedio',
-        genero: studentData.gender || 'masculino',
-        direccion: studentData.address || '',
-        fechaNac: studentData.birthDate || null,
-        peso: parseFloat(studentData.weight) || null,
-        altura: parseFloat(studentData.height) || null,
-        password: studentData.password
+      const registrationData = {
+        name: studentData.name,
+        email: studentData.email,
+        password: studentData.password,
+        gender: studentData.gender || 'masculino',
+        phone: studentData.phone || '',
+        weight: studentData.weight || '',
+        height: studentData.height || '',
+        address: studentData.address || '',
+        birthDate: studentData.birthDate || ''
       }
       
-      await personasAPI.create(personaData)
+      // Usar el endpoint de registro que maneja la reclamación de cuentas
+      const response = await personasAPI.register(registrationData)
       
       setLoading(false)
+      
+      // Si el backend devuelve la persona, iniciar sesión automáticamente
+      if (response.persona) {
+        const userWithAvatar = addAvatarToUser(response.persona)
+        setUser(userWithAvatar)
+        setIsAuthenticated(true)
+        localStorage.setItem('user', JSON.stringify(userWithAvatar))
+      }
+      
       return true
     } catch (error) {
       console.error('Error registering student:', error)
