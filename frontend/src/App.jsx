@@ -56,7 +56,7 @@ function AppContent() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-[#0a0e1a]">
       {user?.rol !== 'alumno' && <Sidebar />}
       
       <main className={`flex-1 ${user?.rol !== 'alumno' ? 'md:ml-64' : ''} overflow-y-auto`}>

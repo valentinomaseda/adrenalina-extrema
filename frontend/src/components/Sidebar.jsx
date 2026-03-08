@@ -2,7 +2,7 @@ import { Users, ClipboardList, UserCircle, LogOut } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
 
 export default function Sidebar() {
-  const { currentView, setCurrentView, setSelectedStudent, logout, user } = useAppContext()
+  const { currentView, setCurrentView, setSelectedStudent, logout, user, showConfirm } = useAppContext()
 
   const handleNavigation = (view) => {
     setCurrentView(view)
@@ -10,9 +10,11 @@ export default function Sidebar() {
   }
 
   const handleLogout = () => {
-    if (confirm('¿Estás seguro que deseas cerrar sesión?')) {
-      logout()
-    }
+    showConfirm(
+      '¿Estás seguro que deseas cerrar sesión?',
+      () => logout(),
+      'Cerrar Sesión'
+    )
   }
 
   const navItems = [

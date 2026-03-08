@@ -92,6 +92,54 @@ export class Persona {
     return rows;
   }
 
+  // Obtener alumnos paginados ordenados por última asignación de rutina
+  static async getAlumnosPaginados(page = 1, limit = 10) {
+    const offset = (page - 1) * limit;
+    
+    // Query principal: todos los alumnos con fecha de última asignación
+    // Ordenamiento: PRIMERO los que tienen asignación más reciente, LUEGO los que nunca tuvieron
+    const [rows] = await pool.query(
+      `SELECT 
+        p.idPersona,
+        p.nombre,
+        p.mail,
+        p.tel,
+        p.nivel,
+        p.genero,
+        p.fechaNac,
+        p.peso,
+        p.altura,
+        p.direccion,
+        MAX(ar.fechaAsignacion) AS ultima_asignacion,
+        CASE 
+          WHEN ar_future.idPersona IS NULL THEN 1
+          ELSE 0
+        END AS necesita_rutina
+      FROM persona p
+      LEFT JOIN alumno_rutina ar ON p.idPersona = ar.idPersona
+      LEFT JOIN (
+        SELECT DISTINCT idPersona
+        FROM alumno_rutina
+        WHERE fechaAsignacion >= CURDATE()
+      ) ar_future ON p.idPersona = ar_future.idPersona
+      WHERE p.rol = 'alumno'
+      GROUP BY p.idPersona
+      ORDER BY ultima_asignacion DESC, p.nombre ASC
+      LIMIT ? OFFSET ?`,
+      [limit, offset]
+    );
+    
+    return rows;
+  }
+
+  // Obtener total de alumnos (para metadata de paginación)
+  static async getAlumnosCount() {
+    const [rows] = await pool.query(
+      `SELECT COUNT(*) as total FROM persona WHERE rol = 'alumno'`
+    );
+    return rows[0].total;
+  }
+
   // Método de autenticación con bcrypt
   static async authenticate(email, password) {
     const persona = await this.findByEmail(email);

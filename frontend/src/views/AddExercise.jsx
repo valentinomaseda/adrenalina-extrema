@@ -44,20 +44,20 @@ export default function AddExercise() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[#0a0e1a] flex items-center justify-center p-4">
         <div className="text-center animate-fade-in">
           <CheckCircle className="mx-auto text-green-500 mb-4" size={64} />
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">
+          <h2 className="text-2xl font-bold text-[#F3F4F6] mb-2">
             ¡Ejercicio creado exitosamente!
           </h2>
-          <p className="text-gray-600">Redirigiendo...</p>
+          <p className="text-[#9CA3AF]">Redirigiendo...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 pb-32 md:pb-6 animate-fade-in">
+    <div className="min-h-screen p-4 pb-32 md:pb-6 animate-fade-in">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="mb-6">
@@ -68,14 +68,14 @@ export default function AddExercise() {
             <ArrowLeft size={20} />
             <span>Volver a Rutinas</span>
           </button>
-          <h1 className="text-3xl font-black text-gray-800 flex items-center gap-3">
+          <h1 className="text-3xl font-black text-[#F3F4F6] flex items-center gap-3">
             <Dumbbell className="text-[#00BFFF]" size={36} />
             Agregar Nuevo Ejercicio
           </h1>
         </div>
 
         {/* Formulario */}
-        <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 border-2 border-[#1E40AF]">
+        <div className="bg-gradient-to-br from-[#1a2942] to-[#0f1729] rounded-xl shadow-2xl p-6 md:p-8 border-2 border-[#1E40AF]">
           {error && (
             <div className="mb-6 p-4 bg-red-100 border-2 border-red-500 rounded-lg text-red-700 animate-shake">
               {error}
@@ -85,7 +85,7 @@ export default function AddExercise() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Nombre del Ejercicio */}
             <div>
-              <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">
+              <label htmlFor="name" className="block text-sm font-semibold text-[#F3F4F6] mb-2">
                 Nombre del Ejercicio *
               </label>
               <input
@@ -95,14 +95,14 @@ export default function AddExercise() {
                 value={formData.name}
                 onChange={handleChange}
                 required
-                className="text-gray-900 w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg"
+                className="text-[#F3F4F6] bg-[#0f1729] w-full px-4 py-3 border-2 border-[#1E40AF] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg"
                 placeholder="Ej: Burpees, Sentadillas, Plancha..."
               />
             </div>
 
             {/* Tipo de Contador */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-[#F3F4F6] mb-2">
                 ¿Cómo se mide este ejercicio? *
               </label>
               <div className="flex gap-4">
@@ -115,7 +115,7 @@ export default function AddExercise() {
                     onChange={handleChange}
                     className="w-5 h-5 text-[#00BFFF] focus:ring-[#00BFFF]"
                   />
-                  <span className="text-gray-700 text-lg">Repeticiones</span>
+                  <span className="text-[#F3F4F6] text-lg">Repeticiones</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
@@ -126,10 +126,10 @@ export default function AddExercise() {
                     onChange={handleChange}
                     className="w-5 h-5 text-[#00BFFF] focus:ring-[#00BFFF]"
                   />
-                  <span className="text-gray-700 text-lg">Tiempo (segundos)</span>
+                  <span className="text-[#F3F4F6] text-lg">Tiempo (segundos)</span>
                 </label>
               </div>
-              <p className="text-sm text-gray-500 mt-2">
+              <p className="text-sm text-[#9CA3AF] mt-2">
                 Las cantidades específicas (sets, reps/segundos) se asignarán al agregar el ejercicio a una rutina.
               </p>
             </div>
@@ -155,7 +155,7 @@ export default function AddExercise() {
                 type="button"
                 onClick={() => setCurrentView('routines')}
                 disabled={loading}
-                className="flex-1 bg-gray-200 text-gray-700 font-bold py-3 px-6 rounded-lg hover:bg-gray-300 transition disabled:opacity-50"
+                className="flex-1 bg-gray-700 text-[#F3F4F6] font-bold py-3 px-6 rounded-lg hover:bg-gray-600 transition disabled:opacity-50"
               >
                 Cancelar
               </button>

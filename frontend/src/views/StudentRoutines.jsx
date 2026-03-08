@@ -3,7 +3,7 @@ import { Dumbbell, CheckCircle2, XCircle, Clock, ChevronDown, ChevronUp } from '
 import { useAppContext } from '../context/AppContext'
 
 export default function StudentRoutines() {
-  const { user, myRoutines, updateRoutineStatus, loadMyRoutines, loading } = useAppContext()
+  const { user, myRoutines, updateRoutineStatus, loadMyRoutines, loading, showAlert } = useAppContext()
   const [expandedRoutine, setExpandedRoutine] = useState(null)
   const [updatingStatus, setUpdatingStatus] = useState(null)
 
@@ -20,7 +20,7 @@ export default function StudentRoutines() {
       await updateRoutineStatus(routineId, newStatus, fechaAsignacion)
     } catch (error) {
       console.error('Error updating routine status:', error)
-      alert('Error al actualizar el estado de la rutina')
+      showAlert('Error al actualizar el estado de la rutina', 'error')
     } finally {
       setUpdatingStatus(null)
     }

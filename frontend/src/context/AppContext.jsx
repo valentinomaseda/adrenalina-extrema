@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import { personasAPI, ejerciciosAPI, rutinasAPI } from '../services/api'
+import Modal from '../components/Modal'
 
 const AppContext = createContext()
 
@@ -101,6 +102,60 @@ export const AppProvider = ({ children }) => {
   // Estados para alumno
   const [myRoutines, setMyRoutines] = useState([])
   const [showRegister, setShowRegister] = useState(false)
+
+  // Estado para modal global
+  const [modalState, setModalState] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'info',
+    buttons: []
+  })
+
+  // Funciones para mostrar modales
+  const showAlert = (message, type = 'info', title = null) => {
+    setModalState({
+      isOpen: true,
+      title: title || (type === 'error' ? 'Error' : type === 'success' ? 'Éxito' : type === 'warning' ? 'Advertencia' : 'Información'),
+      message,
+      type,
+      buttons: []
+    })
+  }
+
+  const showConfirm = (message, onConfirm, title = '¿Estás seguro?') => {
+    setModalState({
+      isOpen: true,
+      title,
+      message,
+      type: 'warning',
+      buttons: [
+        {
+          label: 'Cancelar',
+          variant: 'secondary',
+          onClick: () => closeModal()
+        },
+        {
+          label: 'Confirmar',
+          variant: 'primary',
+          onClick: () => {
+            closeModal()
+            onConfirm()
+          }
+        }
+      ]
+    })
+  }
+
+  const closeModal = () => {
+    setModalState({
+      isOpen: false,
+      title: '',
+      message: '',
+      type: 'info',
+      buttons: []
+    })
+  }
 
   // Cargar datos del usuario desde localStorage al iniciar
   useEffect(() => {
@@ -324,6 +379,62 @@ export const AppProvider = ({ children }) => {
     }
   }
 
+  // Función para cargar detalles completos de un alumno específico
+  const loadStudentDetails = async (idPersona) => {
+    try {
+      const alumno = await personasAPI.getById(idPersona)
+      if (!alumno) {
+        throw new Error('Alumno no encontrado')
+      }
+
+      const rutinasAsignadas = await personasAPI.getRutinas(idPersona)
+      const studentData = transformPersonaToStudent(alumno)
+      
+      // Transformar rutinas asignadas al formato del frontend con ejercicios
+      studentData.routineHistory = await Promise.all(
+        rutinasAsignadas.map(async (ra) => {
+          try {
+            // Cargar ejercicios de esta rutina
+            const ejercicios = await rutinasAPI.getEjercicios(ra.idRutina)
+            
+            return {
+              id: ra.idRutina,
+              name: ra.nombre,
+              date: ra.fechaAsignacion ? new Date(ra.fechaAsignacion).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+              fechaAsignacion: ra.fechaAsignacion,
+              status: ra.estado || 'activa',
+              completed: ra.estado === 'completada',
+              exercises: ejercicios.map(ej => ({
+                exerciseId: ej.idEjercicio,
+                id: ej.idEjercicio,
+                name: ej.nombre,
+                sets: ej.cantSets || 3,
+                value: ej.cantidad || 10,
+                type: ej.tipoContador || 'reps'
+              }))
+            }
+          } catch (error) {
+            console.error(`Error loading exercises for routine ${ra.idRutina}:`, error)
+            return {
+              id: ra.idRutina,
+              name: ra.nombre,
+              date: ra.fechaAsignacion ? new Date(ra.fechaAsignacion).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+              fechaAsignacion: ra.fechaAsignacion,
+              status: ra.estado || 'activa',
+              completed: ra.estado === 'completada',
+              exercises: []
+            }
+          }
+        })
+      )
+      
+      return studentData
+    } catch (error) {
+      console.error('Error loading student details:', error)
+      throw error
+    }
+  }
+
   // Función para añadir nuevo alumno
   const addStudent = async (studentData) => {
     try {
@@ -343,7 +454,8 @@ export const AppProvider = ({ children }) => {
         fechaNac: studentData.birthDate || null,
         peso: parseFloat(studentData.weight) || null,
         altura: parseFloat(studentData.height) || null,
-        password: studentData.password || '123456' // Password por defecto
+        password: studentData.password || '123456', // Password por defecto
+        activo: true // Por defecto todos los alumnos nuevos están activos
       }
 
       await personasAPI.create(personaData)
@@ -680,10 +792,28 @@ export const AppProvider = ({ children }) => {
     addExercise,
     refreshStudents,
     refreshExercises,
+    loadStudentDetails,
+    
+    // Modales
+    showAlert,
+    showConfirm,
+    closeModal,
     
     // Role (para compatibilidad)
     userRole: user?.rol || 'coach',
   }
 
-  return <AppContext.Provider value={value}>{children}</AppContext.Provider>
+  return (
+    <AppContext.Provider value={value}>
+      {children}
+      <Modal
+        isOpen={modalState.isOpen}
+        onClose={closeModal}
+        title={modalState.title}
+        message={modalState.message}
+        type={modalState.type}
+        buttons={modalState.buttons}
+      />
+    </AppContext.Provider>
+  )
 }

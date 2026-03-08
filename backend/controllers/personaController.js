@@ -110,5 +110,44 @@ export const personaController = {
       console.error('Error en login:', error);
       res.status(500).json({ error: 'Error al iniciar sesión' });
     }
+  },
+
+  // GET /api/profesora/alumnos - Paginación optimizada con ordenamiento inteligente
+  async getAlumnosPaginados(req, res) {
+    try {
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+
+      // Validar parámetros
+      if (page < 1 || limit < 1 || limit > 100) {
+        return res.status(400).json({ 
+          error: 'Parámetros inválidos. page >= 1, 1 <= limit <= 100' 
+        });
+      }
+
+      // Obtener alumnos paginados y total
+      const [alumnos, totalRecords] = await Promise.all([
+        Persona.getAlumnosPaginados(page, limit),
+        Persona.getAlumnosCount()
+      ]);
+
+      // Calcular metadata de paginación
+      const totalPages = Math.ceil(totalRecords / limit);
+
+      res.json({
+        data: alumnos,
+        pagination: {
+          currentPage: page,
+          totalPages,
+          totalRecords,
+          limit,
+          hasNextPage: page < totalPages,
+          hasPrevPage: page > 1
+        }
+      });
+    } catch (error) {
+      console.error('Error al obtener alumnos paginados:', error);
+      res.status(500).json({ error: 'Error al obtener alumnos' });
+    }
   }
 };

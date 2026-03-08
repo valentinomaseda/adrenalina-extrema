@@ -65,6 +65,14 @@ export const personasAPI = {
   }
 }
 
+// ========== PROFESORA ==========
+
+export const profesoraAPI = {
+  // Obtener alumnos con paginación ordenados por última asignación
+  getAlumnosPaginados: (page = 1, limit = 10) => 
+    fetchAPI(`/profesora/alumnos?page=${page}&limit=${limit}`)
+}
+
 // ========== EJERCICIOS ==========
 
 export const ejerciciosAPI = {

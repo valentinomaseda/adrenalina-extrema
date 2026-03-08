@@ -1,27 +1,68 @@
-import { useState } from 'react'
-import { Search, Filter, UserPlus } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Search, Filter, UserPlus, ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
 import SkeletonLoader from '../components/SkeletonLoader'
+import { profesoraAPI } from '../services/api'
 
 export default function StudentList() {
-  const { students, setCurrentView, setSelectedStudent } = useAppContext()
+  const { setCurrentView, setSelectedStudent, loadStudentDetails, showAlert } = useAppContext()
   const [searchTerm, setSearchTerm] = useState('')
   const [levelFilter, setLevelFilter] = useState('all')
   const [loading, setLoading] = useState(false)
+  const [students, setStudents] = useState([])
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalRecords: 0,
+    limit: 10,
+    hasNextPage: false,
+    hasPrevPage: false
+  })
 
+  // Fetch alumnos desde el servidor con paginación
+  useEffect(() => {
+    const fetchStudents = async () => {
+      setLoading(true)
+      try {
+        const response = await profesoraAPI.getAlumnosPaginados(pagination.currentPage, pagination.limit)
+        setStudents(response.data)
+        setPagination(response.pagination)
+      } catch (error) {
+        console.error('Error al obtener alumnos:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchStudents()
+  }, [pagination.currentPage])
+
+  // Filtrado local (opcional, si quieres filtrar los datos ya cargados)
   const filteredStudents = students.filter((student) => {
-    const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesLevel = levelFilter === 'all' || student.level === levelFilter
+    const matchesSearch = student.nombre.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesLevel = levelFilter === 'all' || student.nivel === levelFilter
     return matchesSearch && matchesLevel
   })
 
-  const handleStudentClick = (student) => {
+  const handleStudentClick = async (student) => {
     setLoading(true)
-    setTimeout(() => {
-      setSelectedStudent(student)
+    try {
+      // Cargar detalles completos del alumno desde el servidor
+      const studentDetails = await loadStudentDetails(student.idPersona)
+      setSelectedStudent(studentDetails)
       setCurrentView('studentDetail')
+    } catch (error) {
+      console.error('Error al cargar detalles del alumno:', error)
+      showAlert('Error al cargar los detalles del alumno', 'error')
+    } finally {
       setLoading(false)
-    }, 300)
+    }
+  }
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= pagination.totalPages) {
+      setPagination(prev => ({ ...prev, currentPage: newPage }))
+    }
   }
 
   if (loading) {
@@ -65,50 +106,109 @@ export default function StudentList() {
         </div>
       </div>
 
+      {/* Contador de resultados */}
+      <div className="text-sm text-gray-400 px-1">
+        Mostrando {filteredStudents.length} de {pagination.totalRecords} alumnos
+      </div>
+
       {/* Lista de alumnos */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredStudents.map((student, index) => (
           <button
-            key={student.id}
+            key={student.idPersona}
             onClick={() => handleStudentClick(student)}
-            className="bg-gradient-to-br from-[#1E40AF] to-[#152e6b] rounded-xl shadow-md hover:shadow-2xl transition-all p-6 text-left hover:scale-105 active:scale-95 border-2 border-transparent hover:border-[#00BFFF] animate-scale-in"
-            style={{ animationDelay: `${index * 0.1}s`, opacity: 0 }}
+            className={`bg-gradient-to-br from-[#1E40AF] to-[#152e6b] rounded-xl shadow-md hover:shadow-2xl transition-all p-6 text-left hover:scale-105 active:scale-95 border-2 ${
+              student.necesita_rutina 
+                ? 'border-red-500 animate-pulse-border' 
+                : 'border-transparent hover:border-[#00BFFF]'
+            } relative`}
           >
+            {/* Badge de alerta */}
+            {student.necesita_rutina === 1 && (
+              <div className="absolute -top-2 -right-2 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
+                <AlertCircle size={14} />
+                Sin rutina
+              </div>
+            )}
+
             <div className="flex items-center space-x-4">
               <img
-                src={student.photo}
-                alt={student.name}
-                className="w-16 h-16 rounded-full border-4 border-[#00BFFF]"
+                src={student.genero === 'femenino' ? '/avatar-fem.jpg' : '/avatar-masc.jpg'}
+                alt={student.nombre || 'Usuario'}
+                className={`w-16 h-16 rounded-full border-4 object-cover ${
+                  student.necesita_rutina ? 'border-red-500' : 'border-[#00BFFF]'
+                }`}
+                onError={(e) => {
+                  e.target.src = '/avatar-masc.jpg'
+                }}
               />
               <div className="flex-1">
-                <h3 className="text-lg font-bold text-[#F3F4F6]">{student.name}</h3>
+                <h3 className="text-lg font-bold text-[#F3F4F6]">{student.nombre || 'Sin nombre'}</h3>
                 <p className="text-sm text-gray-600 mt-1">
                   <span
                     className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
-                      student.level === 'Avanzado'
+                      student.nivel === 'Avanzado'
                         ? 'bg-[#00FF88] text-[#111827]'
-                        : student.level === 'Intermedio'
+                        : student.nivel === 'Intermedio'
                         ? 'bg-[#00BFFF] text-[#111827]'
                         : 'bg-[#FFD700] text-[#111827]'
                     }`}
                   >
-                    {student.level}
+                    {student.nivel || 'Sin nivel'}
                   </span>
                 </p>
               </div>
             </div>
             <div className="mt-4 pt-4 border-t border-[#111827]">
               <p className="text-xs text-[#f2fcff]">
-                {student.routineHistory.length} rutina(s) asignada(s)
+                {student.mail || 'Sin email'}
               </p>
             </div>
           </button>
         ))}
       </div>
 
-      {filteredStudents.length === 0 && (
+      {filteredStudents.length === 0 && !loading && (
         <div className="text-center py-12">
           <p className="text-[#F3F4F6] text-lg">No se encontraron alumnos</p>
+        </div>
+      )}
+
+      {/* Controles de paginación Mobile-First */}
+      {pagination.totalPages > 1 && (
+        <div className="mt-8 space-y-3">
+          <div className="flex items-center justify-center gap-4">
+            <button
+              onClick={() => handlePageChange(pagination.currentPage - 1)}
+              disabled={!pagination.hasPrevPage}
+              className={`flex items-center justify-center gap-2 py-4 px-8 rounded-xl text-lg font-bold transition-all shadow-lg ${
+                pagination.hasPrevPage
+                  ? 'bg-gradient-to-r from-[#1E40AF] to-[#00BFFF] text-white hover:scale-105 active:scale-95'
+                  : 'bg-gray-700 text-gray-500 cursor-not-allowed'
+              }`}
+            >
+              <ChevronLeft size={24} />
+              Anterior
+            </button>
+
+            <button
+              onClick={() => handlePageChange(pagination.currentPage + 1)}
+              disabled={!pagination.hasNextPage}
+              className={`flex items-center justify-center gap-2 py-4 px-8 rounded-xl text-lg font-bold transition-all shadow-lg ${
+                pagination.hasNextPage
+                  ? 'bg-gradient-to-r from-[#00BFFF] to-[#1E40AF] text-white hover:scale-105 active:scale-95'
+                  : 'bg-gray-700 text-gray-500 cursor-not-allowed'
+              }`}
+            >
+              Siguiente
+              <ChevronRight size={24} />
+            </button>
+          </div>
+
+          {/* Indicador de página */}
+          <div className="text-center text-sm text-gray-400">
+            Página {pagination.currentPage} de {pagination.totalPages}
+          </div>
         </div>
       )}
 

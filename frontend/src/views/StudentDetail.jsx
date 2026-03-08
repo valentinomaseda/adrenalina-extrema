@@ -4,7 +4,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { useAppContext } from '../context/AppContext'
 
 export default function StudentDetail() {
-  const { selectedStudent, setCurrentView, setSelectedStudent, savedRoutines, assignRoutineToStudent, removeRoutineFromStudent, updateStudent, updateStudentRoutineStatus } = useAppContext()
+  const { selectedStudent, setCurrentView, setSelectedStudent, savedRoutines, assignRoutineToStudent, removeRoutineFromStudent, updateStudent, updateStudentRoutineStatus, showAlert } = useAppContext()
   const [selectedRoutineId, setSelectedRoutineId] = useState('')
   const [showAssignSuccess, setShowAssignSuccess] = useState(false)
   const [showProgress, setShowProgress] = useState(false)
@@ -43,7 +43,7 @@ export default function StudentDetail() {
   // Función para asignar rutina
   const handleAssignRoutine = () => {
     if (!selectedRoutineId) {
-      alert('Por favor selecciona una rutina')
+      showAlert('Por favor selecciona una rutina', 'warning')
       return
     }
     
@@ -104,7 +104,7 @@ export default function StudentDetail() {
       }
     } catch (error) {
       console.error('Error updating routine status:', error)
-      alert('Error al actualizar el estado de la rutina')
+      showAlert('Error al actualizar el estado de la rutina', 'error')
     } finally {
       setUpdatingRoutineStatus(null)
     }
@@ -135,11 +135,33 @@ export default function StudentDetail() {
     setCurrentView('students')
   }
 
-  // Preparar datos para el gráfico
-  const chartData = selectedStudent.progress.map((value, index) => ({
-    sesion: `S${index + 1}`,
-    rendimiento: value,
-  }))
+  // Preparar datos para el gráfico usando routineHistory con status
+  const routinesWithStatus = selectedStudent.routineHistory || []
+  
+  // Calcular estadísticas
+  const totalRoutines = routinesWithStatus.length
+  const completedRoutines = routinesWithStatus.filter(r => r.status === 'completada').length
+  const incompleteRoutines = routinesWithStatus.filter(r => r.status === 'incompleta').length
+  
+  const completionRate = totalRoutines > 0 ? Math.round((completedRoutines / totalRoutines) * 100) : 0
+
+  // Datos para el gráfico de progreso basados en status real
+  const chartData = routinesWithStatus
+    .filter(r => r.status === 'completada' || r.status === 'incompleta')
+    .sort((a, b) => new Date(a.date) - new Date(b.date))
+    .map((routine, index) => ({
+      sesion: `S${index + 1}`,
+      rendimiento: routine.status === 'completada' ? 100 : 50,
+      fecha: routine.date
+    }))
+
+  // Último rendimiento
+  const lastPerformance = chartData.length > 0 ? chartData[chartData.length - 1].rendimiento : 0
+  
+  // Promedio de rendimiento
+  const averagePerformance = chartData.length > 0 
+    ? Math.round(chartData.reduce((sum, item) => sum + item.rendimiento, 0) / chartData.length)
+    : 0
 
   return (
     <div className="p-4 space-y-6 pb-32 md:pb-6 animate-fade-in">
@@ -225,8 +247,8 @@ export default function StudentDetail() {
 
       {/* Modal de información del alumno */}
       {showInfoModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 animate-fade-in">
-          <div className="bg-gradient-to-br from-[#1a2942] to-[#0f1729] rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto animate-scale-in border border-[#00BFFF]">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 p-4 pt-8 overflow-y-auto animate-fade-in">
+          <div className="bg-gradient-to-br from-[#1a2942] to-[#0f1729] rounded-xl shadow-2xl max-w-md w-full my-8 animate-scale-in border border-[#00BFFF]">
             <div className="sticky top-0 bg-[#1E40AF] text-white p-6 flex items-center justify-between rounded-t-xl">
               <h3 className="text-xl font-bold">Información del Alumno</h3>
               <button
@@ -475,46 +497,82 @@ export default function StudentDetail() {
         {showProgress && (
           <div className="mt-6 space-y-6">
             {/* Gráfico de progreso */}
-            <div>
-              <div className="bg-[#111827] rounded-lg p-4" style={{ height: '300px' }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="sesion" />
-                    <YAxis domain={[0, 100]} />
-                    <Tooltip />
-                    <Line
-                      type="monotone"
-                      dataKey="rendimiento"
-                      stroke="#00BFFF"
-                      strokeWidth={3}
-                      dot={{ fill: '#00BFFF', r: 6 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
+            {chartData.length > 0 ? (
+              <div>
+                <h4 className="text-sm font-bold text-[#F3F4F6] mb-3">Rendimiento en el Tiempo</h4>
+                <div className="bg-[#111827] rounded-lg p-4" style={{ height: '300px' }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={chartData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#1E40AF" />
+                      <XAxis dataKey="sesion" stroke="#F3F4F6" />
+                      <YAxis domain={[0, 100]} stroke="#F3F4F6" />
+                      <Tooltip 
+                        contentStyle={{ backgroundColor: '#111827', border: '2px solid #00BFFF', borderRadius: '8px' }}
+                        labelStyle={{ color: '#F3F4F6' }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="rendimiento"
+                        stroke="#00BFFF"
+                        strokeWidth={3}
+                        dot={{ fill: '#00BFFF', r: 6 }}
+                        activeDot={{ r: 8 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+                <p className="text-xs text-gray-400 mt-2 text-center">
+                  100% = Completada | 50% = Incompleta
+                </p>
               </div>
-            </div>
+            ) : (
+              <div className="bg-[#111827] rounded-lg p-8 text-center">
+                <TrendingUp className="mx-auto text-gray-500 mb-3" size={48} />
+                <p className="text-[#F3F4F6] font-semibold mb-2">No hay datos de progreso aún</p>
+                <p className="text-sm text-gray-400">
+                  El gráfico aparecerá cuando el alumno complete o marque rutinas como incompletas.
+                </p>
+              </div>
+            )}
 
             {/* Estadísticas rápidas */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <div className="bg-[#111827] rounded-lg p-4 text-center">
                 <p className="text-3xl font-bold text-[#00BFFF]">
-                  {selectedStudent.progress[selectedStudent.progress.length - 1]}%
+                  {lastPerformance}%
                 </p>
                 <p className="text-xs text-[#F3F4F6] mt-1">Último rendimiento</p>
               </div>
               <div className="bg-[#111827] rounded-lg p-4 text-center">
                 <p className="text-3xl font-bold text-[#00BFFF]">
-                  {Math.round(selectedStudent.progress.reduce((a, b) => a + b, 0) / selectedStudent.progress.length)}%
+                  {averagePerformance}%
                 </p>
                 <p className="text-xs text-[#F3F4F6] mt-1">Promedio</p>
               </div>
               <div className="bg-[#111827] rounded-lg p-4 text-center col-span-2 md:col-span-1">
                 <p className="text-3xl font-bold text-[#00BFFF]">
-                  {selectedStudent.routineHistory.filter((r) => r.completed).length}
+                  {completedRoutines}
                 </p>
                 <p className="text-xs text-[#F3F4F6] mt-1">Rutinas completadas</p>
               </div>
+            </div>
+
+            {/* Resumen adicional */}
+            <div className="bg-[#111827] rounded-lg p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="text-sm font-bold text-[#F3F4F6]">Tasa de Completado</h4>
+                <span className="text-2xl font-bold text-[#00BFFF]">{completionRate}%</span>
+              </div>
+              <div className="w-full bg-[#0f1729] rounded-full h-3 overflow-hidden">
+                <div
+                  className="bg-gradient-to-r from-[#00BFFF] to-[#00FF88] h-full rounded-full transition-all duration-1000 ease-out"
+                  style={{ width: `${completionRate}%` }}
+                ></div>
+              </div>
+              <p className="text-xs text-gray-400 mt-2">
+                {completedRoutines} de {totalRoutines} rutinas completadas
+                {incompleteRoutines > 0 && ` · ${incompleteRoutines} incompletas`}
+              </p>
             </div>
           </div>
         )}
@@ -567,7 +625,7 @@ export default function StudentDetail() {
 
       {/* Modal de edición de alumno */}
       {showEditModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 animate-fade-in overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 p-4 pt-8 animate-fade-in overflow-y-auto">
           <div className="bg-gradient-to-br from-[#1a2942] to-[#0f1729] rounded-xl shadow-2xl max-w-md w-full my-8 animate-scale-in border border-[#00BFFF]">
             <div className="sticky top-0 bg-[#1E40AF] text-white p-6 flex items-center justify-between rounded-t-xl">
               <h3 className="text-xl font-bold">Editar Alumno</h3>

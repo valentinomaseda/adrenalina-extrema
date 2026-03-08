@@ -3,7 +3,7 @@ import { Plus, Trash2, Save, Dumbbell, List } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
 
 export default function RoutineBuilder() {
-  const { exercises, saveRoutine, savedRoutines, setCurrentView } = useAppContext()
+  const { exercises, saveRoutine, savedRoutines, setCurrentView, showAlert } = useAppContext()
   const [routineName, setRoutineName] = useState('')
   const [exerciseInstances, setExerciseInstances] = useState([])
   const [showSuccess, setShowSuccess] = useState(false)
@@ -46,11 +46,11 @@ export default function RoutineBuilder() {
 
   const handleSave = async () => {
     if (!routineName.trim()) {
-      alert('Por favor ingresa un nombre para la rutina')
+      showAlert('Por favor ingresa un nombre para la rutina', 'warning')
       return
     }
     if (exerciseInstances.length === 0) {
-      alert('Agrega al menos un ejercicio')
+      showAlert('Agrega al menos un ejercicio', 'warning')
       return
     }
 
@@ -73,7 +73,7 @@ export default function RoutineBuilder() {
       setExerciseInstances([])
     } catch (error) {
       console.error('Error al guardar rutina:', error)
-      alert('Error al guardar la rutina: ' + (error.message || 'Error desconocido'))
+      showAlert('Error al guardar la rutina: ' + (error.message || 'Error desconocido'), 'error')
     }
   }
 
