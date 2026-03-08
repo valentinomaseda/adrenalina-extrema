@@ -61,9 +61,9 @@ function AppContent() {
       {/* Header fijo en la parte superior */}
       <Header />
       
-      {user?.rol !== 'alumno' && <Sidebar />}
+      {user && <Sidebar />}
       
-      <main className={`flex-1 ${user?.rol !== 'alumno' ? 'md:ml-64' : ''} overflow-y-auto pt-16`}>
+      <main className={`flex-1 ${user ? 'md:ml-64' : ''} overflow-y-auto pt-16`}>
         <div className="max-w-7xl mx-auto">
           {renderView()}
         </div>

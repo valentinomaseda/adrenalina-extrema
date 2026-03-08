@@ -119,7 +119,7 @@ export default function StudentList() {
             onClick={() => handleStudentClick(student)}
             className={`bg-gradient-to-br from-[#1E40AF] to-[#152e6b] rounded-xl shadow-md hover:shadow-2xl transition-all p-6 text-left hover:scale-105 active:scale-95 border-2 ${
               student.necesita_rutina 
-                ? 'border-red-500 animate-pulse-border' 
+                ? 'border-red-500' 
                 : 'border-transparent hover:border-[#00BFFF]'
             } relative`}
           >
