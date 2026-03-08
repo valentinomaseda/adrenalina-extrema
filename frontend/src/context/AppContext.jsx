@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import { personasAPI, ejerciciosAPI, rutinasAPI } from '../services/api'
 import Modal from '../components/Modal'
+import Toast from '../components/Toast'
 
 const AppContext = createContext()
 
@@ -103,7 +104,14 @@ export const AppProvider = ({ children }) => {
   const [myRoutines, setMyRoutines] = useState([])
   const [showRegister, setShowRegister] = useState(false)
 
-  // Estado para modal global
+  // Estado para toast notifications
+  const [toastState, setToastState] = useState({
+    isOpen: false,
+    message: '',
+    type: 'info'
+  })
+
+  // Estado para modal global (solo para confirmaciones)
   const [modalState, setModalState] = useState({
     isOpen: false,
     title: '',
@@ -112,17 +120,24 @@ export const AppProvider = ({ children }) => {
     buttons: []
   })
 
-  // Funciones para mostrar modales
+  // Función para mostrar toast (para alertas simples)
   const showAlert = (message, type = 'info', title = null) => {
-    setModalState({
+    setToastState({
       isOpen: true,
-      title: title || (type === 'error' ? 'Error' : type === 'success' ? 'Éxito' : type === 'warning' ? 'Advertencia' : 'Información'),
       message,
-      type,
-      buttons: []
+      type
     })
   }
 
+  const closeToast = () => {
+    setToastState({
+      isOpen: false,
+      message: '',
+      type: 'info'
+    })
+  }
+
+  // Función para mostrar modal de confirmación
   const showConfirm = (message, onConfirm, title = '¿Estás seguro?') => {
     setModalState({
       isOpen: true,
@@ -618,10 +633,21 @@ export const AppProvider = ({ children }) => {
   // Función para actualizar perfil del usuario
   const updateProfile = async (profileData) => {
     try {
-      // Filtrar password si está vacío
-      const dataToUpdate = { ...profileData }
-      if (!dataToUpdate.password || dataToUpdate.password.trim() === '') {
-        delete dataToUpdate.password
+      // Mapear campos del frontend a campos de la base de datos
+      const dataToUpdate = {
+        nombre: profileData.nombre,
+        mail: profileData.mail,
+        tel: profileData.tel || '',
+        genero: profileData.genero,
+        direccion: profileData.domicilio || '',
+        fechaNac: profileData.fechaNacimiento || null,
+        peso: parseFloat(profileData.peso) || null,
+        altura: parseFloat(profileData.altura) || null
+      }
+      
+      // Agregar password solo si se proporcionó
+      if (profileData.password && profileData.password.trim() !== '') {
+        dataToUpdate.password = profileData.password
       }
       
       await personasAPI.update(user.idPersona, dataToUpdate)
@@ -809,6 +835,16 @@ export const AppProvider = ({ children }) => {
   return (
     <AppContext.Provider value={value}>
       {children}
+      
+      {/* Toast para notificaciones simples */}
+      <Toast
+        isOpen={toastState.isOpen}
+        onClose={closeToast}
+        message={toastState.message}
+        type={toastState.type}
+      />
+      
+      {/* Modal para confirmaciones */}
       <Modal
         isOpen={modalState.isOpen}
         onClose={closeModal}

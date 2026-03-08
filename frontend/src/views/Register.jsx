@@ -1,12 +1,10 @@
 import { useState } from 'react'
-import { UserPlus, ArrowLeft, Loader2, CheckCircle, Mail, Lock, User, Phone, Calendar, MapPin, Eye, EyeOff } from 'lucide-react'
+import { UserPlus, ArrowLeft, Loader2, Mail, Lock, User, Phone, Calendar, MapPin, Eye, EyeOff } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
 
 export default function Register() {
-  const { register, setShowRegister } = useAppContext()
+  const { register, setShowRegister, showAlert } = useAppContext()
   const [loading, setLoading] = useState(false)
-  const [success, setSuccess] = useState(false)
-  const [error, setError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   
@@ -28,54 +26,38 @@ export default function Register() {
       ...formData,
       [e.target.name]: e.target.value
     })
-    setError('')
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
-    setError('')
 
     // Validar contraseñas
     if (formData.password !== formData.confirmPassword) {
-      setError('Las contraseñas no coinciden')
+      showAlert('Las contraseñas no coinciden', 'error')
       setLoading(false)
       return
     }
 
     if (formData.password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres')
+      showAlert('La contraseña debe tener al menos 6 caracteres', 'error')
       setLoading(false)
       return
     }
 
     try {
       await register(formData)
-      setSuccess(true)
+      showAlert('¡Registro exitoso! Redirigiendo...', 'success')
       
       // Redirigir al login después de 2 segundos
       setTimeout(() => {
         setShowRegister(false)
       }, 2000)
     } catch (err) {
-      setError(err.message || 'Error al registrarse')
+      showAlert(err.message || 'Error al registrarse', 'error')
     } finally {
       setLoading(false)
     }
-  }
-
-  if (success) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F172A] flex items-center justify-center p-4">
-        <div className="text-center animate-fade-in">
-          <CheckCircle className="mx-auto text-[#00BFFF] mb-4" size={64} />
-          <h2 className="text-2xl font-bold text-[#F3F4F6] mb-2">
-            ¡Registro exitoso!
-          </h2>
-          <p className="text-gray-400">Redirigiendo al inicio de sesión...</p>
-        </div>
-      </div>
-    )
   }
 
   return (
@@ -102,12 +84,6 @@ export default function Register() {
 
         {/* Formulario */}
         <div className="bg-gradient-to-br from-[#1E40AF] to-[#152e6b] rounded-2xl shadow-2xl p-8 border-2 border-[#00BFFF]">
-          {error && (
-            <div className="mb-6 p-4 bg-red-500/20 border-2 border-red-500 rounded-lg flex items-center gap-2 animate-shake">
-              <p className="text-red-500 text-sm">{error}</p>
-            </div>
-          )}
-
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Nombre */}
             <div>

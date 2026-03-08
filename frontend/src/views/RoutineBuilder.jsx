@@ -6,7 +6,6 @@ export default function RoutineBuilder() {
   const { exercises, saveRoutine, savedRoutines, setCurrentView, showAlert } = useAppContext()
   const [routineName, setRoutineName] = useState('')
   const [exerciseInstances, setExerciseInstances] = useState([])
-  const [showSuccess, setShowSuccess] = useState(false)
 
   const addExercise = () => {
     const newInstance = {
@@ -65,8 +64,7 @@ export default function RoutineBuilder() {
       await saveRoutine(routine)
       console.log('Rutina guardada:', routine)
       
-      setShowSuccess(true)
-      setTimeout(() => setShowSuccess(false), 3000)
+      showAlert('Rutina guardada exitosamente', 'success')
       
       // Reset form
       setRoutineName('')
@@ -83,12 +81,6 @@ export default function RoutineBuilder() {
         <Dumbbell className="text-[#00BFFF]" size={28} strokeWidth={2.5} />
         <h2 className="text-2xl font-bold text-[#F3F4F6]">Constructor de Rutinas</h2>
       </div>
-
-      {showSuccess && (
-        <div className="bg-[#1E40AF] border-2 border-[#00BFFF] text-[#00BFFF] px-6 py-4 rounded-lg animate-pulse animate-scale-in">
-          <p className="font-semibold">✓ Rutina guardada exitosamente</p>
-        </div>
-      )}
 
       <div className="bg-gradient-to-br from-[#1E40AF] to-[#152e6b] rounded-xl shadow-lg p-6 space-y-6 animate-slide-in-up delay-100 border border-[#00BFFF]/20">
         {/* Nombre de la rutina */}

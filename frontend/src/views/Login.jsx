@@ -1,24 +1,22 @@
 import { useState } from 'react'
-import { Lock, Mail, AlertCircle, Loader2, Eye, EyeOff } from 'lucide-react'
+import { Lock, Mail, Loader2, Eye, EyeOff } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
 
 export default function Login() {
-  const { login, setShowRegister } = useAppContext()
+  const { login, setShowRegister, showAlert } = useAppContext()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setError('')
     setLoading(true)
 
     try {
       await login(email, password)
     } catch (err) {
-      setError(err.message || 'Error al iniciar sesión')
+      showAlert(err.message || 'Error al iniciar sesión', 'error')
     } finally {
       setLoading(false)
     }
@@ -43,13 +41,6 @@ export default function Login() {
           <h2 className="text-2xl font-bold text-[#F3F4F6] mb-6 text-center">
             Iniciar Sesión
           </h2>
-
-          {error && (
-            <div className="mb-4 p-4 bg-red-500/20 border-2 border-red-500 rounded-lg flex items-center gap-2 animate-shake">
-              <AlertCircle className="text-red-500 flex-shrink-0" size={20} />
-              <p className="text-red-500 text-sm">{error}</p>
-            </div>
-          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email Input */}

@@ -8,16 +8,12 @@ import StreakDisplay from '../components/StreakDisplay'
 export default function StudentDetail() {
   const { selectedStudent, setCurrentView, setSelectedStudent, savedRoutines, assignRoutineToStudent, removeRoutineFromStudent, updateStudent, updateStudentRoutineStatus, showAlert } = useAppContext()
   const [selectedRoutineId, setSelectedRoutineId] = useState('')
-  const [showAssignSuccess, setShowAssignSuccess] = useState(false)
   const [showProgress, setShowProgress] = useState(false)
   const [showInfoModal, setShowInfoModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [routineToDelete, setRoutineToDelete] = useState(null)
   const [showEditModal, setShowEditModal] = useState(false)
   const [editFormData, setEditFormData] = useState({})
-  const [showEditSuccess, setShowEditSuccess] = useState(false)
-  const [showEditError, setShowEditError] = useState(false)
-  const [editErrorMessage, setEditErrorMessage] = useState('')
   const [updatingRoutineStatus, setUpdatingRoutineStatus] = useState(null)
 
   // Función para formatear rutina como texto plano para WhatsApp
@@ -52,11 +48,8 @@ export default function StudentDetail() {
     const routine = savedRoutines.find(r => r.id === parseInt(selectedRoutineId))
     if (routine) {
       assignRoutineToStudent(selectedStudent.id, routine)
-      setShowAssignSuccess(true)
-      setTimeout(() => {
-        setShowAssignSuccess(false)
-        setSelectedRoutineId('')
-      }, 2000)
+      showAlert('Rutina asignada exitosamente', 'success')
+      setSelectedRoutineId('')
     }
   }
 
@@ -72,22 +65,13 @@ export default function StudentDetail() {
   // Función para editar alumno
   const handleEditStudent = async (e) => {
     e.preventDefault()
-    setEditErrorMessage('')
-    setShowEditError(false)
     
     try {
       await updateStudent(selectedStudent.id, editFormData)
       setShowEditModal(false)
-      setShowEditSuccess(true)
-      setTimeout(() => {
-        setShowEditSuccess(false)
-      }, 3000)
+      showAlert('Alumno actualizado exitosamente', 'success')
     } catch (error) {
-      setEditErrorMessage(error.message || 'Error al actualizar el alumno')
-      setShowEditError(true)
-      setTimeout(() => {
-        setShowEditError(false)
-      }, 5000)
+      showAlert(error.message || 'Error al actualizar el alumno', 'error')
     }
   }
 
@@ -246,19 +230,6 @@ export default function StudentDetail() {
         <h2 className="text-2xl font-bold text-[#F3F4F6]">Detalle del Alumno</h2>
       </div>
 
-      {/* Notificaciones de edición */}
-      {showEditSuccess && (
-        <div className="bg-green-600 border-2 border-green-400 text-white px-6 py-4 rounded-lg animate-scale-in mb-4">
-          <p className="font-semibold">✓ Alumno actualizado exitosamente</p>
-        </div>
-      )}
-
-      {showEditError && (
-        <div className="bg-red-600 border-2 border-red-400 text-white px-6 py-4 rounded-lg animate-shake mb-4">
-          <p className="font-semibold">✗ {editErrorMessage}</p>
-        </div>
-      )}
-
       {/* Card del alumno */}
       <div className="bg-gradient-to-br from-[#1a2942] to-[#0f1729] rounded-xl shadow-lg p-6 animate-slide-in-up delay-100 border border-[#1E40AF]">
         <div className="flex items-center space-x-4">
@@ -412,12 +383,6 @@ export default function StudentDetail() {
           <Plus className="text-[#00BFFF]" size={20} />
           <h4 className="text-lg font-semibold text-[#F3F4F6]">Asignar Nueva Rutina</h4>
         </div>
-
-        {showAssignSuccess && (
-          <div className="bg-[#1E40AF] border-2 border-[#00BFFF] text-[#00BFFF] px-6 py-4 rounded-lg mb-4 animate-pulse">
-            <p className="font-semibold">✓ Rutina asignada exitosamente</p>
-          </div>
-        )}
 
         {savedRoutines.length === 0 ? (
           <p className="text-[#F3F4F6] text-center py-8">No hay rutinas guardadas. Crea una rutina en la sección "Rutinas".</p>
@@ -718,12 +683,6 @@ export default function StudentDetail() {
             </div>
             
             <form onSubmit={handleEditStudent} className="p-6 space-y-4">
-              {showEditError && (
-                <div className="bg-red-600 border-2 border-red-400 text-white px-4 py-3 rounded-lg animate-shake mb-4">
-                  <p className="font-semibold text-sm">✗ {editErrorMessage}</p>
-                </div>
-              )}
-
               <div>
                 <label className="block text-[#00BFFF] font-semibold mb-2">Nombre</label>
                 <input

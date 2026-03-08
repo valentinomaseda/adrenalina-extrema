@@ -3,11 +3,8 @@ import { UserCircle, Mail, Phone, Award, LogOut, X, Edit, MapPin, Cake, Weight, 
 import { useAppContext } from '../context/AppContext'
 
 export default function Profile() {
-  const { user, students, logout, updateProfile, showConfirm } = useAppContext()
+  const { user, students, logout, updateProfile, showConfirm, showAlert } = useAppContext()
   const [showEditModal, setShowEditModal] = useState(false)
-  const [showEditSuccess, setShowEditSuccess] = useState(false)
-  const [showEditError, setShowEditError] = useState(false)
-  const [editErrorMessage, setEditErrorMessage] = useState('')
   const [editFormData, setEditFormData] = useState({})
 
   const handleLogout = () => {
@@ -20,22 +17,13 @@ export default function Profile() {
 
   const handleEditProfile = async (e) => {
     e.preventDefault()
-    setEditErrorMessage('')
-    setShowEditError(false)
     
     try {
       await updateProfile(editFormData)
       setShowEditModal(false)
-      setShowEditSuccess(true)
-      setTimeout(() => {
-        setShowEditSuccess(false)
-      }, 3000)
+      showAlert('Perfil actualizado exitosamente', 'success')
     } catch (error) {
-      setEditErrorMessage(error.message || 'Error al actualizar el perfil')
-      setShowEditError(true)
-      setTimeout(() => {
-        setShowEditError(false)
-      }, 5000)
+      showAlert(error.message || 'Error al actualizar el perfil', 'error')
     }
   }
 
@@ -45,19 +33,6 @@ export default function Profile() {
         <UserCircle className="text-[#00BFFF]" size={28} strokeWidth={2.5} />
         <h2 className="text-2xl font-bold text-[#F3F4F6]">Mi Perfil</h2>
       </div>
-
-      {/* Notificaciones de edición */}
-      {showEditSuccess && (
-        <div className="bg-green-600 border-2 border-green-400 text-white px-6 py-4 rounded-lg animate-scale-in">
-          <p className="font-semibold">✓ Perfil actualizado exitosamente</p>
-        </div>
-      )}
-
-      {showEditError && (
-        <div className="bg-red-600 border-2 border-red-400 text-white px-6 py-4 rounded-lg animate-shake">
-          <p className="font-semibold">✗ {editErrorMessage}</p>
-        </div>
-      )}
 
       <div className="bg-gradient-to-br from-[#1E40AF] to-[#152e6b] rounded-xl shadow-lg p-6 space-y-6 animate-slide-in-up delay-100 border border-[#00BFFF]/20">
         <div className="flex flex-col items-center animate-scale-in delay-200">
@@ -217,12 +192,6 @@ export default function Profile() {
             </div>
             
             <form onSubmit={handleEditProfile} className="p-6 space-y-4">
-              {showEditError && (
-                <div className="bg-red-600 border-2 border-red-400 text-white px-4 py-3 rounded-lg animate-shake mb-4">
-                  <p className="font-semibold text-sm">✗ {editErrorMessage}</p>
-                </div>
-              )}
-
               <div>
                 <label className="block text-[#00BFFF] font-semibold mb-2">Nombre</label>
                 <input

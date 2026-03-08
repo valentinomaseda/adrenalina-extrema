@@ -1,12 +1,10 @@
 import { useState } from 'react'
-import { Dumbbell, ArrowLeft, Loader2, CheckCircle } from 'lucide-react'
+import { Dumbbell, ArrowLeft, Loader2 } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
 
 export default function AddExercise() {
-  const { addExercise, setCurrentView } = useAppContext()
+  const { addExercise, setCurrentView, showAlert } = useAppContext()
   const [loading, setLoading] = useState(false)
-  const [success, setSuccess] = useState(false)
-  const [error, setError] = useState('')
   
   const [formData, setFormData] = useState({
     name: '',
@@ -19,41 +17,21 @@ export default function AddExercise() {
       ...formData,
       [name]: value
     })
-    setError('')
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
-    setError('')
 
     try {
       await addExercise(formData)
-      setSuccess(true)
-      
-      // Volver a rutinas después de 2 segundos
-      setTimeout(() => {
-        setCurrentView('routines')
-      }, 2000)
+      showAlert('Ejercicio creado exitosamente', 'success')
+      setCurrentView('routines')
     } catch (err) {
-      setError(err.message || 'Error al crear el ejercicio')
+      showAlert(err.message || 'Error al crear el ejercicio', 'error')
     } finally {
       setLoading(false)
     }
-  }
-
-  if (success) {
-    return (
-      <div className="min-h-screen bg-[#0a0e1a] flex items-center justify-center p-4">
-        <div className="text-center animate-fade-in">
-          <CheckCircle className="mx-auto text-green-500 mb-4" size={64} />
-          <h2 className="text-2xl font-bold text-[#F3F4F6] mb-2">
-            ¡Ejercicio creado exitosamente!
-          </h2>
-          <p className="text-[#9CA3AF]">Redirigiendo...</p>
-        </div>
-      </div>
-    )
   }
 
   return (
@@ -76,12 +54,6 @@ export default function AddExercise() {
 
         {/* Formulario */}
         <div className="bg-gradient-to-br from-[#1a2942] to-[#0f1729] rounded-xl shadow-2xl p-6 md:p-8 border-2 border-[#1E40AF]">
-          {error && (
-            <div className="mb-6 p-4 bg-red-100 border-2 border-red-500 rounded-lg text-red-700 animate-shake">
-              {error}
-            </div>
-          )}
-
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Nombre del Ejercicio */}
             <div>
