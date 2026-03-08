@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { ArrowLeft, TrendingUp, Calendar, CheckCircle2, XCircle, Send, Plus, ChevronDown, ChevronUp, Info, X, Phone, Mail, Weight, Ruler, MapPin, Cake, Trash2, Edit } from 'lucide-react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { useAppContext } from '../context/AppContext'
+import AchievementBadges from '../components/AchievementBadges'
+import StreakDisplay from '../components/StreakDisplay'
 
 export default function StudentDetail() {
   const { selectedStudent, setCurrentView, setSelectedStudent, savedRoutines, assignRoutineToStudent, removeRoutineFromStudent, updateStudent, updateStudentRoutineStatus, showAlert } = useAppContext()
@@ -162,6 +164,74 @@ export default function StudentDetail() {
   const averagePerformance = chartData.length > 0 
     ? Math.round(chartData.reduce((sum, item) => sum + item.rendimiento, 0) / chartData.length)
     : 0
+
+  // Calcular racha de días consecutivos
+  const calculateStreak = () => {
+    if (!routinesWithStatus || routinesWithStatus.length === 0) return { current: 0, longest: 0 }
+    
+    const sortedDates = routinesWithStatus
+      .filter(r => r.status === 'completada')
+      .map(r => new Date(r.date).toDateString())
+      .sort((a, b) => new Date(b) - new Date(a))
+    
+    const uniqueDates = [...new Set(sortedDates)]
+    
+    let currentStreak = 0
+    let longestStreak = 0
+    let tempStreak = 1
+    
+    const today = new Date()
+    const yesterday = new Date(today)
+    yesterday.setDate(yesterday.getDate() - 1)
+    
+    // Verificar si entrenó hoy o ayer para racha actual
+    const lastDate = uniqueDates[0] ? new Date(uniqueDates[0]) : null
+    if (lastDate) {
+      const daysDiff = Math.floor((today - lastDate) / (1000 * 60 * 60 * 24))
+      if (daysDiff <= 1) {
+        currentStreak = 1
+        // Calcular el resto de la racha
+        for (let i = 1; i < uniqueDates.length; i++) {
+          const prevDate = new Date(uniqueDates[i - 1])
+          const currDate = new Date(uniqueDates[i])
+          const diff = Math.floor((prevDate - currDate) / (1000 * 60 * 60 * 24))
+          if (diff === 1) {
+            currentStreak++
+          } else {
+            break
+          }
+        }
+      }
+    }
+    
+    // Calcular la racha más larga
+    for (let i = 1; i < uniqueDates.length; i++) {
+      const prevDate = new Date(uniqueDates[i - 1])
+      const currDate = new Date(uniqueDates[i])
+      const diff = Math.floor((prevDate - currDate) / (1000 * 60 * 60 * 24))
+      
+      if (diff === 1) {
+        tempStreak++
+        longestStreak = Math.max(longestStreak, tempStreak)
+      } else {
+        tempStreak = 1
+      }
+    }
+    
+    longestStreak = Math.max(longestStreak, currentStreak, uniqueDates.length > 0 ? 1 : 0)
+    
+    return { current: currentStreak, longest: longestStreak }
+  }
+
+  const streak = calculateStreak()
+
+  // Estadísticas para logros
+  const achievementStats = {
+    completedRoutines,
+    currentStreak: streak.current,
+    completionRate,
+    averagePerformance
+  }
 
   return (
     <div className="p-4 space-y-6 pb-32 md:pb-6 animate-fade-in">
@@ -573,6 +643,16 @@ export default function StudentDetail() {
                 {completedRoutines} de {totalRoutines} rutinas completadas
                 {incompleteRoutines > 0 && ` · ${incompleteRoutines} incompletas`}
               </p>
+            </div>
+
+            {/* Racha de entrenamiento */}
+            <div className="mt-6">
+              <StreakDisplay currentStreak={streak.current} longestStreak={streak.longest} />
+            </div>
+
+            {/* Sistema de logros */}
+            <div className="mt-6 bg-[#111827] rounded-lg p-4">
+              <AchievementBadges stats={achievementStats} />
             </div>
           </div>
         )}

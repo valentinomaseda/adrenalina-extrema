@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
 import { Dumbbell, CheckCircle2, XCircle, Clock, ChevronDown, ChevronUp } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
+import Confetti from '../components/Confetti'
 
 export default function StudentRoutines() {
   const { user, myRoutines, updateRoutineStatus, loadMyRoutines, loading, showAlert } = useAppContext()
   const [expandedRoutine, setExpandedRoutine] = useState(null)
   const [updatingStatus, setUpdatingStatus] = useState(null)
+  const [showConfetti, setShowConfetti] = useState(false)
 
   // Cargar rutinas cuando el componente se monte
   useEffect(() => {
@@ -18,6 +20,11 @@ export default function StudentRoutines() {
     setUpdatingStatus(routineId)
     try {
       await updateRoutineStatus(routineId, newStatus, fechaAsignacion)
+      // Activar confetti si se completó la rutina
+      if (newStatus === 'completada') {
+        setShowConfetti(true)
+        showAlert('¡Felicitaciones! Rutina completada 🎉', 'success', '¡Genial!')
+      }
     } catch (error) {
       console.error('Error updating routine status:', error)
       showAlert('Error al actualizar el estado de la rutina', 'error')
@@ -231,6 +238,9 @@ export default function StudentRoutines() {
           ))
         )}
       </div>
+
+      {/* Efecto confetti */}
+      <Confetti active={showConfetti} onComplete={() => setShowConfetti(false)} />
     </div>
   )
 }
