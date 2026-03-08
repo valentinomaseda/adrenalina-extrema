@@ -8,12 +8,13 @@ export default function RoutineBuilder() {
   const [exerciseInstances, setExerciseInstances] = useState([])
 
   const addExercise = () => {
+    const firstExercise = exercises[0]
     const newInstance = {
       id: Date.now(),
-      exerciseId: exercises[0].id,
-      name: exercises[0].name,
-      type: exercises[0].defaultType,
-      value: 10,
+      exerciseId: firstExercise.id,
+      name: firstExercise.name,
+      type: firstExercise.defaultType,
+      value: firstExercise.defaultType === 'reps' ? 10 : 30,
       sets: 3,
     }
     setExerciseInstances([...exerciseInstances, newInstance])
@@ -34,6 +35,7 @@ export default function RoutineBuilder() {
               exerciseId: selectedExercise.id,
               name: selectedExercise.name,
               type: selectedExercise.defaultType,
+              value: selectedExercise.defaultType === 'reps' ? 10 : 30,
             }
           }
           return { ...ex, [field]: value }
@@ -136,37 +138,29 @@ export default function RoutineBuilder() {
                     <label className="block text-xs font-semibold text-[#F3F4F6] mb-1">
                       Ejercicio
                     </label>
-                    <select
-                      value={instance.exerciseId}
-                      onChange={(e) => updateExercise(instance.id, 'exerciseId', e.target.value)}
-                      className="w-full px-3 py-2 border-2 border-[#1E40AF] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent bg-[#1E40AF] text-[#F3F4F6]"
-                    >
-                      {exercises.map((ex) => (
-                        <option key={ex.id} value={ex.id}>
-                          {ex.name}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="flex items-center gap-2">
+                      <select
+                        value={instance.exerciseId}
+                        onChange={(e) => updateExercise(instance.id, 'exerciseId', e.target.value)}
+                        className="flex-1 px-3 py-2 border-2 border-[#1E40AF] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent bg-[#1E40AF] text-[#F3F4F6]"
+                      >
+                        {exercises.map((ex) => (
+                          <option key={ex.id} value={ex.id}>
+                            {ex.name}
+                          </option>
+                        ))}
+                      </select>
+                      <span className="px-3 py-2 bg-[#00BFFF] text-[#111827] rounded-lg text-xs font-bold whitespace-nowrap">
+                        {instance.type === 'reps' ? 'REPS' : 'SEGUNDOS'}
+                      </span>
+                    </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-3">
-                    {/* Tipo */}
-                    <div>
-                      <label className="block text-xs font-semibold text-[#F3F4F6] mb-1">Tipo</label>
-                      <select
-                        value={instance.type}
-                        onChange={(e) => updateExercise(instance.id, 'type', e.target.value)}
-                        className="w-full px-3 py-2 border-2 border-[#1E40AF] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent bg-[#1E40AF] text-[#F3F4F6]"
-                      >
-                        <option value="reps">Reps</option>
-                        <option value="segundos">Segundos</option>
-                      </select>
-                    </div>
-
+                  <div className="grid grid-cols-2 gap-3">
                     {/* Valor */}
                     <div>
                       <label className="block text-xs font-semibold text-[#F3F4F6] mb-1">
-                        {instance.type === 'reps' ? 'Reps' : 'Seg'}
+                        {instance.type === 'reps' ? 'Repeticiones' : 'Segundos'}
                       </label>
                       <input
                         type="number"
@@ -181,7 +175,7 @@ export default function RoutineBuilder() {
 
                     {/* Sets */}
                     <div>
-                      <label className="block text-xs font-semibold text-[#F3F4F6] mb-1">Sets</label>
+                      <label className="block text-xs font-semibold text-[#F3F4F6] mb-1">Series</label>
                       <input
                         type="number"
                         min="1"
