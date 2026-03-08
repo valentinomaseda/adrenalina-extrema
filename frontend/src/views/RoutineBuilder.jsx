@@ -81,7 +81,7 @@ export default function RoutineBuilder() {
     <div className="p-4 space-y-6 pb-32 md:pb-6 animate-fade-in">
       <div className="flex items-center space-x-3 animate-slide-in-left">
         <Dumbbell className="text-[#00BFFF]" size={28} strokeWidth={2.5} />
-        <h2 className="text-2xl font-bold text-[#1E40AF]">Constructor de Rutinas</h2>
+        <h2 className="text-2xl font-bold text-[#F3F4F6]">Constructor de Rutinas</h2>
       </div>
 
       {showSuccess && (

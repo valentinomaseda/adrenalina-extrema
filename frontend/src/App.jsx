@@ -1,6 +1,7 @@
 import { AppProvider, useAppContext } from './context/AppContext'
 import Sidebar from './components/Sidebar'
 import BottomNavbar from './components/BottomNavbar'
+import Header from './components/Header'
 import StudentList from './views/StudentList'
 import StudentDetail from './views/StudentDetail'
 import RoutineBuilder from './views/RoutineBuilder'
@@ -57,9 +58,12 @@ function AppContent() {
 
   return (
     <div className="flex h-screen bg-[#0a0e1a]">
+      {/* Header fijo en la parte superior */}
+      <Header />
+      
       {user?.rol !== 'alumno' && <Sidebar />}
       
-      <main className={`flex-1 ${user?.rol !== 'alumno' ? 'md:ml-64' : ''} overflow-y-auto`}>
+      <main className={`flex-1 ${user?.rol !== 'alumno' ? 'md:ml-64' : ''} overflow-y-auto pt-16`}>
         <div className="max-w-7xl mx-auto">
           {renderView()}
         </div>

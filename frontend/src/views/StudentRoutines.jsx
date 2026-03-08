@@ -74,7 +74,7 @@ export default function StudentRoutines() {
       {/* Header */}
       <div className="flex items-center space-x-3 animate-slide-in-left">
         <Dumbbell className="text-[#00BFFF]" size={28} strokeWidth={2.5} />
-        <h2 className="text-2xl font-bold text-[#1E40AF]">Mis Rutinas</h2>
+        <h2 className="text-2xl font-bold text-[#F3F4F6]">Mis Rutinas</h2>
       </div>
 
       {/* Saludo */}

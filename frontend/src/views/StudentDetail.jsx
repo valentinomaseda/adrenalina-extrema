@@ -243,7 +243,7 @@ export default function StudentDetail() {
         >
           <ArrowLeft size={24} strokeWidth={2.5} />
         </button>
-        <h2 className="text-2xl font-bold text-[#1E40AF]">Detalle del Alumno</h2>
+        <h2 className="text-2xl font-bold text-[#F3F4F6]">Detalle del Alumno</h2>
       </div>
 
       {/* Notificaciones de edición */}

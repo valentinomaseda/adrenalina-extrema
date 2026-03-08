@@ -121,7 +121,7 @@ export default function StudentProgress() {
       {/* Header */}
       <div className="flex items-center space-x-3 animate-slide-in-left">
         <TrendingUp className="text-[#00BFFF]" size={28} strokeWidth={2.5} />
-        <h2 className="text-2xl font-bold text-[#1E40AF]">Mi Progreso</h2>
+        <h2 className="text-2xl font-bold text-[#F3F4F6]">Mi Progreso</h2>
       </div>
 
       {/* Tarjetas de estadísticas */}
