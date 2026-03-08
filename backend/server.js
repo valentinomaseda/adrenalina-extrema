@@ -28,6 +28,7 @@ import ejerciciosRoutes from './routes/ejercicios.js';
 import rutinasRoutes from './routes/rutinas.js';
 import tiposEjercicioRoutes from './routes/tiposEjercicio.js';
 import profesoraRoutes from './routes/profesora.js';
+import authRoutes from './routes/auth.js';
 
 // Usar rutas
 app.use('/api/personas', personasRoutes);
@@ -35,6 +36,7 @@ app.use('/api/ejercicios', ejerciciosRoutes);
 app.use('/api/rutinas', rutinasRoutes);
 app.use('/api/tipos-ejercicio', tiposEjercicioRoutes);
 app.use('/api/profesora', profesoraRoutes);
+app.use('/api/auth', authRoutes);
 
 // Manejo de errores
 app.use((err, req, res, next) => {

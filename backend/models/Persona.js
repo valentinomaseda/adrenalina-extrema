@@ -40,24 +40,41 @@ export class Persona {
   }
 
   static async update(id, personaData) {
+    // Si se está intentando cambiar la contraseña, validar la actual primero
+    if (personaData.newPassword) {
+      if (!personaData.currentPassword) {
+        throw new Error('Contraseña actual requerida para cambiar la contraseña');
+      }
+      
+      // Obtener el usuario actual
+      const usuario = await this.findById(id);
+      if (!usuario) {
+        throw new Error('Usuario no encontrado');
+      }
+      
+      // Verificar la contraseña actual
+      const isValid = await bcrypt.compare(personaData.currentPassword, usuario.password);
+      if (!isValid) {
+        throw new Error('La contraseña actual es incorrecta');
+      }
+      
+      // Hashear la nueva contraseña
+      personaData.password = await bcrypt.hash(personaData.newPassword, SALT_ROUNDS);
+      
+      // Eliminar campos temporales
+      delete personaData.currentPassword;
+      delete personaData.newPassword;
+    }
+    
     const fields = [];
     const values = [];
     
     Object.keys(personaData).forEach(key => {
-      if (personaData[key] !== undefined && key !== 'idPersona') {
+      if (personaData[key] !== undefined && key !== 'idPersona' && key !== 'currentPassword' && key !== 'newPassword') {
         fields.push(`${key} = ?`);
         values.push(personaData[key]);
       }
     });
-    
-    // Si se está actualizando la contraseña, hashearla
-    if (personaData.password) {
-      const passwordIndex = fields.indexOf('password = ?');
-      if (passwordIndex !== -1) {
-        const hashedPassword = await bcrypt.hash(personaData.password, SALT_ROUNDS);
-        values[passwordIndex] = hashedPassword;
-      }
-    }
     
     values.push(id);
     const [result] = await pool.query(
@@ -146,24 +163,34 @@ export class Persona {
     const persona = await this.findByEmail(email);
     
     if (!persona) {
-      return null;
+      return { success: false, error: 'INVALID_CREDENTIALS' };
     }
 
     // Si la persona no tiene contraseña (registrada por profesor), no puede hacer login
     if (!persona.password) {
-      return null;
+      return { success: false, error: 'INVALID_CREDENTIALS' };
     }
 
     // Verificar la contraseña hasheada
     const isValid = await bcrypt.compare(password, persona.password);
     
     if (!isValid) {
-      return null;
+      return { success: false, error: 'INVALID_CREDENTIALS' };
+    }
+
+    // Verificar si el email está verificado
+    if (!persona.email_verificado) {
+      return { 
+        success: false, 
+        error: 'EMAIL_NOT_VERIFIED',
+        email: persona.mail,
+        nombre: persona.nombre
+      };
     }
 
     // Retornar persona sin el password
     const { password: _, ...personaSinPassword } = persona;
-    return personaSinPassword;
+    return { success: true, persona: personaSinPassword };
   }
 
   // Método para "reclamar" una cuenta existente sin contraseña

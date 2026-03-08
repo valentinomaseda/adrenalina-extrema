@@ -14,6 +14,14 @@ const fetchAPI = async (endpoint, options = {}) => {
 
     if (!response.ok) {
       const errorData = await response.json()
+      // Si es un error de email no verificado, lanzar un error con información adicional
+      if (errorData.errorCode === 'EMAIL_NOT_VERIFIED') {
+        const error = new Error(errorData.error || 'Email no verificado')
+        error.code = 'EMAIL_NOT_VERIFIED'
+        error.email = errorData.email
+        error.nombre = errorData.nombre
+        throw error
+      }
       throw new Error(errorData.error || `HTTP error! status: ${response.status}`)
     }
 

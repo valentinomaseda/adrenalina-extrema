@@ -3,7 +3,7 @@ import { Lock, Mail, Loader2, Eye, EyeOff } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
 
 export default function Login() {
-  const { login, setShowRegister, showAlert } = useAppContext()
+  const { login, setShowRegister, setAuthView, showAlert } = useAppContext()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -89,6 +89,17 @@ export default function Login() {
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
+            </div>
+
+            {/* Forgot Password Link */}
+            <div className="text-right">
+              <button
+                type="button"
+                onClick={() => setAuthView('forgot-password')}
+                className="text-sm text-[#00BFFF] hover:text-[#1E40AF] font-semibold transition-colors"
+              >
+                ¿Olvidaste tu contraseña?
+              </button>
             </div>
 
             {/* Submit Button */}

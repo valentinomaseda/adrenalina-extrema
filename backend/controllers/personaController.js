@@ -1,4 +1,5 @@
 import { Persona } from '../models/Persona.js';
+import { enviarEmailConfirmacion } from '../utils/emailService.js';
 
 export const personaController = {
   // GET /api/personas
@@ -144,12 +145,22 @@ export const personaController = {
 
       await Persona.create(personaData);
       
-      // Autenticar automáticamente después del registro
-      const persona = await Persona.authenticate(email, password);
+      // Enviar email de confirmación
+      try {
+        await enviarEmailConfirmacion({
+          idPersona: newId,
+          email: email,
+          nombre: name
+        });
+      } catch (emailError) {
+        console.error('Error enviando email de confirmación:', emailError);
+        // No fallar el registro si el email falla
+      }
       
       res.status(201).json({ 
-        message: 'Registro exitoso',
-        persona
+        message: 'Registro exitoso. Por favor, verifica tu email para activar tu cuenta.',
+        requiresEmailVerification: true,
+        email: email
       });
     } catch (error) {
       console.error('Error en registro:', error);
@@ -166,13 +177,21 @@ export const personaController = {
         return res.status(400).json({ error: 'Email y contraseña son requeridos' });
       }
 
-      const persona = await Persona.authenticate(email, password);
+      const resultado = await Persona.authenticate(email, password);
       
-      if (!persona) {
+      if (!resultado.success) {
+        if (resultado.error === 'EMAIL_NOT_VERIFIED') {
+          return res.status(403).json({ 
+            error: 'Email no verificado',
+            errorCode: 'EMAIL_NOT_VERIFIED',
+            email: resultado.email,
+            nombre: resultado.nombre
+          });
+        }
         return res.status(401).json({ error: 'Credenciales inválidas' });
       }
 
-      res.json(persona);
+      res.json(resultado.persona);
     } catch (error) {
       console.error('Error en login:', error);
       res.status(500).json({ error: 'Error al iniciar sesión' });

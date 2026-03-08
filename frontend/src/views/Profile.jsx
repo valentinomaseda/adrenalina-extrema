@@ -1,11 +1,14 @@
 import { useState } from 'react'
-import { UserCircle, Mail, Phone, Award, LogOut, X, Edit, MapPin, Cake, Weight, Ruler, User } from 'lucide-react'
+import { UserCircle, Mail, Phone, Award, LogOut, X, Edit, MapPin, Cake, Weight, Ruler, User, Eye, EyeOff } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
 
 export default function Profile() {
   const { user, students, logout, updateProfile, showConfirm, showAlert } = useAppContext()
   const [showEditModal, setShowEditModal] = useState(false)
   const [editFormData, setEditFormData] = useState({})
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const handleLogout = () => {
     showConfirm(
@@ -18,9 +21,32 @@ export default function Profile() {
   const handleEditProfile = async (e) => {
     e.preventDefault()
     
+    // Validar contraseñas si se están cambiando
+    if (editFormData.currentPassword || editFormData.newPassword || editFormData.confirmPassword) {
+      if (!editFormData.currentPassword) {
+        showAlert('Debes ingresar tu contraseña actual', 'error')
+        return
+      }
+      if (!editFormData.newPassword) {
+        showAlert('Debes ingresar una nueva contraseña', 'error')
+        return
+      }
+      if (editFormData.newPassword !== editFormData.confirmPassword) {
+        showAlert('Las contraseñas nuevas no coinciden', 'error')
+        return
+      }
+      if (editFormData.newPassword.length < 6) {
+        showAlert('La nueva contraseña debe tener al menos 6 caracteres', 'error')
+        return
+      }
+    }
+    
     try {
       await updateProfile(editFormData)
       setShowEditModal(false)
+      setShowCurrentPassword(false)
+      setShowNewPassword(false)
+      setShowConfirmPassword(false)
       showAlert('Perfil actualizado exitosamente', 'success')
     } catch (error) {
       showAlert(error.message || 'Error al actualizar el perfil', 'error')
@@ -157,8 +183,13 @@ export default function Profile() {
                 peso: user?.peso || '',
                 altura: user?.altura || '',
                 genero: user?.genero || 'masculino',
-                password: ''
+                currentPassword: '',
+                newPassword: '',
+                confirmPassword: ''
               })
+              setShowCurrentPassword(false)
+              setShowNewPassword(false)
+              setShowConfirmPassword(false)
               setShowEditModal(true)
             }}
             className="w-full px-6 py-3 bg-[#00BFFF] text-[#111827] rounded-lg hover:bg-[#1E40AF] hover:text-[#00BFFF] active:scale-95 transition-all font-semibold animate-fade-in delay-500 flex items-center justify-center gap-2"
@@ -179,9 +210,9 @@ export default function Profile() {
 
       {/* Modal de edición de perfil */}
       {showEditModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 p-4 pt-8 animate-fade-in overflow-y-auto">
-          <div className="bg-gradient-to-br from-[#1a2942] to-[#0f1729] rounded-xl shadow-2xl max-w-md w-full my-8 animate-scale-in border border-[#00BFFF]">
-            <div className="sticky top-0 bg-[#1E40AF] text-white p-6 flex items-center justify-between rounded-t-xl">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 p-4 animate-fade-in overflow-y-auto">
+          <div className="bg-gradient-to-br from-[#1a2942] to-[#0f1729] rounded-xl shadow-2xl max-w-md w-full my-8 mb-20 animate-scale-in border border-[#00BFFF]">
+            <div className="sticky top-0 bg-[#1E40AF] text-white p-6 flex items-center justify-between rounded-t-xl z-10">
               <h3 className="text-xl font-bold">Editar Perfil</h3>
               <button
                 onClick={() => setShowEditModal(false)}
@@ -191,7 +222,7 @@ export default function Profile() {
               </button>
             </div>
             
-            <form onSubmit={handleEditProfile} className="p-6 space-y-4">
+            <form onSubmit={handleEditProfile} className="p-6 space-y-4 pb-8">
               <div>
                 <label className="block text-[#00BFFF] font-semibold mb-2">Nombre</label>
                 <input
@@ -283,18 +314,78 @@ export default function Profile() {
                 </>
               )}
 
-              <div>
-                <label className="block text-[#00BFFF] font-semibold mb-2">Nueva Contraseña</label>
-                <input
-                  type="password"
-                  value={editFormData.password || ''}
-                  onChange={(e) => setEditFormData({...editFormData, password: e.target.value})}
-                  className="w-full px-4 py-3 bg-[#111827] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:border-[#00BFFF] focus:outline-none"
-                  placeholder="Dejar vacío para no cambiar"
-                />
-                <p className="text-xs text-gray-400 mt-1">Solo completa este campo si deseas cambiar tu contraseña</p>
+              {/* Sección de cambio de contraseña */}
+              <div className="border-t border-[#1E40AF] pt-4 mt-4">
+                <h4 className="text-[#00BFFF] font-bold mb-3">Cambiar Contraseña</h4>
+                <p className="text-xs text-gray-400 mb-4">Solo completa estos campos si deseas cambiar tu contraseña</p>
+                
+                <div className="space-y-3">
+                  {/* Contraseña actual */}
+                  <div>
+                    <label className="block text-[#00BFFF] font-semibold mb-2">Contraseña Actual</label>
+                    <div className="relative">
+                      <input
+                        type={showCurrentPassword ? "text" : "password"}
+                        value={editFormData.currentPassword || ''}
+                        onChange={(e) => setEditFormData({...editFormData, currentPassword: e.target.value})}
+                        className="w-full px-4 py-3 pr-12 bg-[#111827] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:border-[#00BFFF] focus:outline-none"
+                        placeholder="Ingresa tu contraseña actual"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-[#00BFFF] transition"
+                      >
+                        {showCurrentPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Nueva contraseña */}
+                  <div>
+                    <label className="block text-[#00BFFF] font-semibold mb-2">Nueva Contraseña</label>
+                    <div className="relative">
+                      <input
+                        type={showNewPassword ? "text" : "password"}
+                        value={editFormData.newPassword || ''}
+                        onChange={(e) => setEditFormData({...editFormData, newPassword: e.target.value})}
+                        className="w-full px-4 py-3 pr-12 bg-[#111827] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:border-[#00BFFF] focus:outline-none"
+                        placeholder="Mínimo 6 caracteres"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-[#00BFFF] transition"
+                      >
+                        {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Confirmar nueva contraseña */}
+                  <div>
+                    <label className="block text-[#00BFFF] font-semibold mb-2">Confirmar Nueva Contraseña</label>
+                    <div className="relative">
+                      <input
+                        type={showConfirmPassword ? "text" : "password"}
+                        value={editFormData.confirmPassword || ''}
+                        onChange={(e) => setEditFormData({...editFormData, confirmPassword: e.target.value})}
+                        className="w-full px-4 py-3 pr-12 bg-[#111827] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:border-[#00BFFF] focus:outline-none"
+                        placeholder="Repite la nueva contraseña"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-[#00BFFF] transition"
+                      >
+                        {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
 
+              {/* Botones del modal */}
               <div className="flex space-x-3 mt-6">
                 <button
                   type="button"

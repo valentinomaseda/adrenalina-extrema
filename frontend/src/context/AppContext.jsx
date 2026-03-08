@@ -103,6 +103,8 @@ export const AppProvider = ({ children }) => {
   // Estados para alumno
   const [myRoutines, setMyRoutines] = useState([])
   const [showRegister, setShowRegister] = useState(false)
+  const [authView, setAuthView] = useState('login') // 'login', 'register', 'forgot-password', 'reset-password', 'verify-email', 'pending-verification'
+  const [pendingEmailData, setPendingEmailData] = useState({ email: '', nombre: '' }) // Para almacenar datos cuando email no está verificado
 
   // Estado para toast notifications
   const [toastState, setToastState] = useState({
@@ -302,6 +304,12 @@ export const AppProvider = ({ children }) => {
       // Cargar datos pasando el usuario explícitamente
       await loadData(userWithAvatar)
     } catch (error) {
+      // Si el error es por email no verificado, cambiar a vista de verificación pendiente
+      if (error.code === 'EMAIL_NOT_VERIFIED') {
+        setPendingEmailData({ email: error.email, nombre: error.nombre })
+        setAuthView('pending-verification')
+        throw new Error('Por favor verifica tu email antes de iniciar sesión')
+      }
       throw error
     }
   }
@@ -645,9 +653,10 @@ export const AppProvider = ({ children }) => {
         altura: parseFloat(profileData.altura) || null
       }
       
-      // Agregar password solo si se proporcionó
-      if (profileData.password && profileData.password.trim() !== '') {
-        dataToUpdate.password = profileData.password
+      // Si se está cambiando la contraseña, validar y agregar campos
+      if (profileData.newPassword && profileData.newPassword.trim() !== '') {
+        dataToUpdate.currentPassword = profileData.currentPassword
+        dataToUpdate.newPassword = profileData.newPassword
       }
       
       await personasAPI.update(user.idPersona, dataToUpdate)
@@ -685,7 +694,14 @@ export const AppProvider = ({ children }) => {
       
       setLoading(false)
       
-      // Si el backend devuelve la persona, iniciar sesión automáticamente
+      // Si el registro requiere verificación de email
+      if (response.requiresEmailVerification) {
+        setPendingEmailData({ email: response.email, nombre: studentData.name })
+        setAuthView('pending-verification')
+        return true
+      }
+      
+      // Si el backend devuelve la persona (reclamación de cuenta), iniciar sesión automáticamente
       if (response.persona) {
         const userWithAvatar = addAvatarToUser(response.persona)
         setUser(userWithAvatar)
@@ -806,6 +822,10 @@ export const AppProvider = ({ children }) => {
     myRoutines,
     showRegister,
     setShowRegister,
+    authView,
+    setAuthView,
+    pendingEmailData,
+    setPendingEmailData,
     
     // Funciones
     saveRoutine,

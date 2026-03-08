@@ -47,12 +47,8 @@ export default function Register() {
 
     try {
       await register(formData)
-      showAlert('¡Registro exitoso! Redirigiendo...', 'success')
-      
-      // Redirigir al login después de 2 segundos
-      setTimeout(() => {
-        setShowRegister(false)
-      }, 2000)
+      // El contexto manejará el cambio a la vista de verificación de email
+      // No es necesario redirigir aquí
     } catch (err) {
       showAlert(err.message || 'Error al registrarse', 'error')
     } finally {

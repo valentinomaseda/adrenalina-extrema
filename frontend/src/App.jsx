@@ -12,13 +12,54 @@ import AddStudent from './views/AddStudent'
 import AddExercise from './views/AddExercise'
 import StudentRoutines from './views/StudentRoutines'
 import StudentProgress from './views/StudentProgress'
+import VerifyEmail from './views/VerifyEmail'
+import ForgotPassword from './views/ForgotPassword'
+import ResetPassword from './views/ResetPassword'
+import PendingEmailVerification from './views/PendingEmailVerification'
 
 function AppContent() {
-  const { currentView, isAuthenticated, user, showRegister } = useAppContext()
+  const { currentView, isAuthenticated, user, showRegister, authView, setAuthView, pendingEmailData } = useAppContext()
 
-  // Si no está autenticado, mostrar login o registro
+  // Si no está autenticado, mostrar vistas de autenticación
   if (!isAuthenticated) {
-    return showRegister ? <Register /> : <Login />
+    // Verificar si hay un token en la URL para verificación de email o reset
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    
+    // Si hay un token en la URL, determinar si es para verify-email o reset-password
+    if (token) {
+      // Si authView ya está en reset-password, mantenerse ahí
+      if (authView === 'reset-password') {
+        return <ResetPassword 
+          onBackToLogin={() => setAuthView('login')} 
+          onGoToForgotPassword={() => setAuthView('forgot-password')} 
+        />;
+      }
+      // Por defecto, si hay token, es para verify-email
+      return <VerifyEmail onBackToLogin={() => setAuthView('login')} />;
+    }
+    
+    switch (authView) {
+      case 'register':
+        return <Register />;
+      case 'forgot-password':
+        return <ForgotPassword onBackToLogin={() => setAuthView('login')} />;
+      case 'reset-password':
+        return <ResetPassword 
+          onBackToLogin={() => setAuthView('login')} 
+          onGoToForgotPassword={() => setAuthView('forgot-password')} 
+        />;
+      case 'verify-email':
+        return <VerifyEmail onBackToLogin={() => setAuthView('login')} />;
+      case 'pending-verification':
+        return <PendingEmailVerification 
+          email={pendingEmailData.email}
+          nombre={pendingEmailData.nombre}
+          onBackToLogin={() => setAuthView('login')} 
+        />;
+      default:
+        return showRegister ? <Register /> : <Login />;
+    }
   }
 
   // Renderizado basado en el rol del usuario

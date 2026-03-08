@@ -1,0 +1,283 @@
+# 🏗️ Arquitectura del Sistema de Emails
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                         FRONTEND (React)                             │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐             │
+│  │   Register   │  │  VerifyEmail │  │ ForgotPassword│             │
+│  │              │  │              │  │              │             │
+│  │ Formulario   │  │ Valida token │  │ Solicita     │             │
+│  │ de registro  │  │ de URL       │  │ recovery     │             │
+│  └──────┬───────┘  └──────▲───────┘  └──────┬───────┘             │
+│         │                  │                  │                      │
+│         │ POST /register   │ POST             │ POST                 │
+│         │                  │ /verify-email    │ /forgot-password     │
+│         │                  │                  │                      │
+│  ┌──────▼──────────────────┴──────────────────▼──────┐             │
+│  │            AppContext (Estado Global)             │             │
+│  │  - authView: 'login' | 'register' | ...          │             │
+│  │  - setAuthView(), login(), register()            │             │
+│  └───────────────────────────────────────────────────┘             │
+│                                                                      │
+└──────────────────────────┬───────────────────────────────────────────┘
+                           │
+                           │ HTTP Requests
+                           │
+┌──────────────────────────▼───────────────────────────────────────────┐
+│                      BACKEND (Node + Express)                        │
+├──────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  ┌─────────────────────────────────────────────────────────┐       │
+│  │          Routes (routes/auth.js)                        │       │
+│  │                                                          │       │
+│  │  POST /api/auth/verify-email                           │       │
+│  │  POST /api/auth/resend-verification                    │       │
+│  │  POST /api/auth/forgot-password                        │       │
+│  │  POST /api/auth/verify-reset-token                     │       │
+│  │  POST /api/auth/reset-password                         │       │
+│  └────────────────────┬───────────────────┬─────────────────┘       │
+│                       │                   │                         │
+│                       │                   │                         │
+│  ┌────────────────────▼───────────────────▼────────┐               │
+│  │     Email Service (utils/emailService.js)       │               │
+│  │                                                  │               │
+│  │  • enviarEmailConfirmacion()                    │               │
+│  │  • enviarEmailRecuperacion()                    │               │
+│  │  • verificarEmailToken()                        │               │
+│  │  • verificarResetToken()                        │               │
+│  │  • Generación de tokens (crypto.randomBytes)    │               │
+│  └────────┬─────────────────────────────┬───────────┘               │
+│           │                             │                           │
+│           │                             │                           │
+│  ┌────────▼─────────┐         ┌─────────▼──────────┐               │
+│  │  React Email     │         │     Resend API     │               │
+│  │  Templates       │         │                    │               │
+│  │                  │         │  • Envío de emails │               │
+│  │ ConfirmEmail.tsx │────────►│  • Tracking        │               │
+│  │ ResetPassword.tsx│         │  • Deliverability  │               │
+│  └──────────────────┘         └────────────────────┘               │
+│                                                                      │
+└──────────────────────────┬───────────────────────────────────────────┘
+                           │
+                           │ SQL Queries
+                           │
+┌──────────────────────────▼───────────────────────────────────────────┐
+│                        DATABASE (MySQL)                              │
+├──────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  ┌──────────────────────────┐    ┌──────────────────────────┐      │
+│  │   Tabla: persona         │    │  Tabla: auth_tokens      │      │
+│  │                          │    │                          │      │
+│  │  - idPersona (PK)        │    │  - id (PK)               │      │
+│  │  - nombre                │    │  - idPersona (FK)        │      │
+│  │  - mail                  │◄───┤  - token (UNIQUE)        │      │
+│  │  - password (bcrypt)     │    │  - tipo (ENUM)           │      │
+│  │  - email_verificado ✨   │    │  - usado (BOOLEAN)       │      │
+│  │  - ...                   │    │  - expiraEn (DATETIME)   │      │
+│  └──────────────────────────┘    │  - creadoEn              │      │
+│                                   └──────────────────────────┘      │
+│                                                                      │
+└──────────────────────────────────────────────────────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════════════
+                        FLUJO DE DATOS
+═══════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                   1. CONFIRMACIÓN DE REGISTRO                        │
+└─────────────────────────────────────────────────────────────────────┘
+
+    Usuario                Frontend              Backend              DB          Resend
+      │                       │                     │                 │             │
+      │  Completa formulario  │                     │                 │             │
+      ├──────────────────────►│                     │                 │             │
+      │                       │  POST /register     │                 │             │
+      │                       ├────────────────────►│                 │             │
+      │                       │                     │ INSERT persona  │             │
+      │                       │                     ├────────────────►│             │
+      │                       │                     │                 │             │
+      │                       │                     │ INSERT token    │             │
+      │                       │                     ├────────────────►│             │
+      │                       │                     │                 │             │
+      │                       │                     │   Enviar email  │             │
+      │                       │                     ├─────────────────┼────────────►│
+      │                       │                     │                 │             │
+      │◄──────────── Email recibido ─────────────────────────────────┼─────────────┤
+      │                       │                     │                 │             │
+      │  Click en link        │                     │                 │             │
+      ├──────────────────────►│                     │                 │             │
+      │                       │ POST /verify-email  │                 │             │
+      │                       ├────────────────────►│                 │             │
+      │                       │                     │ UPDATE persona  │             │
+      │                       │                     │ SET verificado  │             │
+      │                       │                     ├────────────────►│             │
+      │                       │                     │                 │             │
+      │                       │      Success        │                 │             │
+      │                       │◄────────────────────┤                 │             │
+      │  ✅ Verificado!       │                     │                 │             │
+      │◄──────────────────────┤                     │                 │             │
+      │                       │                     │                 │             │
+
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                  2. RECUPERACIÓN DE CONTRASEÑA                       │
+└─────────────────────────────────────────────────────────────────────┘
+
+    Usuario                Frontend              Backend              DB          Resend
+      │                       │                     │                 │             │
+      │  "Olvidé contraseña"  │                     │                 │             │
+      ├──────────────────────►│                     │                 │             │
+      │                       │                     │                 │             │
+      │  Ingresa email        │                     │                 │             │
+      ├──────────────────────►│                     │                 │             │
+      │                       │ POST /forgot-pass   │                 │             │
+      │                       ├────────────────────►│                 │             │
+      │                       │                     │ SELECT persona  │             │
+      │                       │                     ├────────────────►│             │
+      │                       │                     │                 │             │
+      │                       │                     │ INSERT token    │             │
+      │                       │                     ├────────────────►│             │
+      │                       │                     │                 │             │
+      │                       │                     │   Enviar email  │             │
+      │                       │                     ├─────────────────┼────────────►│
+      │                       │                     │                 │             │
+      │◄──────────── Email recibido ─────────────────────────────────┼─────────────┤
+      │                       │                     │                 │             │
+      │  Click en link        │                     │                 │             │
+      ├──────────────────────►│                     │                 │             │
+      │                       │ POST /verify-token  │                 │             │
+      │                       ├────────────────────►│                 │             │
+      │                       │                     │ SELECT token    │             │
+      │                       │                     ├────────────────►│             │
+      │                       │      Valid ✅       │                 │             │
+      │                       │◄────────────────────┤                 │             │
+      │                       │                     │                 │             │
+      │  Nueva contraseña     │                     │                 │             │
+      ├──────────────────────►│                     │                 │             │
+      │                       │ POST /reset-pass    │                 │             │
+      │                       ├────────────────────►│                 │             │
+      │                       │                     │ UPDATE persona  │             │
+      │                       │                     │ SET password    │             │
+      │                       │                     ├────────────────►│             │
+      │                       │                     │                 │             │
+      │                       │                     │ UPDATE token    │             │
+      │                       │                     │ SET usado=TRUE  │             │
+      │                       │                     ├────────────────►│             │
+      │                       │      Success        │                 │             │
+      │                       │◄────────────────────┤                 │             │
+      │  🔑 Password cambiado │                     │                 │             │
+      │◄──────────────────────┤                     │                 │             │
+      │                       │                     │                 │             │
+
+
+═══════════════════════════════════════════════════════════════════════
+                      SEGURIDAD IMPLEMENTADA
+═══════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────┐
+│  🔐 Capas de Seguridad                      │
+├─────────────────────────────────────────────┤
+│                                             │
+│  1. Tokens Criptográficos                  │
+│     • crypto.randomBytes(32)               │
+│     • 64 caracteres hexadecimales          │
+│     • Imposible de adivinar                │
+│                                             │
+│  2. Expiración Temporal                    │
+│     • Verificación: 24 horas               │
+│     • Reset: 1 hora                        │
+│     • Validación en cada uso               │
+│                                             │
+│  3. Un Solo Uso                            │
+│     • Campo "usado" en DB                  │
+│     • Marcado al consumirse                │
+│     • No reutilizable                      │
+│                                             │
+│  4. Hashing de Passwords                   │
+│     • bcrypt con SALT_ROUNDS=10            │
+│     • Nunca se guarda en texto plano       │
+│     • Resistente a rainbow tables          │
+│                                             │
+│  5. No Revelar Info                        │
+│     • Respuestas genéricas                 │
+│     • No indica si email existe            │
+│     • Previene enumeración                 │
+│                                             │
+│  6. Foreign Keys                           │
+│     • Integridad referencial               │
+│     • Cascada en DELETE                    │
+│     • No quedan tokens huérfanos           │
+│                                             │
+└─────────────────────────────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════════════
+                       STACK TECNOLÓGICO
+═══════════════════════════════════════════════════════════════════════
+
+┌──────────────────────────────────────────────────────────────┐
+│  Component          │  Technology                            │
+├──────────────────────────────────────────────────────────────┤
+│  Frontend           │  React 19 + Vite + Tailwind CSS        │
+│  UI Components      │  Lucide React (iconos)                 │
+│  Routing            │  Context-based (AppContext)            │
+│  Estado Global      │  React Context API                     │
+│                     │                                        │
+│  Backend            │  Node.js + Express                     │
+│  Base de Datos      │  MySQL 8                               │
+│  ORM/Query          │  mysql2/promise (pool)                 │
+│  Auth               │  bcrypt (hashing)                      │
+│  Tokens             │  crypto (Node.js built-in)             │
+│                     │                                        │
+│  Email Service      │  Resend (API)                          │
+│  Email Templates    │  React Email + @react-email/components │
+│  Email Rendering    │  @react-email/render                   │
+│                     │                                        │
+│  Security           │  bcrypt, crypto, token expiration      │
+│  Validation         │  Frontend + Backend validation         │
+│  Rate Limiting      │  (Recomendado para producción)         │
+└──────────────────────────────────────────────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════════════
+                   CONFIGURACIÓN REQUERIDA
+═══════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────┐
+│  Variables de Entorno (backend)     │
+├─────────────────────────────────────┤
+│  RESEND_API_KEY     ← De resend.com │
+│  EMAIL_FROM         ← Verificado    │
+│  FRONTEND_URL       ← URL frontend  │
+│  DB_HOST            ← MySQL host    │
+│  DB_NAME            ← DB name       │
+│  DB_USER            ← DB user       │
+│  DB_PASSWORD        ← DB password   │
+└─────────────────────────────────────┘
+
+┌─────────────────────────────────────┐
+│  Dependencias npm (backend)         │
+├─────────────────────────────────────┤
+│  resend                             │
+│  @react-email/components            │
+│  @react-email/render                │
+└─────────────────────────────────────┘
+
+┌─────────────────────────────────────┐
+│  Base de Datos                      │
+├─────────────────────────────────────┤
+│  Ejecutar: auth_tokens_table.sql    │
+│  • Crea tabla auth_tokens           │
+│  • Agrega columna email_verificado  │
+│  • Crea índices                     │
+└─────────────────────────────────────┘
+```
+
+---
+
+**Diagrama creado**: 2026-03-08  
+**Sistema**: Adrenalina Extrema - Email Transaccional  
+**Versión**: 1.0.0
