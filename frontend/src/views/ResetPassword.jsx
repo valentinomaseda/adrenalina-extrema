@@ -19,6 +19,8 @@ const ResetPassword = ({ onBackToLogin, onGoToForgotPassword }) => {
     if (!tokenParam) {
       setEstado('error');
       setError('Token no proporcionado');
+      // Limpiar URL
+      window.history.replaceState({}, document.title, '/');
       return;
     }
 
@@ -43,11 +45,15 @@ const ResetPassword = ({ onBackToLogin, onGoToForgotPassword }) => {
       } else {
         setEstado('error');
         setError(data.message || 'Token inválido o expirado');
+        // Limpiar URL cuando el token es inválido
+        window.history.replaceState({}, document.title, '/');
       }
     } catch (error) {
       console.error('Error verificando token:', error);
       setEstado('error');
       setError('Error de conexión. Por favor, intenta de nuevo.');
+      // Limpiar URL en caso de error
+      window.history.replaceState({}, document.title, '/');
     }
   };
 
@@ -95,8 +101,14 @@ const ResetPassword = ({ onBackToLogin, onGoToForgotPassword }) => {
       if (response.ok && data.success) {
         setEstado('exito');
         setMensaje(data.message);
+        // Limpiar la URL inmediatamente
+        window.history.replaceState({}, document.title, '/');
         // Redirigir al login después de 3 segundos
-        setTimeout(() => onBackToLogin && onBackToLogin(), 3000);
+        setTimeout(() => {
+          if (onBackToLogin) {
+            onBackToLogin();
+          }
+        }, 3000);
       } else {
         setEstado('formulario');
         setError(data.message || 'Error al restablecer contraseña');
@@ -135,6 +147,17 @@ const ResetPassword = ({ onBackToLogin, onGoToForgotPassword }) => {
                   Redirigiendo al login en 3 segundos...
                 </p>
               </div>
+              <button
+                onClick={() => {
+                  window.history.replaceState({}, document.title, '/');
+                  if (onBackToLogin) {
+                    onBackToLogin();
+                  }
+                }}
+                className="w-full bg-[#00BFFF] hover:bg-[#0099CC] text-[#0a0e1a] font-bold py-3 px-6 rounded-lg transition-all duration-200 active:scale-95"
+              >
+                Ir al Login Ahora
+              </button>
             </div>
           </div>
         </div>
@@ -156,13 +179,19 @@ const ResetPassword = ({ onBackToLogin, onGoToForgotPassword }) => {
               </div>
               <div className="flex flex-col space-y-3 w-full">
                 <button
-                  onClick={onGoToForgotPassword}
+                  onClick={() => {
+                    window.history.replaceState({}, document.title, '/');
+                    onGoToForgotPassword();
+                  }}
                   className="w-full bg-[#00BFFF] hover:bg-[#0099CC] text-[#0a0e1a] font-bold py-3 px-6 rounded-lg transition-all duration-200 active:scale-95"
                 >
                   Solicitar Nuevo Enlace
                 </button>
                 <button
-                  onClick={onBackToLogin}
+                  onClick={() => {
+                    window.history.replaceState({}, document.title, '/');
+                    onBackToLogin();
+                  }}
                   className="w-full bg-[#1E40AF] hover:bg-[#1e3a8a] text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 active:scale-95"
                 >
                   Ir al Login

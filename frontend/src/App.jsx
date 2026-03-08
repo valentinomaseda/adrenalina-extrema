@@ -25,17 +25,18 @@ function AppContent() {
     // Verificar si hay un token en la URL para verificación de email o reset
     const params = new URLSearchParams(window.location.search);
     const token = params.get('token');
+    const pathname = window.location.pathname;
     
     // Si hay un token en la URL, determinar si es para verify-email o reset-password
     if (token) {
-      // Si authView ya está en reset-password, mantenerse ahí
-      if (authView === 'reset-password') {
+      // Detectar si es reset-password por la ruta
+      if (pathname.includes('reset-password') || authView === 'reset-password') {
         return <ResetPassword 
           onBackToLogin={() => setAuthView('login')} 
           onGoToForgotPassword={() => setAuthView('forgot-password')} 
         />;
       }
-      // Por defecto, si hay token, es para verify-email
+      // Si es verify-email (por defecto)
       return <VerifyEmail onBackToLogin={() => setAuthView('login')} />;
     }
     
