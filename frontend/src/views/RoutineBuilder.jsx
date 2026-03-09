@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { Plus, Trash2, Save, Dumbbell, List } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
+import Modal from '../components/Modal'
 
 export default function RoutineBuilder() {
-  const { exercises, saveRoutine, savedRoutines, setCurrentView, showAlert } = useAppContext()
+  const { exercises, saveRoutine, deleteRoutine, savedRoutines, setCurrentView, showAlert } = useAppContext()
   const [routineName, setRoutineName] = useState('')
   const [exerciseInstances, setExerciseInstances] = useState([])
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, routineId: null, routineName: '' })
 
   const addExercise = () => {
     const firstExercise = exercises[0]
@@ -75,6 +77,26 @@ export default function RoutineBuilder() {
       console.error('Error al guardar rutina:', error)
       showAlert('Error al guardar la rutina: ' + (error.message || 'Error desconocido'), 'error')
     }
+  }
+
+  const handleDeleteRoutine = (routineId, routineName) => {
+    setDeleteModal({ isOpen: true, routineId, routineName })
+  }
+
+  const confirmDeleteRoutine = async () => {
+    try {
+      await deleteRoutine(deleteModal.routineId)
+      setDeleteModal({ isOpen: false, routineId: null, routineName: '' })
+      showAlert('Rutina eliminada exitosamente', 'success')
+    } catch (error) {
+      console.error('Error al eliminar rutina:', error)
+      setDeleteModal({ isOpen: false, routineId: null, routineName: '' })
+      showAlert('Error al eliminar la rutina: ' + (error.message || 'Error desconocido'), 'error')
+    }
+  }
+
+  const cancelDeleteRoutine = () => {
+    setDeleteModal({ isOpen: false, routineId: null, routineName: '' })
   }
 
   return (
@@ -249,6 +271,13 @@ export default function RoutineBuilder() {
                       })}
                     </p>
                   </div>
+                  <button
+                    onClick={() => handleDeleteRoutine(routine.id, routine.name)}
+                    className="ml-4 p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 active:scale-95 transition-all"
+                    title="Eliminar rutina"
+                  >
+                    <Trash2 size={20} />
+                  </button>
                 </div>
               </div>
             ))}
@@ -267,6 +296,27 @@ export default function RoutineBuilder() {
           Agregar Ejercicio
         </span>
       </button>
+
+      {/* Modal de confirmación para eliminar rutina */}
+      <Modal
+        isOpen={deleteModal.isOpen}
+        onClose={cancelDeleteRoutine}
+        title="Confirmar Eliminación"
+        message={`¿Estás seguro de que deseas eliminar la rutina "${deleteModal.routineName}"?\n\nEsta acción no se puede deshacer y se eliminarán todos los ejercicios asociados.`}
+        type="warning"
+        buttons={[
+          {
+            label: 'Cancelar',
+            onClick: cancelDeleteRoutine,
+            variant: 'secondary'
+          },
+          {
+            label: 'Eliminar',
+            onClick: confirmDeleteRoutine,
+            variant: 'danger'
+          }
+        ]}
+      />
     </div>
   )
 }

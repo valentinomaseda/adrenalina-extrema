@@ -565,6 +565,31 @@ export const AppProvider = ({ children }) => {
     }
   }
 
+  // Función para eliminar rutina
+  const deleteRoutine = async (routineId) => {
+    try {
+      await rutinasAPI.delete(routineId)
+      
+      // Recargar todas las rutinas desde el backend
+      const rutinas = await rutinasAPI.getAll()
+      const rutinasConEjercicios = await Promise.all(
+        rutinas.map(async (rutina) => {
+          try {
+            const ejercicios = await rutinasAPI.getEjercicios(rutina.idRutina)
+            return transformRutinaToRoutine(rutina, ejercicios)
+          } catch (error) {
+            console.error(`Error loading exercises for routine ${rutina.idRutina}:`, error)
+            return transformRutinaToRoutine(rutina, [])
+          }
+        })
+      )
+      setSavedRoutines(rutinasConEjercicios)
+    } catch (error) {
+      console.error('Error deleting routine:', error)
+      throw error
+    }
+  }
+
   // Función para asignar rutina a alumno
   const assignRoutineToStudent = async (studentId, routine) => {
     try {
@@ -841,6 +866,7 @@ export const AppProvider = ({ children }) => {
     
     // Funciones
     saveRoutine,
+    deleteRoutine,
     assignRoutineToStudent,
     removeRoutineFromStudent,
     updateStudent,
