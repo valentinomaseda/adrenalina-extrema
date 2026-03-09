@@ -17,17 +17,17 @@ function generarToken() {
 /**
  * Guarda un token en la base de datos
  * @param {number} idPersona - ID de la persona
- * @param {string} tipo - Tipo de token ('email_verification' o 'password_reset')
+ * @param {string} tipo - Tipo de token ('verificacion' o 'reset_password')
  * @param {number} horasExpiracion - Horas hasta que expire el token
  * @returns {Promise<string>} - El token generado
  */
 async function guardarToken(idPersona, tipo, horasExpiracion = 24) {
   const token = generarToken();
-  const expiraEn = new Date(Date.now() + horasExpiracion * 60 * 60 * 1000);
+  const expiracion = new Date(Date.now() + horasExpiracion * 60 * 60 * 1000);
   
   await pool.query(
-    'INSERT INTO auth_tokens (idPersona, token, tipo, expiraEn) VALUES (?, ?, ?, ?)',
-    [idPersona, token, tipo, expiraEn]
+    'INSERT INTO auth_tokens (idPersona, token, tipo, expiracion) VALUES (?, ?, ?, ?)',
+    [idPersona, token, tipo, expiracion]
   );
   
   return token;
@@ -42,7 +42,7 @@ async function guardarToken(idPersona, tipo, horasExpiracion = 24) {
 async function validarToken(token, tipo) {
   const [rows] = await pool.query(
     `SELECT * FROM auth_tokens 
-     WHERE token = ? AND tipo = ? AND usado = FALSE AND expiraEn > NOW()`,
+     WHERE token = ? AND tipo = ? AND usado = FALSE AND expiracion > NOW()`,
     [token, tipo]
   );
   
@@ -80,7 +80,7 @@ async function invalidarTokens(idPersona, tipo) {
 export async function enviarEmailConfirmacion({ idPersona, email, nombre }) {
   try {
     // Generar token con 24 horas de expiración
-    const token = await guardarToken(idPersona, 'email_verification', 24);
+    const token = await guardarToken(idPersona, 'verificacion', 24);
     
     // Construir URL de confirmación
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
@@ -163,7 +163,7 @@ export async function enviarEmailRecuperacion({ idPersona, email, nombre }) {
  */
 export async function verificarEmailToken(token) {
   try {
-    const tokenData = await validarToken(token, 'email_verification');
+    const tokenData = await validarToken(token, 'verificacion');
     
     if (!tokenData) {
       return { success: false, message: 'Token inválido o expirado' };
