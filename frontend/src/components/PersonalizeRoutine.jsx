@@ -87,7 +87,7 @@ export default function PersonalizeRoutine({ routine, student, onClose, onSave, 
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 animate-fade-in">
-      <div className="bg-[#1a1f3a] rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden border border-[#00BFFF]/20">
+      <div className="bg-[#1a1f3a] rounded-2xl shadow-2xl max-w-4xl w-full max-h-[95vh] flex flex-col overflow-hidden border border-[#00BFFF]/20">
         {/* Header */}
         <div className="bg-gradient-to-br from-[#1E40AF] to-[#152e6b] p-6 border-b border-[#00BFFF]/20">
           <div className="flex items-center justify-between">
@@ -111,7 +111,7 @@ export default function PersonalizeRoutine({ routine, student, onClose, onSave, 
         </div>
 
         {/* Content */}
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
+        <div className="flex-1 overflow-y-auto p-6 pb-4">
           {loading ? (
             <div className="text-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00BFFF] mx-auto"></div>
@@ -244,7 +244,7 @@ export default function PersonalizeRoutine({ routine, student, onClose, onSave, 
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t border-[#00BFFF]/20 flex flex-col sm:flex-row gap-3 justify-end">
+        <div className="flex-shrink-0 p-6 bg-[#0f1629] border-t-2 border-[#00BFFF]/30 flex flex-col sm:flex-row gap-3 justify-end">
           <button
             onClick={onClose}
             disabled={saving}
