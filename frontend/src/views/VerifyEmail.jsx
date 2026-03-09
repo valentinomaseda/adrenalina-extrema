@@ -32,14 +32,8 @@ const VerifyEmail = ({ onBackToLogin }) => {
         if (response.ok && data.success) {
           setEstado('exito');
           setMensaje(data.message);
-          // Limpiar la URL PRIMERO y luego redirigir
+          // Limpiar la URL
           window.history.replaceState({}, document.title, '/');
-          // Redirigir al login después de 3 segundos
-          setTimeout(() => {
-            if (onBackToLogin) {
-              onBackToLogin();
-            }
-          }, 3000);
         } else {
           setEstado('error');
           setMensaje(data.message || 'Error al verificar el email');
@@ -110,12 +104,15 @@ const VerifyEmail = ({ onBackToLogin }) => {
             {estado === 'exito' && (
               <>
                 <CheckCircle className="w-12 h-12 sm:w-16 sm:h-16 text-green-500" />
-                <div className="text-center space-y-2">
+                <div className="text-center space-y-4 w-full">
                   <p className="text-lg sm:text-xl font-bold text-white">¡Email Verificado!</p>
                   <p className="text-sm sm:text-base text-gray-300">{mensaje}</p>
-                  <p className="text-xs sm:text-sm text-gray-400 mt-4">
-                    Redirigiendo al login en 3 segundos...
-                  </p>
+                  <button
+                    onClick={onBackToLogin}
+                    className="w-full mt-4 px-6 py-3 bg-[#00BFFF] text-[#0a0e1a] rounded-lg hover:bg-[#0099CC] active:scale-95 transition-all font-semibold"
+                  >
+                    Ir al Login
+                  </button>
                 </div>
               </>
             )}

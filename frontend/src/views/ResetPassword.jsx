@@ -101,14 +101,8 @@ const ResetPassword = ({ onBackToLogin, onGoToForgotPassword }) => {
       if (response.ok && data.success) {
         setEstado('exito');
         setMensaje(data.message);
-        // Limpiar la URL inmediatamente
+        // Limpiar la URL
         window.history.replaceState({}, document.title, '/');
-        // Redirigir al login después de 3 segundos
-        setTimeout(() => {
-          if (onBackToLogin) {
-            onBackToLogin();
-          }
-        }, 3000);
       } else {
         setEstado('formulario');
         setError(data.message || 'Error al restablecer contraseña');
@@ -143,20 +137,12 @@ const ResetPassword = ({ onBackToLogin, onGoToForgotPassword }) => {
               <div className="space-y-2">
                 <h2 className="text-2xl font-bold text-white">¡Contraseña Actualizada!</h2>
                 <p className="text-gray-300">{mensaje}</p>
-                <p className="text-sm text-gray-400 mt-4">
-                  Redirigiendo al login en 3 segundos...
-                </p>
               </div>
               <button
-                onClick={() => {
-                  window.history.replaceState({}, document.title, '/');
-                  if (onBackToLogin) {
-                    onBackToLogin();
-                  }
-                }}
+                onClick={onBackToLogin}
                 className="w-full bg-[#00BFFF] hover:bg-[#0099CC] text-[#0a0e1a] font-bold py-3 px-6 rounded-lg transition-all duration-200 active:scale-95"
               >
-                Ir al Login Ahora
+                Volver al Login
               </button>
             </div>
           </div>
@@ -179,19 +165,13 @@ const ResetPassword = ({ onBackToLogin, onGoToForgotPassword }) => {
               </div>
               <div className="flex flex-col space-y-3 w-full">
                 <button
-                  onClick={() => {
-                    window.history.replaceState({}, document.title, '/');
-                    onGoToForgotPassword();
-                  }}
+                  onClick={onGoToForgotPassword}
                   className="w-full bg-[#00BFFF] hover:bg-[#0099CC] text-[#0a0e1a] font-bold py-3 px-6 rounded-lg transition-all duration-200 active:scale-95"
                 >
                   Solicitar Nuevo Enlace
                 </button>
                 <button
-                  onClick={() => {
-                    window.history.replaceState({}, document.title, '/');
-                    onBackToLogin();
-                  }}
+                  onClick={onBackToLogin}
                   className="w-full bg-[#1E40AF] hover:bg-[#1e3a8a] text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 active:scale-95"
                 >
                   Ir al Login

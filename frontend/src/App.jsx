@@ -27,17 +27,26 @@ function AppContent() {
     const token = params.get('token');
     const pathname = window.location.pathname;
     
-    // Si hay un token en la URL, determinar si es para verify-email o reset-password
-    if (token) {
+    // Si hay un token en la URL Y no estamos cambiando de vista, mostrar componentes de verificación
+    if (token && authView !== 'login' && authView !== 'register' && authView !== 'forgot-password') {
       // Detectar si es reset-password por la ruta
       if (pathname.includes('reset-password') || authView === 'reset-password') {
         return <ResetPassword 
-          onBackToLogin={() => setAuthView('login')} 
-          onGoToForgotPassword={() => setAuthView('forgot-password')} 
+          onBackToLogin={() => {
+            window.history.replaceState({}, document.title, '/');
+            setAuthView('login');
+          }} 
+          onGoToForgotPassword={() => {
+            window.history.replaceState({}, document.title, '/');
+            setAuthView('forgot-password');
+          }} 
         />;
       }
       // Si es verify-email (por defecto)
-      return <VerifyEmail onBackToLogin={() => setAuthView('login')} />;
+      return <VerifyEmail onBackToLogin={() => {
+        window.history.replaceState({}, document.title, '/');
+        setAuthView('login');
+      }} />;
     }
     
     switch (authView) {
@@ -47,11 +56,20 @@ function AppContent() {
         return <ForgotPassword onBackToLogin={() => setAuthView('login')} />;
       case 'reset-password':
         return <ResetPassword 
-          onBackToLogin={() => setAuthView('login')} 
-          onGoToForgotPassword={() => setAuthView('forgot-password')} 
+          onBackToLogin={() => {
+            window.history.replaceState({}, document.title, '/');
+            setAuthView('login');
+          }} 
+          onGoToForgotPassword={() => {
+            window.history.replaceState({}, document.title, '/');
+            setAuthView('forgot-password');
+          }} 
         />;
       case 'verify-email':
-        return <VerifyEmail onBackToLogin={() => setAuthView('login')} />;
+        return <VerifyEmail onBackToLogin={() => {
+          window.history.replaceState({}, document.title, '/');
+          setAuthView('login');
+        }} />;
       case 'pending-verification':
         return <PendingEmailVerification 
           email={pendingEmailData.email}
