@@ -214,7 +214,7 @@ export default function StudentRoutines() {
                               <h5 className="font-bold text-[#F3F4F6] mb-1">
                                 {idx + 1}. {exercise.name}
                               </h5>
-                              <div className="flex flex-wrap gap-2 text-sm">
+                              <div className="flex flex-wrap gap-2 text-sm mb-2">
                                 <span className="px-2 py-1 bg-[#1E40AF] text-[#00BFFF] rounded font-semibold">
                                   {exercise.sets} {exercise.sets === 1 ? 'serie' : 'series'}
                                 </span>
@@ -222,6 +222,13 @@ export default function StudentRoutines() {
                                   {exercise.value} {exercise.type === 'reps' ? 'repeticiones' : 'segundos'}
                                 </span>
                               </div>
+                              {/* Mostrar especificaciones si existen */}
+                              {exercise.especificaciones && (
+                                <div className="mt-2 p-2 bg-[#1E40AF]/30 rounded border border-[#00BFFF]/20">
+                                  <p className="text-sm text-[#00BFFF] font-semibold mb-1">📝 Especificaciones:</p>
+                                  <p className="text-sm text-gray-300">{exercise.especificaciones}</p>
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>

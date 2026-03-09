@@ -4,9 +4,10 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { useAppContext } from '../context/AppContext'
 import AchievementBadges from '../components/AchievementBadges'
 import StreakDisplay from '../components/StreakDisplay'
+import PersonalizeRoutine from '../components/PersonalizeRoutine'
 
 export default function StudentDetail() {
-  const { selectedStudent, setCurrentView, setSelectedStudent, savedRoutines, assignRoutineToStudent, removeRoutineFromStudent, updateStudent, updateStudentRoutineStatus, showAlert } = useAppContext()
+  const { selectedStudent, setCurrentView, setSelectedStudent, savedRoutines, assignRoutineToStudent, removeRoutineFromStudent, updateStudent, updateStudentRoutineStatus, showAlert, refreshStudents } = useAppContext()
   const [selectedRoutineId, setSelectedRoutineId] = useState('')
   const [showProgress, setShowProgress] = useState(false)
   const [showInfoModal, setShowInfoModal] = useState(false)
@@ -15,6 +16,8 @@ export default function StudentDetail() {
   const [showEditModal, setShowEditModal] = useState(false)
   const [editFormData, setEditFormData] = useState({})
   const [updatingRoutineStatus, setUpdatingRoutineStatus] = useState(null)
+  const [showPersonalizeModal, setShowPersonalizeModal] = useState(false)
+  const [routineToPersonalize, setRoutineToPersonalize] = useState(null)
 
   // Función para formatear rutina como texto plano para WhatsApp
   const formatRoutineForWhatsApp = (routine) => {
@@ -38,7 +41,7 @@ export default function StudentDetail() {
     window.open(whatsappUrl, '_blank')
   }
 
-  // Función para asignar rutina
+  // Función para asignar rutina (ahora abre modal de personalización)
   const handleAssignRoutine = () => {
     if (!selectedRoutineId) {
       showAlert('Por favor selecciona una rutina', 'warning')
@@ -47,10 +50,25 @@ export default function StudentDetail() {
     
     const routine = savedRoutines.find(r => r.id === parseInt(selectedRoutineId))
     if (routine) {
-      assignRoutineToStudent(selectedStudent.id, routine)
-      showAlert('Rutina asignada exitosamente', 'success')
-      setSelectedRoutineId('')
+      setRoutineToPersonalize(routine)
+      setShowPersonalizeModal(true)
     }
+  }
+
+  // Función para manejar después de guardar personalización
+  const handlePersonalizeSave = async () => {
+    // Recargar los estudiantes con sus rutinas actualizadas
+    const alumnosActualizados = await refreshStudents()
+    
+    // Actualizar selectedStudent si existe
+    if (selectedStudent) {
+      const estudianteActualizado = alumnosActualizados.find(s => s.id === selectedStudent.id)
+      if (estudianteActualizado) {
+        setSelectedStudent(estudianteActualizado)
+      }
+    }
+    
+    setSelectedRoutineId('')
   }
 
   // Función para eliminar rutina
@@ -800,6 +818,20 @@ export default function StudentDetail() {
             </form>
           </div>
         </div>
+      )}
+
+      {/* Modal de personalización de rutina */}
+      {showPersonalizeModal && routineToPersonalize && (
+        <PersonalizeRoutine
+          routine={routineToPersonalize}
+          student={selectedStudent}
+          onClose={() => {
+            setShowPersonalizeModal(false)
+            setRoutineToPersonalize(null)
+          }}
+          onSave={handlePersonalizeSave}
+          showAlert={showAlert}
+        />
       )}
     </div>
   )

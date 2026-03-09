@@ -727,11 +727,12 @@ export const AppProvider = ({ children }) => {
       setLoading(true)
       const rutinas = await personasAPI.getRutinas(userData.idPersona)
       
-      // Transformar rutinas con sus ejercicios
+      // Transformar rutinas con sus ejercicios PERSONALIZADOS
       const rutinasCompletas = await Promise.all(
         rutinas.map(async (rutina) => {
           try {
-            const ejercicios = await rutinasAPI.getEjercicios(rutina.idRutina)
+            // Usar getAlumnoEjercicios para obtener los ejercicios personalizados
+            const ejercicios = await rutinasAPI.getAlumnoEjercicios(rutina.idRutina, userData.idPersona)
             return {
               id: rutina.idRutina,
               name: rutina.nombre,
@@ -744,7 +745,8 @@ export const AppProvider = ({ children }) => {
                 name: ej.nombre,
                 sets: ej.cantSets || 3,
                 value: ej.cantidad || 10,
-                type: ej.tipoContador || 'reps'
+                type: ej.tipoContador || 'reps',
+                especificaciones: ej.especificaciones || null  // NUEVO: agregar especificaciones
               }))
             }
           } catch (error) {

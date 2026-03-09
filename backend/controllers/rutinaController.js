@@ -161,5 +161,92 @@ export const rutinaController = {
       console.error('Error al eliminar rutina:', error);
       res.status(500).json({ error: 'Error al eliminar rutina' });
     }
+  },
+
+  // ============================================
+  // ENDPOINTS DE PERSONALIZACIÓN POR ALUMNO
+  // ============================================
+
+  // GET /api/rutinas/:id/alumnos/:idAlumno/ejercicios
+  async getAlumnoEjercicios(req, res) {
+    try {
+      const { id, idAlumno } = req.params;
+      const ejercicios = await Rutina.getAlumnoEjercicios(id, idAlumno);
+      res.json(ejercicios);
+    } catch (error) {
+      console.error('Error al obtener ejercicios del alumno:', error);
+      res.status(500).json({ error: 'Error al obtener ejercicios del alumno' });
+    }
+  },
+
+  // GET /api/rutinas/:id/alumnos/:idAlumno/full
+  async getFullRutinaAlumno(req, res) {
+    try {
+      const { id, idAlumno } = req.params;
+      const rutina = await Rutina.getFullRutinaAlumno(id, idAlumno);
+      if (!rutina) {
+        return res.status(404).json({ error: 'Rutina no encontrada para este alumno' });
+      }
+      res.json(rutina);
+    } catch (error) {
+      console.error('Error al obtener rutina del alumno:', error);
+      res.status(500).json({ error: 'Error al obtener rutina del alumno' });
+    }
+  },
+
+  // PUT /api/rutinas/:id/alumnos/:idAlumno/ejercicios/:idEjercicio
+  async updateAlumnoEjercicio(req, res) {
+    try {
+      const { id, idAlumno, idEjercicio } = req.params;
+      const updates = req.body;
+      const result = await Rutina.updateAlumnoEjercicio(idAlumno, id, idEjercicio, updates);
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: 'Ejercicio no encontrado para este alumno' });
+      }
+      res.json({ message: 'Ejercicio del alumno actualizado exitosamente' });
+    } catch (error) {
+      console.error('Error al actualizar ejercicio del alumno:', error);
+      res.status(500).json({ error: error.message || 'Error al actualizar ejercicio del alumno' });
+    }
+  },
+
+  // POST /api/rutinas/:id/alumnos/:idAlumno/ejercicios
+  async addAlumnoEjercicio(req, res) {
+    try {
+      const { id, idAlumno } = req.params;
+      const ejercicioData = req.body;
+      await Rutina.addAlumnoEjercicio(idAlumno, id, ejercicioData);
+      res.status(201).json({ message: 'Ejercicio agregado al alumno exitosamente' });
+    } catch (error) {
+      console.error('Error al agregar ejercicio al alumno:', error);
+      res.status(500).json({ error: 'Error al agregar ejercicio al alumno' });
+    }
+  },
+
+  // DELETE /api/rutinas/:id/alumnos/:idAlumno/ejercicios/:idEjercicio
+  async removeAlumnoEjercicio(req, res) {
+    try {
+      const { id, idAlumno, idEjercicio } = req.params;
+      const result = await Rutina.removeAlumnoEjercicio(idAlumno, id, idEjercicio);
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: 'Ejercicio no encontrado para este alumno' });
+      }
+      res.json({ message: 'Ejercicio removido del alumno exitosamente' });
+    } catch (error) {
+      console.error('Error al remover ejercicio del alumno:', error);
+      res.status(500).json({ error: 'Error al remover ejercicio del alumno' });
+    }
+  },
+
+  // GET /api/rutinas/:id/alumnos-personalizaciones
+  async getAlumnosConPersonalizaciones(req, res) {
+    try {
+      const { id } = req.params;
+      const alumnos = await Rutina.getAlumnosConPersonalizaciones(id);
+      res.json(alumnos);
+    } catch (error) {
+      console.error('Error al obtener alumnos con personalizaciones:', error);
+      res.status(500).json({ error: 'Error al obtener alumnos con personalizaciones' });
+    }
   }
 };

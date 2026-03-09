@@ -185,6 +185,37 @@ export const rutinasAPI = {
   removeEjercicio: (rutinaId, ejercicioId) => fetchAPI(`/rutinas/${rutinaId}/ejercicios/${ejercicioId}`, {
     method: 'DELETE',
   }),
+
+  // ========== PERSONALIZACIÓN POR ALUMNO ==========
+
+  // Obtener alumnos con personalizaciones
+  getAlumnosConPersonalizaciones: (rutinaId) => fetchAPI(`/rutinas/${rutinaId}/alumnos-personalizaciones`),
+
+  // Obtener ejercicios personalizados del alumno
+  getAlumnoEjercicios: (rutinaId, alumnoId) => fetchAPI(`/rutinas/${rutinaId}/alumnos/${alumnoId}/ejercicios`),
+
+  // Obtener rutina completa del alumno con ejercicios personalizados
+  getFullRutinaAlumno: (rutinaId, alumnoId) => fetchAPI(`/rutinas/${rutinaId}/alumnos/${alumnoId}/full`),
+
+  // Actualizar ejercicio personalizado del alumno
+  updateAlumnoEjercicio: (rutinaId, alumnoId, ejercicioId, data) => 
+    fetchAPI(`/rutinas/${rutinaId}/alumnos/${alumnoId}/ejercicios/${ejercicioId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  // Agregar ejercicio personalizado al alumno
+  addAlumnoEjercicio: (rutinaId, alumnoId, ejercicioData) => 
+    fetchAPI(`/rutinas/${rutinaId}/alumnos/${alumnoId}/ejercicios`, {
+      method: 'POST',
+      body: JSON.stringify(ejercicioData),
+    }),
+
+  // Eliminar ejercicio personalizado del alumno
+  removeAlumnoEjercicio: (rutinaId, alumnoId, ejercicioId) => 
+    fetchAPI(`/rutinas/${rutinaId}/alumnos/${alumnoId}/ejercicios/${ejercicioId}`, {
+      method: 'DELETE',
+    }),
 }
 
 // ========== TIPOS DE EJERCICIO ==========

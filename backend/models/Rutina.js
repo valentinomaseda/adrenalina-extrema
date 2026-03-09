@@ -77,16 +77,38 @@ export class Rutina {
     return result;
   }
 
-  // Asignar rutina a alumno
+  // Asignar rutina a alumno CON ejercicios personalizables
   static async assignToAlumno(idRutina, idPersona, estado = 'activa') {
-    // Permite asignar la misma rutina múltiples veces con diferentes fechas
-    // La PK incluye fechaAsignacion, por lo que NOW() garantiza unicidad
-    const [result] = await pool.query(
-      `INSERT INTO alumno_rutina (idPersona, idRutina, estado, fechaAsignacion) 
-       VALUES (?, ?, ?, NOW())`,
-      [idPersona, idRutina, estado]
-    );
-    return result;
+    const connection = await pool.getConnection();
+    
+    try {
+      await connection.beginTransaction();
+      
+      // 1. Crear relación alumno_rutina
+      await connection.query(
+        `INSERT INTO alumno_rutina (idPersona, idRutina, estado, fechaAsignacion) 
+         VALUES (?, ?, ?, NOW())`,
+        [idPersona, idRutina, estado]
+      );
+      
+      // 2. Copiar ejercicios de la plantilla con valores default
+      await connection.query(
+        `INSERT INTO alumno_rutina_ejercicio 
+         (idPersona, idRutina, idEjercicio, cantSets, cantidad, orden)
+         SELECT ?, re.idRutina, re.idEjercicio, re.cantSets, re.cantidad, re.orden
+         FROM rutina_ejercicio re
+         WHERE re.idRutina = ?`,
+        [idPersona, idRutina]
+      );
+      
+      await connection.commit();
+      return { success: true };
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
   }
 
   // Desasignar rutina de alumno
@@ -172,5 +194,130 @@ export class Rutina {
       ...rutina,
       ejercicios
     };
+  }
+
+  // ============================================
+  // MÉTODOS DE PERSONALIZACIÓN POR ALUMNO
+  // ============================================
+
+  // Obtener ejercicios personalizados del alumno
+  static async getAlumnoEjercicios(idRutina, idPersona) {
+    const [rows] = await pool.query(
+      `SELECT e.idEjercicio, e.nombre, e.tipoContador,
+              are.cantSets, are.cantidad, are.especificaciones, are.orden
+       FROM ejercicio e
+       INNER JOIN alumno_rutina_ejercicio are ON e.idEjercicio = are.idEjercicio
+       WHERE are.idRutina = ? AND are.idPersona = ?
+       ORDER BY are.orden`,
+      [idRutina, idPersona]
+    );
+    return rows;
+  }
+
+  // Actualizar ejercicio personalizado del alumno
+  static async updateAlumnoEjercicio(idPersona, idRutina, idEjercicio, updates) {
+    const fields = [];
+    const values = [];
+    
+    if (updates.cantSets !== undefined) {
+      fields.push('cantSets = ?');
+      values.push(updates.cantSets);
+    }
+    if (updates.cantidad !== undefined) {
+      fields.push('cantidad = ?');
+      values.push(updates.cantidad);
+    }
+    if (updates.especificaciones !== undefined) {
+      fields.push('especificaciones = ?');
+      values.push(updates.especificaciones);
+    }
+    if (updates.orden !== undefined) {
+      fields.push('orden = ?');
+      values.push(updates.orden);
+    }
+    
+    if (fields.length === 0) {
+      throw new Error('No hay campos para actualizar');
+    }
+    
+    values.push(idPersona, idRutina, idEjercicio);
+    
+    const [result] = await pool.query(
+      `UPDATE alumno_rutina_ejercicio 
+       SET ${fields.join(', ')} 
+       WHERE idPersona = ? AND idRutina = ? AND idEjercicio = ?`,
+      values
+    );
+    return result;
+  }
+
+  // Agregar ejercicio personalizado a rutina de alumno
+  static async addAlumnoEjercicio(idPersona, idRutina, ejercicioData) {
+    const { idEjercicio, cantSets, cantidad, especificaciones, orden } = ejercicioData;
+    const [result] = await pool.query(
+      `INSERT INTO alumno_rutina_ejercicio 
+       (idPersona, idRutina, idEjercicio, cantSets, cantidad, especificaciones, orden) 
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [idPersona, idRutina, idEjercicio, cantSets || 3, cantidad || 10, especificaciones || null, orden || null]
+    );
+    return result;
+  }
+
+  // Eliminar ejercicio personalizado de alumno
+  static async removeAlumnoEjercicio(idPersona, idRutina, idEjercicio) {
+    const [result] = await pool.query(
+      `DELETE FROM alumno_rutina_ejercicio 
+       WHERE idPersona = ? AND idRutina = ? AND idEjercicio = ?`,
+      [idPersona, idRutina, idEjercicio]
+    );
+    return result;
+  }
+
+  // Obtener rutina completa del alumno con ejercicios personalizados
+  static async getFullRutinaAlumno(idRutina, idPersona) {
+    // Obtener datos de la rutina
+    const rutina = await this.findById(idRutina);
+    if (!rutina) return null;
+    
+    // Obtener estado de asignación
+    const [asignacion] = await pool.query(
+      `SELECT estado, fechaAsignacion 
+       FROM alumno_rutina 
+       WHERE idRutina = ? AND idPersona = ?`,
+      [idRutina, idPersona]
+    );
+    
+    if (asignacion.length === 0) return null;
+    
+    // Obtener ejercicios personalizados
+    const ejercicios = await this.getAlumnoEjercicios(idRutina, idPersona);
+    
+    return {
+      ...rutina,
+      estado: asignacion[0].estado,
+      fechaAsignacion: asignacion[0].fechaAsignacion,
+      ejercicios
+    };
+  }
+
+  // Obtener alumnos con rutina asignada y sus personalizaciones
+  static async getAlumnosConPersonalizaciones(idRutina) {
+    const [rows] = await pool.query(
+      `SELECT 
+         p.idPersona,
+         p.nombre,
+         p.mail,
+         ar.estado,
+         ar.fechaAsignacion,
+         COUNT(are.idEjercicio) as cantEjercicios
+       FROM persona p
+       INNER JOIN alumno_rutina ar ON p.idPersona = ar.idPersona
+       LEFT JOIN alumno_rutina_ejercicio are ON ar.idPersona = are.idPersona AND ar.idRutina = are.idRutina
+       WHERE ar.idRutina = ?
+       GROUP BY p.idPersona, p.nombre, p.mail, ar.estado, ar.fechaAsignacion
+       ORDER BY ar.fechaAsignacion DESC`,
+      [idRutina]
+    );
+    return rows;
   }
 }
