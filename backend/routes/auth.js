@@ -175,7 +175,7 @@ router.post('/verify-reset-token', async (req, res) => {
     // Verificar token sin marcarlo como usado
     const [rows] = await pool.query(
       `SELECT idPersona FROM auth_tokens 
-       WHERE token = ? AND tipo = 'password_reset' AND usado = FALSE AND expiracion > NOW()`,
+       WHERE token = ? AND tipo = 'reset_password' AND usado = FALSE AND expiracion > NOW()`,
       [token]
     );
     

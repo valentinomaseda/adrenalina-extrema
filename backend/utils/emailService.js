@@ -122,10 +122,10 @@ export async function enviarEmailConfirmacion({ idPersona, email, nombre }) {
 export async function enviarEmailRecuperacion({ idPersona, email, nombre }) {
   try {
     // Invalidar tokens previos de recuperación
-    await invalidarTokens(idPersona, 'password_reset');
+    await invalidarTokens(idPersona, 'reset_password');
     
     // Generar nuevo token con 1 hora de expiración
-    const token = await guardarToken(idPersona, 'password_reset', 1);
+    const token = await guardarToken(idPersona, 'reset_password', 1);
     
     // Construir URL de reset
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
@@ -194,7 +194,7 @@ export async function verificarEmailToken(token) {
  */
 export async function verificarResetToken(token) {
   try {
-    const tokenData = await validarToken(token, 'password_reset');
+    const tokenData = await validarToken(token, 'reset_password');
     
     if (!tokenData) {
       return { success: false, message: 'Token inválido o expirado' };

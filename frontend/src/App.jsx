@@ -27,10 +27,32 @@ function AppContent() {
     const token = params.get('token');
     const pathname = window.location.pathname;
     
-    // Si hay un token en la URL Y no estamos cambiando de vista, mostrar componentes de verificación
+    // Detectar reset-password PRIMERO por la ruta (tiene prioridad)
+    if (token && pathname.includes('reset-password')) {
+      return <ResetPassword 
+        onBackToLogin={() => {
+          window.history.replaceState({}, document.title, '/');
+          setAuthView('login');
+        }} 
+        onGoToForgotPassword={() => {
+          window.history.replaceState({}, document.title, '/');
+          setAuthView('forgot-password');
+        }} 
+      />;
+    }
+    
+    // Detectar verify-email por la ruta
+    if (token && pathname.includes('verify-email')) {
+      return <VerifyEmail onBackToLogin={() => {
+        window.history.replaceState({}, document.title, '/');
+        setAuthView('login');
+      }} />;
+    }
+    
+    // Si hay un token pero no está en una ruta específica, y authView indica verificación
     if (token && authView !== 'login' && authView !== 'register' && authView !== 'forgot-password') {
-      // Detectar si es reset-password por la ruta
-      if (pathname.includes('reset-password') || authView === 'reset-password') {
+      // Si authView es reset-password, mostrar ResetPassword
+      if (authView === 'reset-password') {
         return <ResetPassword 
           onBackToLogin={() => {
             window.history.replaceState({}, document.title, '/');
@@ -42,7 +64,7 @@ function AppContent() {
           }} 
         />;
       }
-      // Si es verify-email (por defecto)
+      // Por defecto, mostrar VerifyEmail
       return <VerifyEmail onBackToLogin={() => {
         window.history.replaceState({}, document.title, '/');
         setAuthView('login');
