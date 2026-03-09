@@ -3,6 +3,19 @@ import { Dumbbell, CheckCircle2, XCircle, Clock, ChevronDown, ChevronUp } from '
 import { useAppContext } from '../context/AppContext'
 import Confetti from '../components/Confetti'
 
+// Helper para obtener el nombre de la unidad
+const getUnitName = (type) => {
+  const units = {
+    'reps': 'repeticiones',
+    'segundos': 'segundos',
+    'minutos': 'minutos',
+    'horas': 'horas',
+    'km': 'km',
+    'metros': 'metros'
+  }
+  return units[type] || type
+}
+
 export default function StudentRoutines() {
   const { user, myRoutines, updateRoutineStatus, loadMyRoutines, loading, showAlert } = useAppContext()
   const [expandedRoutine, setExpandedRoutine] = useState(null)
@@ -227,15 +240,7 @@ export default function StudentRoutines() {
                               {exercise.sets} {exercise.sets === 1 ? 'serie' : 'series'}
                             </span>
                             <span className="px-2 py-1 bg-[#1E40AF] text-[#00BFFF] rounded font-semibold">
-                              {exercise.value} {
-                                exercise.unidad === 'reps' ? 'repeticiones' :
-                                exercise.unidad === 'segundos' ? 'segundos' :
-                                exercise.unidad === 'minutos' ? 'minutos' :
-                                exercise.unidad === 'horas' ? 'horas' :
-                                exercise.unidad === 'km' ? 'km' :
-                                exercise.unidad === 'metros' ? 'metros' :
-                                exercise.type === 'reps' ? 'repeticiones' : 'segundos'
-                              }
+                              {exercise.value} {getUnitName(exercise.unidad || exercise.type)}
                             </span>
                             {exercise.pausaSeries && (
                               <span className="px-2 py-1 bg-purple-600 text-white rounded font-semibold">

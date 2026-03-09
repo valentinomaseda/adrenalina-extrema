@@ -6,6 +6,19 @@ import AchievementBadges from '../components/AchievementBadges'
 import StreakDisplay from '../components/StreakDisplay'
 import PersonalizeRoutine from '../components/PersonalizeRoutine'
 
+// Helper para obtener el nombre de la unidad
+const getUnitName = (type) => {
+  const units = {
+    'reps': 'repeticiones',
+    'segundos': 'segundos',
+    'minutos': 'minutos',
+    'horas': 'horas',
+    'km': 'km',
+    'metros': 'metros'
+  }
+  return units[type] || type
+}
+
 export default function StudentDetail() {
   const { selectedStudent, setCurrentView, setSelectedStudent, savedRoutines, assignRoutineToStudent, removeRoutineFromStudent, updateStudent, updateStudentRoutineStatus, showAlert, refreshStudents } = useAppContext()
   const [selectedRoutineId, setSelectedRoutineId] = useState('')
@@ -25,7 +38,7 @@ export default function StudentDetail() {
     
     routine.exercises.forEach((exercise, index) => {
       text += `${index + 1}. *${exercise.name}*\n`
-      text += `   • ${exercise.value} ${exercise.type === 'reps' ? 'repeticiones' : 'segundos'}\n`
+      text += `   • ${exercise.value} ${getUnitName(exercise.type)}\n`
       text += `   • ${exercise.sets} ${exercise.sets === 1 ? 'serie' : 'series'}\n\n`
     })
     

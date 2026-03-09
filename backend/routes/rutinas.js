@@ -16,7 +16,7 @@ router.post('/:id/desasignar', rutinaController.removeFromAlumno);
 router.put('/:id', rutinaController.update);
 router.put('/:id/estado', rutinaController.updateEstado);
 router.delete('/:id', rutinaController.delete);
-router.delete('/:id/ejercicios/:idEjercicio', rutinaController.removeEjercicio);
+router.delete('/:id/ejercicios/:rutinaEjercicioId', rutinaController.removeEjercicio);
 
 // Rutas de personalización por alumno
 router.get('/:id/alumnos-personalizaciones', rutinaController.getAlumnosConPersonalizaciones);

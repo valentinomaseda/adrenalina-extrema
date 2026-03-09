@@ -88,10 +88,10 @@ export const rutinaController = {
     }
   },
 
-  // DELETE /api/rutinas/:id/ejercicios/:idEjercicio
+  // DELETE /api/rutinas/:id/ejercicios/:rutinaEjercicioId
   async removeEjercicio(req, res) {
     try {
-      await Rutina.removeEjercicio(req.params.id, req.params.idEjercicio);
+      await Rutina.removeEjercicio(req.params.rutinaEjercicioId);
       res.json({ message: 'Ejercicio removido de la rutina' });
     } catch (error) {
       console.error('Error al remover ejercicio:', error);

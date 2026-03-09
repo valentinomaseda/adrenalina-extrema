@@ -3,6 +3,45 @@ import { Plus, Trash2, Save, Dumbbell, List } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
 import Modal from '../components/Modal'
 
+// Helper para formatear el nombre del tipo de ejercicio
+const getTypeLabel = (type) => {
+  const labels = {
+    'reps': 'REPS',
+    'segundos': 'SEGUNDOS',
+    'minutos': 'MINUTOS',
+    'horas': 'HORAS',
+    'km': 'KM',
+    'metros': 'METROS'
+  }
+  return labels[type] || type.toUpperCase()
+}
+
+// Helper para obtener la etiqueta del campo de valor
+const getValueLabel = (type) => {
+  const labels = {
+    'reps': 'Repeticiones',
+    'segundos': 'Segundos',
+    'minutos': 'Minutos',
+    'horas': 'Horas',
+    'km': 'Kilómetros',
+    'metros': 'Metros'
+  }
+  return labels[type] || 'Cantidad'
+}
+
+// Helper para obtener la unidad abreviada
+const getUnitShort = (type) => {
+  const units = {
+    'reps': 'reps',
+    'segundos': 'seg',
+    'minutos': 'min',
+    'horas': 'h',
+    'km': 'km',
+    'metros': 'm'
+  }
+  return units[type] || type
+}
+
 export default function RoutineBuilder() {
   const { exercises, saveRoutine, deleteRoutine, savedRoutines, setCurrentView, showAlert } = useAppContext()
   const [routineName, setRoutineName] = useState('')
@@ -27,6 +66,15 @@ export default function RoutineBuilder() {
   }
 
   const updateExercise = (id, field, value) => {
+    // Validar valores numéricos
+    if ((field === 'value' || field === 'sets') && value !== '') {
+      const numValue = parseInt(value)
+      if (!isNaN(numValue) && numValue < 1) {
+        showAlert('El valor debe ser mayor o igual a 1', 'warning')
+        return
+      }
+    }
+
     setExerciseInstances(
       exerciseInstances.map((ex) => {
         if (ex.id === id) {
@@ -55,6 +103,18 @@ export default function RoutineBuilder() {
     if (exerciseInstances.length === 0) {
       showAlert('Agrega al menos un ejercicio', 'warning')
       return
+    }
+
+    // Validar que todos los valores sean >= 1
+    for (const exercise of exerciseInstances) {
+      if (!exercise.value || exercise.value < 1) {
+        showAlert('Todos los ejercicios deben tener valores mayores o iguales a 1', 'warning')
+        return
+      }
+      if (!exercise.sets || exercise.sets < 1) {
+        showAlert('Todos los ejercicios deben tener al menos 1 serie', 'warning')
+        return
+      }
     }
 
     try {
@@ -173,7 +233,7 @@ export default function RoutineBuilder() {
                         ))}
                       </select>
                       <span className="px-3 py-2 bg-[#00BFFF] text-[#111827] rounded-lg text-xs font-bold whitespace-nowrap">
-                        {instance.type === 'reps' ? 'REPS' : 'SEGUNDOS'}
+                        {getTypeLabel(instance.type)}
                       </span>
                     </div>
                   </div>
@@ -182,14 +242,13 @@ export default function RoutineBuilder() {
                     {/* Valor */}
                     <div>
                       <label className="block text-xs font-semibold text-[#F3F4F6] mb-1">
-                        {instance.type === 'reps' ? 'Repeticiones' : 'Segundos'}
+                        {getValueLabel(instance.type)}
                       </label>
                       <input
                         type="number"
-                        min="1"
                         value={instance.value}
                         onChange={(e) =>
-                          updateExercise(instance.id, 'value', parseInt(e.target.value) || 1)
+                          updateExercise(instance.id, 'value', e.target.value === '' ? '' : parseInt(e.target.value))
                         }
                         className="w-full px-3 py-2 border-2 border-[#1E40AF] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent bg-[#1E40AF] text-[#F3F4F6]"
                       />
@@ -200,10 +259,9 @@ export default function RoutineBuilder() {
                       <label className="block text-xs font-semibold text-[#F3F4F6] mb-1">Series</label>
                       <input
                         type="number"
-                        min="1"
                         value={instance.sets}
                         onChange={(e) =>
-                          updateExercise(instance.id, 'sets', parseInt(e.target.value) || 1)
+                          updateExercise(instance.id, 'sets', e.target.value === '' ? '' : parseInt(e.target.value))
                         }
                         className="w-full px-3 py-2 border-2 border-[#1E40AF] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent bg-[#1E40AF] text-[#F3F4F6]"
                       />
@@ -256,7 +314,7 @@ export default function RoutineBuilder() {
                           <span className="text-gray-400">•</span>
                           <span className="text-gray-300">
                             {exercise.sets} sets × {exercise.value}{' '}
-                            {exercise.type === 'reps' ? 'reps' : 'seg'}
+                            {getUnitShort(exercise.type)}
                           </span>
                         </div>
                       ))}

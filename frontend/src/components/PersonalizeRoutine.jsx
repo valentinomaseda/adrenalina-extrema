@@ -41,6 +41,15 @@ export default function PersonalizeRoutine({ routine, student, onClose, onSave, 
   }
 
   const handleExerciseChange = (index, field, value) => {
+    // Validar valores numéricos
+    if ((field === 'cantSets' || field === 'cantidad') && value !== '') {
+      const numValue = parseInt(value)
+      if (!isNaN(numValue) && numValue < 1) {
+        showAlert('El valor debe ser mayor o igual a 1', 'warning')
+        return
+      }
+    }
+
     setExercises(prev => {
       const updated = [...prev]
       updated[index] = { ...updated[index], [field]: value }
@@ -49,6 +58,18 @@ export default function PersonalizeRoutine({ routine, student, onClose, onSave, 
   }
 
   const handleSave = async () => {
+    // Validar que todos los valores sean >= 1
+    for (const exercise of exercises) {
+      if (!exercise.cantSets || exercise.cantSets < 1) {
+        showAlert('Todos los ejercicios deben tener al menos 1 serie', 'warning')
+        return
+      }
+      if (!exercise.cantidad || exercise.cantidad < 1) {
+        showAlert('Todos los ejercicios deben tener cantidades mayores o iguales a 1', 'warning')
+        return
+      }
+    }
+
     try {
       setSaving(true)
       
@@ -166,7 +187,6 @@ export default function PersonalizeRoutine({ routine, student, onClose, onSave, 
                       </label>
                       <input
                         type="number"
-                        min="1"
                         value={exercise.cantSets}
                         onChange={(e) => handleExerciseChange(index, 'cantSets', e.target.value)}
                         className="w-full px-3 py-2 bg-[#1a1f3a] border border-gray-600 rounded-lg text-[#F3F4F6] focus:outline-none focus:border-[#00BFFF] transition-colors"
@@ -181,7 +201,6 @@ export default function PersonalizeRoutine({ routine, student, onClose, onSave, 
                       </label>
                       <input
                         type="number"
-                        min="1"
                         value={exercise.cantidad}
                         onChange={(e) => handleExerciseChange(index, 'cantidad', e.target.value)}
                         className="w-full px-3 py-2 bg-[#1a1f3a] border border-gray-600 rounded-lg text-[#F3F4F6] focus:outline-none focus:border-[#00BFFF] transition-colors"

@@ -49,7 +49,7 @@ export class Rutina {
     const [rows] = await pool.query(
       `SELECT e.idEjercicio, e.nombre, e.tipoContador, e.unidad,
               e.distancia, e.duracion, e.descripcionIntervalo,
-              re.cantSets, re.cantidad, re.orden,
+              re.id as rutinaEjercicioId, re.cantSets, re.cantidad, re.orden,
               re.pausaSeries, re.intensidad, re.esCalentamiento
        FROM ejercicio e
        INNER JOIN rutina_ejercicio re ON e.idEjercicio = re.idEjercicio
@@ -90,11 +90,11 @@ export class Rutina {
     return result;
   }
 
-  // Remover ejercicio de rutina
-  static async removeEjercicio(idRutina, idEjercicio) {
+  // Remover ejercicio de rutina por ID único
+  static async removeEjercicio(rutinaEjercicioId) {
     const [result] = await pool.query(
-      'DELETE FROM rutina_ejercicio WHERE idRutina = ? AND idEjercicio = ?',
-      [idRutina, idEjercicio]
+      'DELETE FROM rutina_ejercicio WHERE id = ?',
+      [rutinaEjercicioId]
     );
     return result;
   }

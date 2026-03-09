@@ -64,7 +64,8 @@ const transformEjercicioToExercise = (ejercicio) => {
   return {
     id: ejercicio.idEjercicio,
     name: ejercicio.nombre,
-    defaultType: ejercicio.tipoContador || 'reps'
+    defaultType: ejercicio.unidad || ejercicio.tipoContador || 'reps',
+    unidad: ejercicio.unidad || ejercicio.tipoContador || 'reps'
   }
 }
 
@@ -81,7 +82,8 @@ const transformRutinaToRoutine = (rutina, ejercicios = []) => {
         name: ej.nombre,
         sets: ej.cantSets || 3,
         value: ej.cantidad || 10,
-        type: ej.tipoContador || 'reps'
+        type: ej.unidad || ej.tipoContador || 'reps',
+        unidad: ej.unidad || ej.tipoContador || 'reps'
       }
     })
   }
@@ -236,7 +238,8 @@ export const AppProvider = ({ children }) => {
                       name: ej.nombre,
                       sets: ej.cantSets || 3,
                       value: ej.cantidad || 10,
-                      type: ej.tipoContador || 'reps'
+                      type: ej.unidad || ej.tipoContador || 'reps',
+                      unidad: ej.unidad || ej.tipoContador || 'reps'
                     }))
                   }
                 } catch (error) {
@@ -358,7 +361,8 @@ export const AppProvider = ({ children }) => {
                       name: ej.nombre,
                       sets: ej.cantSets || 3,
                       value: ej.cantidad || 10,
-                      type: ej.tipoContador || 'reps'
+                      type: ej.unidad || ej.tipoContador || 'reps',
+                      unidad: ej.unidad || ej.tipoContador || 'reps'
                     }))
                   }
                 } catch (error) {
@@ -433,7 +437,8 @@ export const AppProvider = ({ children }) => {
                 name: ej.nombre,
                 sets: ej.cantSets || 3,
                 value: ej.cantidad || 10,
-                type: ej.tipoContador || 'reps'
+                type: ej.unidad || ej.tipoContador || 'reps',
+                unidad: ej.unidad || ej.tipoContador || 'reps'
               }))
             }
           } catch (error) {
