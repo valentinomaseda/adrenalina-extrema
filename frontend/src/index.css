@@ -27,6 +27,10 @@ body {
   letter-spacing: 0.01em;
 }
 
+button {
+  cursor: pointer;
+}
+
 button:active {
   @apply scale-95 transition-transform;
 }
