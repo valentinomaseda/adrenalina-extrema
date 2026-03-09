@@ -47,8 +47,10 @@ export class Rutina {
   // Obtener ejercicios de una rutina
   static async getEjercicios(idRutina) {
     const [rows] = await pool.query(
-      `SELECT e.idEjercicio, e.nombre, e.tipoContador, 
-              re.cantSets, re.cantidad, re.orden
+      `SELECT e.idEjercicio, e.nombre, e.tipoContador, e.unidad,
+              e.distancia, e.duracion, e.descripcionIntervalo,
+              re.cantSets, re.cantidad, re.orden,
+              re.pausaSeries, re.intensidad, re.esCalentamiento
        FROM ejercicio e
        INNER JOIN rutina_ejercicio re ON e.idEjercicio = re.idEjercicio
        WHERE re.idRutina = ?
@@ -60,10 +62,30 @@ export class Rutina {
 
   // Agregar ejercicio a rutina
   static async addEjercicio(idRutina, ejercicioData) {
-    const { idEjercicio, cantSets, cantidad, orden } = ejercicioData;
+    const { 
+      idEjercicio, 
+      cantSets, 
+      cantidad, 
+      orden,
+      pausaSeries,
+      intensidad,
+      esCalentamiento
+    } = ejercicioData;
+    
     const [result] = await pool.query(
-      'INSERT INTO rutina_ejercicio (idRutina, idEjercicio, cantSets, cantidad, orden) VALUES (?, ?, ?, ?, ?)',
-      [idRutina, idEjercicio, cantSets || 3, cantidad || 10, orden || null]
+      `INSERT INTO rutina_ejercicio 
+       (idRutina, idEjercicio, cantSets, cantidad, orden, pausaSeries, intensidad, esCalentamiento) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        idRutina, 
+        idEjercicio, 
+        cantSets || 3, 
+        cantidad || 10, 
+        orden || null,
+        pausaSeries || null,
+        intensidad || null,
+        esCalentamiento || false
+      ]
     );
     return result;
   }
@@ -94,8 +116,10 @@ export class Rutina {
       // 2. Copiar ejercicios de la plantilla con valores default
       await connection.query(
         `INSERT INTO alumno_rutina_ejercicio 
-         (idPersona, idRutina, idEjercicio, cantSets, cantidad, orden)
-         SELECT ?, re.idRutina, re.idEjercicio, re.cantSets, re.cantidad, re.orden
+         (idPersona, idRutina, idEjercicio, cantSets, cantidad, orden, 
+          pausaSeries, intensidad, esCalentamiento)
+         SELECT ?, re.idRutina, re.idEjercicio, re.cantSets, re.cantidad, re.orden,
+                re.pausaSeries, re.intensidad, re.esCalentamiento
          FROM rutina_ejercicio re
          WHERE re.idRutina = ?`,
         [idPersona, idRutina]
@@ -203,8 +227,10 @@ export class Rutina {
   // Obtener ejercicios personalizados del alumno
   static async getAlumnoEjercicios(idRutina, idPersona) {
     const [rows] = await pool.query(
-      `SELECT e.idEjercicio, e.nombre, e.tipoContador,
-              are.cantSets, are.cantidad, are.especificaciones, are.orden
+      `SELECT e.idEjercicio, e.nombre, e.tipoContador, e.unidad,
+              e.distancia, e.duracion, e.descripcionIntervalo,
+              are.cantSets, are.cantidad, are.especificaciones, are.orden,
+              are.pausaSeries, are.intensidad, are.esCalentamiento
        FROM ejercicio e
        INNER JOIN alumno_rutina_ejercicio are ON e.idEjercicio = are.idEjercicio
        WHERE are.idRutina = ? AND are.idPersona = ?
@@ -231,6 +257,18 @@ export class Rutina {
       fields.push('especificaciones = ?');
       values.push(updates.especificaciones);
     }
+    if (updates.pausaSeries !== undefined) {
+      fields.push('pausaSeries = ?');
+      values.push(updates.pausaSeries);
+    }
+    if (updates.intensidad !== undefined) {
+      fields.push('intensidad = ?');
+      values.push(updates.intensidad);
+    }
+    if (updates.esCalentamiento !== undefined) {
+      fields.push('esCalentamiento = ?');
+      values.push(updates.esCalentamiento);
+    }
     if (updates.orden !== undefined) {
       fields.push('orden = ?');
       values.push(updates.orden);
@@ -253,12 +291,34 @@ export class Rutina {
 
   // Agregar ejercicio personalizado a rutina de alumno
   static async addAlumnoEjercicio(idPersona, idRutina, ejercicioData) {
-    const { idEjercicio, cantSets, cantidad, especificaciones, orden } = ejercicioData;
+    const { 
+      idEjercicio, 
+      cantSets, 
+      cantidad, 
+      especificaciones, 
+      orden,
+      pausaSeries,
+      intensidad,
+      esCalentamiento
+    } = ejercicioData;
+    
     const [result] = await pool.query(
       `INSERT INTO alumno_rutina_ejercicio 
-       (idPersona, idRutina, idEjercicio, cantSets, cantidad, especificaciones, orden) 
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [idPersona, idRutina, idEjercicio, cantSets || 3, cantidad || 10, especificaciones || null, orden || null]
+       (idPersona, idRutina, idEjercicio, cantSets, cantidad, especificaciones, orden, 
+        pausaSeries, intensidad, esCalentamiento) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        idPersona, 
+        idRutina, 
+        idEjercicio, 
+        cantSets || 3, 
+        cantidad || 10, 
+        especificaciones || null, 
+        orden || null,
+        pausaSeries || null,
+        intensidad || null,
+        esCalentamiento || false
+      ]
     );
     return result;
   }

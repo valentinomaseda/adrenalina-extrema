@@ -8,7 +8,10 @@ export default function AddExercise() {
   
   const [formData, setFormData] = useState({
     name: '',
-    tipoContador: 'reps'
+    unidad: 'reps',
+    distancia: '',
+    duracion: '',
+    descripcionIntervalo: ''
   })
 
   const handleChange = (e) => {
@@ -72,37 +75,89 @@ export default function AddExercise() {
               />
             </div>
 
-            {/* Tipo de Contador */}
+            {/* Unidad de Medida */}
             <div>
-              <label className="block text-sm font-semibold text-[#F3F4F6] mb-2">
-                ¿Cómo se mide este ejercicio? *
+              <label htmlFor="unidad" className="block text-sm font-semibold text-[#F3F4F6] mb-2">
+                Unidad de Medida *
               </label>
-              <div className="flex gap-4">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="tipoContador"
-                    value="reps"
-                    checked={formData.tipoContador === 'reps'}
-                    onChange={handleChange}
-                    className="w-5 h-5 text-[#00BFFF] focus:ring-[#00BFFF]"
-                  />
-                  <span className="text-[#F3F4F6] text-lg">Repeticiones</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="tipoContador"
-                    value="segundos"
-                    checked={formData.tipoContador === 'segundos'}
-                    onChange={handleChange}
-                    className="w-5 h-5 text-[#00BFFF] focus:ring-[#00BFFF]"
-                  />
-                  <span className="text-[#F3F4F6] text-lg">Tiempo (segundos)</span>
-                </label>
-              </div>
+              <select
+                id="unidad"
+                name="unidad"
+                value={formData.unidad}
+                onChange={handleChange}
+                required
+                className="text-[#F3F4F6] bg-[#0f1729] w-full px-4 py-3 border-2 border-[#1E40AF] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg"
+              >
+                <option value="reps">Repeticiones</option>
+                <option value="segundos">Segundos</option>
+                <option value="minutos">Minutos</option>
+                <option value="horas">Horas</option>
+                <option value="km">Kilómetros</option>
+                <option value="metros">Metros</option>
+              </select>
               <p className="text-sm text-[#9CA3AF] mt-2">
-                Las cantidades específicas (sets, reps/segundos) se asignarán al agregar el ejercicio a una rutina.
+                Selecciona la unidad principal para este ejercicio. Las cantidades específicas se asignarán al agregar el ejercicio a una rutina.
+              </p>
+            </div>
+
+            {/* Distancia (para km o metros) */}
+            {(formData.unidad === 'km' || formData.unidad === 'metros') && (
+              <div>
+                <label htmlFor="distancia" className="block text-sm font-semibold text-[#F3F4F6] mb-2">
+                  Distancia Predeterminada
+                </label>
+                <input
+                  id="distancia"
+                  name="distancia"
+                  type="text"
+                  value={formData.distancia}
+                  onChange={handleChange}
+                  className="text-[#F3F4F6] bg-[#0f1729] w-full px-4 py-3 border-2 border-[#1E40AF] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg"
+                  placeholder={`Ej: 5 ${formData.unidad}, 10 ${formData.unidad}...`}
+                />
+                <p className="text-sm text-[#9CA3AF] mt-2">
+                  Opcional: Define una distancia por defecto para este ejercicio
+                </p>
+              </div>
+            )}
+
+            {/* Duración (para tiempo) */}
+            {(formData.unidad === 'segundos' || formData.unidad === 'minutos' || formData.unidad === 'horas') && (
+              <div>
+                <label htmlFor="duracion" className="block text-sm font-semibold text-[#F3F4F6] mb-2">
+                  Duración Predeterminada
+                </label>
+                <input
+                  id="duracion"
+                  name="duracion"
+                  type="text"
+                  value={formData.duracion}
+                  onChange={handleChange}
+                  className="text-[#F3F4F6] bg-[#0f1729] w-full px-4 py-3 border-2 border-[#1E40AF] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg"
+                  placeholder={`Ej: 30 ${formData.unidad}, 5 ${formData.unidad}...`}
+                />
+                <p className="text-sm text-[#9CA3AF] mt-2">
+                  Opcional: Define una duración por defecto para este ejercicio
+                </p>
+              </div>
+            )}
+
+            {/* Descripción de Intervalo */}
+            <div>
+              <label htmlFor="descripcionIntervalo" className="block text-sm font-semibold text-[#F3F4F6] mb-2">
+                Descripción de Intervalos
+              </label>
+              <textarea
+                id="descripcionIntervalo"
+                name="descripcionIntervalo"
+                value={formData.descripcionIntervalo}
+                onChange={handleChange}
+                rows="3"
+                className="text-[#F3F4F6] bg-[#0f1729] w-full px-4 py-3 border-2 border-[#1E40AF] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg"
+                placeholder="Ej: 3' suaves x 3' fuertes, rápidos km 4, 8 y 12..."
+              />
+              <p className="text-sm text-[#9CA3AF] mt-2">
+                Opcional: Especifica intervalos, ritmos o detalles adicionales del ejercicio
               </p>
             </div>
 
@@ -114,10 +169,30 @@ export default function AddExercise() {
                   {formData.name || 'Nombre del Ejercicio'}
                 </p>
                 <p className="text-lg text-gray-300">
-                  Se mide en: <span className="font-semibold text-[#00BFFF]">
-                    {formData.tipoContador === 'reps' ? 'Repeticiones' : 'Segundos'}
+                  Unidad: <span className="font-semibold text-[#00BFFF]">
+                    {formData.unidad === 'reps' ? 'Repeticiones' : 
+                     formData.unidad === 'segundos' ? 'Segundos' :
+                     formData.unidad === 'minutos' ? 'Minutos' :
+                     formData.unidad === 'horas' ? 'Horas' :
+                     formData.unidad === 'km' ? 'Kilómetros' :
+                     'Metros'}
                   </span>
                 </p>
+                {formData.distancia && (
+                  <p className="text-base text-gray-300">
+                    Distancia: <span className="font-semibold text-[#00BFFF]">{formData.distancia}</span>
+                  </p>
+                )}
+                {formData.duracion && (
+                  <p className="text-base text-gray-300">
+                    Duración: <span className="font-semibold text-[#00BFFF]">{formData.duracion}</span>
+                  </p>
+                )}
+                {formData.descripcionIntervalo && (
+                  <p className="text-base text-gray-300">
+                    Intervalos: <span className="font-semibold text-[#00BFFF]">{formData.descripcionIntervalo}</span>
+                  </p>
+                )}
               </div>
             </div>
 

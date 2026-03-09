@@ -209,28 +209,71 @@ export default function StudentRoutines() {
                           key={idx}
                           className="bg-[#111827] rounded-lg p-4 border-2 border-[#1E40AF]"
                         >
-                          <div className="flex items-center justify-between">
-                            <div className="flex-1">
-                              <h5 className="font-bold text-[#F3F4F6] mb-1">
-                                {idx + 1}. {exercise.name}
-                              </h5>
-                              <div className="flex flex-wrap gap-2 text-sm mb-2">
-                                <span className="px-2 py-1 bg-[#1E40AF] text-[#00BFFF] rounded font-semibold">
-                                  {exercise.sets} {exercise.sets === 1 ? 'serie' : 'series'}
+                          {/* Header del ejercicio con indicador de calentamiento */}
+                          <div className="flex items-start justify-between mb-2">
+                            <h5 className="font-bold text-[#F3F4F6] flex items-center gap-2">
+                              {idx + 1}. {exercise.name}
+                              {exercise.esCalentamiento === 1 && (
+                                <span className="text-xs px-2 py-1 bg-orange-600 text-white rounded-full">
+                                  🔥 Calentamiento
                                 </span>
-                                <span className="px-2 py-1 bg-[#1E40AF] text-[#00BFFF] rounded font-semibold">
-                                  {exercise.value} {exercise.type === 'reps' ? 'repeticiones' : 'segundos'}
-                                </span>
-                              </div>
-                              {/* Mostrar especificaciones si existen */}
-                              {exercise.especificaciones && (
-                                <div className="mt-2 p-2 bg-[#1E40AF]/30 rounded border border-[#00BFFF]/20">
-                                  <p className="text-sm text-[#00BFFF] font-semibold mb-1">📝 Especificaciones:</p>
-                                  <p className="text-sm text-gray-300">{exercise.especificaciones}</p>
-                                </div>
                               )}
-                            </div>
+                            </h5>
                           </div>
+
+                          {/* Información principal: Sets y Cantidad */}
+                          <div className="flex flex-wrap gap-2 text-sm mb-3">
+                            <span className="px-2 py-1 bg-[#1E40AF] text-[#00BFFF] rounded font-semibold">
+                              {exercise.sets} {exercise.sets === 1 ? 'serie' : 'series'}
+                            </span>
+                            <span className="px-2 py-1 bg-[#1E40AF] text-[#00BFFF] rounded font-semibold">
+                              {exercise.value} {
+                                exercise.unidad === 'reps' ? 'repeticiones' :
+                                exercise.unidad === 'segundos' ? 'segundos' :
+                                exercise.unidad === 'minutos' ? 'minutos' :
+                                exercise.unidad === 'horas' ? 'horas' :
+                                exercise.unidad === 'km' ? 'km' :
+                                exercise.unidad === 'metros' ? 'metros' :
+                                exercise.type === 'reps' ? 'repeticiones' : 'segundos'
+                              }
+                            </span>
+                            {exercise.pausaSeries && (
+                              <span className="px-2 py-1 bg-purple-600 text-white rounded font-semibold">
+                                ⏸️ Pausa: {exercise.pausaSeries}
+                              </span>
+                            )}
+                            {exercise.intensidad && (
+                              <span className="px-2 py-1 bg-red-600 text-white rounded font-semibold">
+                                ⚡ {exercise.intensidad}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Información del ejercicio base */}
+                          {(exercise.distancia || exercise.duracion || exercise.descripcionIntervalo) && (
+                            <div className="mb-3 p-2 bg-[#1E40AF]/20 rounded border border-[#00BFFF]/20">
+                              <p className="text-xs text-gray-400 font-semibold mb-1">📋 Info del ejercicio:</p>
+                              <div className="text-sm text-gray-300 space-y-1">
+                                {exercise.distancia && (
+                                  <div>📏 Distancia: <span className="text-[#00BFFF] font-semibold">{exercise.distancia}</span></div>
+                                )}
+                                {exercise.duracion && (
+                                  <div>⏱️ Duración: <span className="text-[#00BFFF] font-semibold">{exercise.duracion}</span></div>
+                                )}
+                                {exercise.descripcionIntervalo && (
+                                  <div className="italic text-[#00BFFF]">💭 "{exercise.descripcionIntervalo}"</div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Especificaciones personalizadas */}
+                          {exercise.especificaciones && (
+                            <div className="mt-2 p-2 bg-[#1E40AF]/30 rounded border border-[#00BFFF]/20">
+                              <p className="text-sm text-[#00BFFF] font-semibold mb-1">📝 Especificaciones personalizadas:</p>
+                              <p className="text-sm text-gray-300">{exercise.especificaciones}</p>
+                            </div>
+                          )}
                         </div>
                       ))
                     ) : (

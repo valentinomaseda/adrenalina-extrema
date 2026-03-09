@@ -499,7 +499,10 @@ export const AppProvider = ({ children }) => {
       const ejercicioData = {
         idEjercicio: newId,
         nombre: exerciseData.name,
-        tipoContador: exerciseData.tipoContador || 'reps'
+        unidad: exerciseData.unidad || 'reps',
+        distancia: exerciseData.distancia || null,
+        duracion: exerciseData.duracion || null,
+        descripcionIntervalo: exerciseData.descripcionIntervalo || null
       }
 
       await ejerciciosAPI.create(ejercicioData)
@@ -746,7 +749,14 @@ export const AppProvider = ({ children }) => {
                 sets: ej.cantSets || 3,
                 value: ej.cantidad || 10,
                 type: ej.tipoContador || 'reps',
-                especificaciones: ej.especificaciones || null  // NUEVO: agregar especificaciones
+                unidad: ej.unidad || ej.tipoContador || 'reps',
+                distancia: ej.distancia || null,
+                duracion: ej.duracion || null,
+                descripcionIntervalo: ej.descripcionIntervalo || null,
+                pausaSeries: ej.pausaSeries || null,
+                intensidad: ej.intensidad || null,
+                esCalentamiento: ej.esCalentamiento || 0,
+                especificaciones: ej.especificaciones || null
               }))
             }
           } catch (error) {

@@ -20,11 +20,17 @@ export default function PersonalizeRoutine({ routine, student, onClose, onSave, 
       setExercises(ejercicios.map(ej => ({
         idEjercicio: ej.idEjercicio,
         nombre: ej.nombre,
-        tipoContador: ej.tipoContador,
+        unidad: ej.unidad,
+        distancia: ej.distancia,
+        duracion: ej.duracion,
+        descripcionIntervalo: ej.descripcionIntervalo,
         cantSets: ej.cantSets,
         cantidad: ej.cantidad,
         orden: ej.orden,
-        especificaciones: ''
+        especificaciones: '',
+        pausaSeries: ej.pausaSeries || '',
+        intensidad: ej.intensidad || '',
+        esCalentamiento: ej.esCalentamiento || 0
       })))
     } catch (error) {
       console.error('Error loading exercises:', error)
@@ -58,7 +64,10 @@ export default function PersonalizeRoutine({ routine, student, onClose, onSave, 
           {
             cantSets: parseInt(exercise.cantSets),
             cantidad: parseInt(exercise.cantidad),
-            especificaciones: exercise.especificaciones || null
+            especificaciones: exercise.especificaciones || null,
+            pausaSeries: exercise.pausaSeries || null,
+            intensidad: exercise.intensidad || null,
+            esCalentamiento: exercise.esCalentamiento ? 1 : 0
           }
         )
       )
@@ -119,12 +128,37 @@ export default function PersonalizeRoutine({ routine, student, onClose, onSave, 
                   key={exercise.idEjercicio}
                   className="bg-[#0f1629] rounded-xl p-4 border border-[#00BFFF]/20 hover:border-[#00BFFF]/40 transition-all"
                 >
-                  <h4 className="text-lg font-semibold text-[#F3F4F6] mb-3 flex items-center gap-2">
-                    <span className="text-[#00BFFF]">{index + 1}.</span>
-                    {exercise.nombre}
-                  </h4>
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h4 className="text-lg font-semibold text-[#F3F4F6] flex items-center gap-2">
+                        <span className="text-[#00BFFF]">{index + 1}.</span>
+                        {exercise.nombre}
+                      </h4>
+                      {/* Mostrar info del ejercicio base */}
+                      <div className="mt-1 text-sm text-gray-400 space-y-1">
+                        <div>Unidad: {exercise.unidad}</div>
+                        {exercise.distancia && <div>Distancia: {exercise.distancia}</div>}
+                        {exercise.duracion && <div>Duración: {exercise.duracion}</div>}
+                        {exercise.descripcionIntervalo && (
+                          <div className="text-[#00BFFF] italic">"{exercise.descripcionIntervalo}"</div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Checkbox Calentamiento */}
+                    <label className="flex items-center gap-2 cursor-pointer bg-[#1a1f3a] px-3 py-2 rounded-lg">
+                      <input
+                        type="checkbox"
+                        checked={exercise.esCalentamiento === 1}
+                        onChange={(e) => handleExerciseChange(index, 'esCalentamiento', e.target.checked ? 1 : 0)}
+                        className="w-4 h-4 text-[#00BFFF] focus:ring-[#00BFFF] rounded"
+                        disabled={saving}
+                      />
+                      <span className="text-sm text-gray-300">Calentamiento</span>
+                    </label>
+                  </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                     {/* Sets */}
                     <div>
                       <label className="block text-sm text-gray-400 mb-1">
@@ -143,7 +177,7 @@ export default function PersonalizeRoutine({ routine, student, onClose, onSave, 
                     {/* Cantidad */}
                     <div>
                       <label className="block text-sm text-gray-400 mb-1">
-                        Cantidad ({exercise.tipoContador === 'reps' ? 'reps' : 'segundos'})
+                        Cantidad ({exercise.unidad})
                       </label>
                       <input
                         type="number"
@@ -154,20 +188,50 @@ export default function PersonalizeRoutine({ routine, student, onClose, onSave, 
                         disabled={saving}
                       />
                     </div>
+                  </div>
 
-                    {/* Especificaciones (placeholder para desktop) */}
-                    <div className="hidden md:block"></div>
+                  {/* Campos de Running */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                    {/* Pausa entre series */}
+                    <div>
+                      <label className="block text-sm text-gray-400 mb-1">
+                        Pausa entre series
+                      </label>
+                      <input
+                        type="text"
+                        value={exercise.pausaSeries}
+                        onChange={(e) => handleExerciseChange(index, 'pausaSeries', e.target.value)}
+                        placeholder="Ej: 2', 90'', 1 min"
+                        className="w-full px-3 py-2 bg-[#1a1f3a] border border-gray-600 rounded-lg text-[#F3F4F6] focus:outline-none focus:border-[#00BFFF] transition-colors"
+                        disabled={saving}
+                      />
+                    </div>
+
+                    {/* Intensidad */}
+                    <div>
+                      <label className="block text-sm text-gray-400 mb-1">
+                        Intensidad
+                      </label>
+                      <input
+                        type="text"
+                        value={exercise.intensidad}
+                        onChange={(e) => handleExerciseChange(index, 'intensidad', e.target.value)}
+                        placeholder="Ej: suave, fuerte, moderado"
+                        className="w-full px-3 py-2 bg-[#1a1f3a] border border-gray-600 rounded-lg text-[#F3F4F6] focus:outline-none focus:border-[#00BFFF] transition-colors"
+                        disabled={saving}
+                      />
+                    </div>
                   </div>
 
                   {/* Especificaciones */}
                   <div>
                     <label className="block text-sm text-gray-400 mb-1">
-                      Especificaciones (opcional)
+                      Especificaciones adicionales (opcional)
                     </label>
                     <textarea
                       value={exercise.especificaciones}
                       onChange={(e) => handleExerciseChange(index, 'especificaciones', e.target.value)}
-                      placeholder="Ej: Rápidos el 3, 6 y 12"
+                      placeholder="Ej: Rápidos el 3, 6 y 12, Hacer en colina, etc."
                       rows="2"
                       className="w-full px-3 py-2 bg-[#1a1f3a] border border-gray-600 rounded-lg text-[#F3F4F6] focus:outline-none focus:border-[#00BFFF] transition-colors resize-none"
                       disabled={saving}
