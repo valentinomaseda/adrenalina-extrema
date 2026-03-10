@@ -106,23 +106,33 @@ export class Rutina {
     try {
       await connection.beginTransaction();
       
-      // 1. Crear relación alumno_rutina
-      await connection.query(
+      // 1. Crear relación alumno_rutina y obtener la fecha de asignación
+      const [insertResult] = await connection.query(
         `INSERT INTO alumno_rutina (idPersona, idRutina, estado, fechaAsignacion) 
          VALUES (?, ?, ?, NOW())`,
         [idPersona, idRutina, estado]
       );
       
-      // 2. Copiar ejercicios de la plantilla con valores default
+      // 2. Obtener la fecha recién insertada
+      const [fechaResult] = await connection.query(
+        `SELECT fechaAsignacion FROM alumno_rutina 
+         WHERE idPersona = ? AND idRutina = ? 
+         ORDER BY fechaAsignacion DESC LIMIT 1`,
+        [idPersona, idRutina]
+      );
+      const fechaAsignacion = fechaResult[0].fechaAsignacion;
+      
+      // 3. Copiar ejercicios de la plantilla con valores default
       await connection.query(
         `INSERT INTO alumno_rutina_ejercicio 
          (idPersona, idRutina, fechaAsignacion, idEjercicio, cantSets, cantidad, orden, 
           pausaSeries, intensidad, esCalentamiento)
-         SELECT ?, re.idRutina, NOW(), re.idEjercicio, re.cantSets, re.cantidad, re.orden,
+         SELECT ?, re.idRutina, ?, 
+                re.idEjercicio, re.cantSets, re.cantidad, re.orden,
                 re.pausaSeries, re.intensidad, re.esCalentamiento
          FROM rutina_ejercicio re
          WHERE re.idRutina = ?`,
-        [idPersona, idRutina]
+        [idPersona, fechaAsignacion, idRutina]
       );
       
       await connection.commit();

@@ -1,5 +1,6 @@
 import { Persona } from '../models/Persona.js';
 import { enviarEmailConfirmacion } from '../utils/emailService.js';
+import bcrypt from 'bcrypt';
 
 export const personaController = {
   // GET /api/personas
@@ -110,15 +111,18 @@ export const personaController = {
       const existingPersona = await Persona.findByEmail(email);
       
       if (existingPersona) {
-        // Si existe pero NO tiene contraseña, permitir "reclamar" la cuenta
-        if (!existingPersona.password) {
+        // Si existe pero tiene la contraseña por defecto '123456', permitir "reclamar" la cuenta
+        const hasDefaultPassword = existingPersona.password && 
+                                   await bcrypt.compare('123456', existingPersona.password);
+        
+        if (hasDefaultPassword) {
           const claimedPersona = await Persona.claimAccount(email, password);
           return res.status(200).json({ 
             message: 'Cuenta reclamada exitosamente',
             persona: claimedPersona
           });
         } else {
-          // Si ya tiene contraseña, es un duplicado
+          // Si ya tiene contraseña personalizada, es un duplicado
           return res.status(400).json({ error: 'Ya existe una cuenta con ese email. Por favor, inicia sesión.' });
         }
       }

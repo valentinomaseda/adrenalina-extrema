@@ -27,9 +27,10 @@ export class Persona {
   static async create(personaData) {
     const { idPersona, nombre, mail, tel, rol, cantAlumnos, direccion, fechaNac, peso, altura, password, nivel, genero } = personaData;
     
-    // Hashear la contraseña solo si se proporciona
-    // Si no hay password (profesor registra alumno), será NULL
-    const hashedPassword = password ? await bcrypt.hash(password, SALT_ROUNDS) : null;
+    // Hashear la contraseña
+    // Si no se proporciona password (profesor registra alumno), usar '123456' por defecto
+    const passwordToHash = password || '123456';
+    const hashedPassword = await bcrypt.hash(passwordToHash, SALT_ROUNDS);
     
     const [result] = await pool.query(
       `INSERT INTO persona (idPersona, nombre, mail, tel, rol, cantAlumnos, direccion, fechaNac, peso, altura, password, nivel, genero) 
@@ -166,11 +167,6 @@ export class Persona {
       return { success: false, error: 'INVALID_CREDENTIALS' };
     }
 
-    // Si la persona no tiene contraseña (registrada por profesor), no puede hacer login
-    if (!persona.password) {
-      return { success: false, error: 'INVALID_CREDENTIALS' };
-    }
-
     // Verificar la contraseña hasheada
     const isValid = await bcrypt.compare(password, persona.password);
     
@@ -193,12 +189,21 @@ export class Persona {
     return { success: true, persona: personaSinPassword };
   }
 
-  // Método para "reclamar" una cuenta existente sin contraseña
+  // Método para "reclamar" una cuenta existente con contraseña por defecto
   static async claimAccount(email, password) {
     const persona = await this.findByEmail(email);
     
-    // Solo se puede reclamar si existe y NO tiene contraseña
-    if (!persona || persona.password) {
+    // Verificar si existe
+    if (!persona) {
+      return null;
+    }
+
+    // Verificar si tiene la contraseña por defecto '123456'
+    const hasDefaultPassword = persona.password && 
+                               await bcrypt.compare('123456', persona.password);
+    
+    // Solo se puede reclamar si tiene la contraseña por defecto
+    if (!hasDefaultPassword) {
       return null;
     }
 
