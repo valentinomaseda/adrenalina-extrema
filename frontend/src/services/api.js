@@ -1,5 +1,8 @@
 // API Service para conectar con el backend
-const API_BASE_URL = 'http://localhost:3000/api'
+// Si existe la variable de entorno, la usa. Si no, usa el localhost por defecto.
+const API_BASE_URL = import.meta.env.VITE_API_URL 
+  ? `${import.meta.env.VITE_API_URL}/api` 
+  : 'http://localhost:3000/api';
 
 // Helper para hacer peticiones HTTP
 const fetchAPI = async (endpoint, options = {}) => {

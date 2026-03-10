@@ -114,8 +114,8 @@ export const rutinaController = {
   // POST /api/rutinas/:id/desasignar
   async removeFromAlumno(req, res) {
     try {
-      const { idPersona, fechaAsignacion } = req.body;
-      await Rutina.removeFromAlumno(req.params.id, idPersona, fechaAsignacion);
+      const { idPersona } = req.body;
+      await Rutina.removeFromAlumno(req.params.id, idPersona);
       res.json({ message: 'Rutina desasignada del alumno' });
     } catch (error) {
       console.error('Error al desasignar rutina:', error);
@@ -126,8 +126,8 @@ export const rutinaController = {
   // PUT /api/rutinas/:id/estado
   async updateEstado(req, res) {
     try {
-      const { idPersona, estado, fechaAsignacion } = req.body;
-      await Rutina.updateEstadoAsignacion(req.params.id, idPersona, estado, fechaAsignacion);
+      const { idPersona, estado } = req.body;
+      await Rutina.updateEstadoAsignacion(req.params.id, idPersona, estado);
       res.json({ message: 'Estado de rutina actualizado' });
     } catch (error) {
       console.error('Error al actualizar estado:', error);

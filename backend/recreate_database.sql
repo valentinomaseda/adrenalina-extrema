@@ -151,7 +151,7 @@ CREATE TABLE `alumno_rutina` (
   `idRutina` INT UNSIGNED NOT NULL,
   `estado` VARCHAR(45) DEFAULT 'activa',
   `fechaAsignacion` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`idPersona`, `idRutina`, `fechaAsignacion`),
+  PRIMARY KEY (`idPersona`, `idRutina`),
   KEY `fk_alumno_rutina_rutina` (`idRutina`),
   CONSTRAINT `fk_alumno_rutina_alumno` 
     FOREIGN KEY (`idPersona`) 
