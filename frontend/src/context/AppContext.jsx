@@ -425,8 +425,12 @@ export const AppProvider = ({ children }) => {
       studentData.routineHistory = await Promise.all(
         rutinasAsignadas.map(async (ra) => {
           try {
-            // Cargar ejercicios de esta rutina
-            const ejercicios = await rutinasAPI.getEjercicios(ra.idRutina)
+            // Cargar ejercicios personalizados de esta rutina para este alumno
+            const ejercicios = await rutinasAPI.getAlumnoEjercicios(
+              ra.idRutina, 
+              idPersona, 
+              ra.fechaAsignacion
+            )
             
             return {
               id: ra.idRutina,
@@ -442,7 +446,14 @@ export const AppProvider = ({ children }) => {
                 sets: ej.cantSets || 3,
                 value: ej.cantidad || 10,
                 type: ej.unidad || ej.tipoContador || 'reps',
-                unidad: ej.unidad || ej.tipoContador || 'reps'
+                unidad: ej.unidad || ej.tipoContador || 'reps',
+                // Campos adicionales para personalizaciones
+                distancia: ej.distancia,
+                duracion: ej.duracion,
+                descripcionIntervalo: ej.descripcionIntervalo,
+                pausaSeries: ej.pausaSeries,
+                intensidad: ej.intensidad,
+                esCalentamiento: ej.esCalentamiento
               }))
             }
           } catch (error) {
