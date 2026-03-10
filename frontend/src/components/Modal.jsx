@@ -31,9 +31,9 @@ export default function Modal({ isOpen, onClose, title, message, type = 'info', 
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 animate-fade-in">
-      <div className="bg-gradient-to-br from-[#1a2942] to-[#0f1729] rounded-xl shadow-2xl max-w-md w-full animate-scale-in border border-[#1E40AF]">
+      <div className="bg-gradient-to-br from-[#1a2942] to-[#0f1729] rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] flex flex-col animate-scale-in border border-[#1E40AF]">
         {/* Header */}
-        <div className={`${getHeaderColor()} text-white p-4 flex items-center justify-between rounded-t-xl`}>
+        <div className={`${getHeaderColor()} text-white p-4 flex items-center justify-between rounded-t-xl flex-shrink-0`}>
           <h3 className="text-lg font-bold">{title || 'Notificación'}</h3>
           <button
             onClick={onClose}
@@ -44,13 +44,13 @@ export default function Modal({ isOpen, onClose, title, message, type = 'info', 
         </div>
 
         {/* Body */}
-        <div className="p-6 text-center">
+        <div className="flex-1 overflow-y-auto p-6 text-center">
           {getIcon()}
           <p className="text-[#F3F4F6] text-base leading-relaxed whitespace-pre-line">{message}</p>
         </div>
 
         {/* Footer con botones */}
-        <div className="p-4 flex gap-3 justify-center border-t border-[#1E40AF]">
+        <div className="flex-shrink-0 p-4 flex gap-3 justify-center border-t border-[#1E40AF]">
           {buttons && buttons.length > 0 ? (
             buttons.map((button, index) => (
               <button

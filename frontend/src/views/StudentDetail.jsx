@@ -336,9 +336,9 @@ export default function StudentDetail() {
 
       {/* Modal de información del alumno */}
       {showInfoModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 p-4 pt-8 overflow-y-auto animate-fade-in">
-          <div className="bg-gradient-to-br from-[#1a2942] to-[#0f1729] rounded-xl shadow-2xl max-w-md w-full my-8 animate-scale-in border border-[#00BFFF]">
-            <div className="sticky top-0 bg-[#1E40AF] text-white p-6 flex items-center justify-between rounded-t-xl">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 animate-fade-in">
+          <div className="bg-gradient-to-br from-[#1a2942] to-[#0f1729] rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] flex flex-col animate-scale-in border border-[#00BFFF]">
+            <div className="flex-shrink-0 bg-[#1E40AF] text-white p-6 flex items-center justify-between rounded-t-xl">
               <h3 className="text-xl font-bold">Información del Alumno</h3>
               <button
                 onClick={() => setShowInfoModal(false)}
@@ -348,7 +348,7 @@ export default function StudentDetail() {
               </button>
             </div>
             
-            <div className="p-6 space-y-4">
+            <div className="flex-1 overflow-y-auto p-6 space-y-4">
               <div className="flex items-center space-x-4 pb-4 border-b border-[#1E40AF]">
                 <img
                   src={selectedStudent.photo}
@@ -835,9 +835,9 @@ export default function StudentDetail() {
 
       {/* Modal de edición de alumno */}
       {showEditModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 p-4 pt-8 animate-fade-in overflow-y-auto">
-          <div className="bg-gradient-to-br from-[#1a2942] to-[#0f1729] rounded-xl shadow-2xl max-w-md w-full my-8 animate-scale-in border border-[#00BFFF]">
-            <div className="sticky top-0 bg-[#1E40AF] text-white p-6 flex items-center justify-between rounded-t-xl">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 animate-fade-in">
+          <div className="bg-gradient-to-br from-[#1a2942] to-[#0f1729] rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] flex flex-col animate-scale-in border border-[#00BFFF]">
+            <div className="flex-shrink-0 bg-[#1E40AF] text-white p-6 flex items-center justify-between rounded-t-xl">
               <h3 className="text-xl font-bold">Editar Alumno</h3>
               <button
                 onClick={() => setShowEditModal(false)}
@@ -847,131 +847,133 @@ export default function StudentDetail() {
               </button>
             </div>
             
-            <form onSubmit={handleEditStudent} className="p-6 space-y-4">
-              <div>
-                <label className="block text-[#00BFFF] font-semibold mb-2">Nombre</label>
-                <input
-                  type="text"
-                  value={editFormData.nombre || ''}
-                  onChange={(e) => setEditFormData({...editFormData, nombre: e.target.value})}
-                  className="w-full px-4 py-3 bg-[#111827] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:border-[#00BFFF] focus:outline-none"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-[#00BFFF] font-semibold mb-2">Nivel</label>
-                <select
-                  value={editFormData.nivel || 'Intermedio'}
-                  onChange={(e) => setEditFormData({...editFormData, nivel: e.target.value})}
-                  className="w-full px-4 py-3 bg-[#111827] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:border-[#00BFFF] focus:outline-none"
-                >
-                  <option value="Principiante">Principiante</option>
-                  <option value="Intermedio">Intermedio</option>
-                  <option value="Avanzado">Avanzado</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-[#00BFFF] font-semibold mb-2">Género</label>
-                <select
-                  value={editFormData.genero || 'masculino'}
-                  onChange={(e) => setEditFormData({...editFormData, genero: e.target.value})}
-                  className="w-full px-4 py-3 bg-[#111827] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:border-[#00BFFF] focus:outline-none"
-                >
-                  <option value="masculino">Masculino</option>
-                  <option value="femenino">Femenino</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-[#00BFFF] font-semibold mb-2">Teléfono</label>
-                <input
-                  type="tel"
-                  value={editFormData.telefono || ''}
-                  onChange={(e) => setEditFormData({...editFormData, telefono: e.target.value})}
-                  className="w-full px-4 py-3 bg-[#111827] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:border-[#00BFFF] focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[#00BFFF] font-semibold mb-2">Email</label>
-                <input
-                  type="email"
-                  value={editFormData.email || ''}
-                  onChange={(e) => setEditFormData({...editFormData, email: e.target.value})}
-                  className="w-full px-4 py-3 bg-[#111827] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:border-[#00BFFF] focus:outline-none"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
+            <div className="flex-1 overflow-y-auto">
+              <form onSubmit={handleEditStudent} className="p-6 space-y-4">
                 <div>
-                  <label className="block text-[#00BFFF] font-semibold mb-2">Peso (kg)</label>
+                  <label className="block text-[#00BFFF] font-semibold mb-2">Nombre</label>
                   <input
-                    type="number"
-                    step="0.1"
-                    value={editFormData.peso || ''}
-                    onChange={(e) => setEditFormData({...editFormData, peso: e.target.value})}
+                    type="text"
+                    value={editFormData.nombre || ''}
+                    onChange={(e) => setEditFormData({...editFormData, nombre: e.target.value})}
+                    className="w-full px-4 py-3 bg-[#111827] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:border-[#00BFFF] focus:outline-none"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[#00BFFF] font-semibold mb-2">Nivel</label>
+                  <select
+                    value={editFormData.nivel || 'Intermedio'}
+                    onChange={(e) => setEditFormData({...editFormData, nivel: e.target.value})}
+                    className="w-full px-4 py-3 bg-[#111827] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:border-[#00BFFF] focus:outline-none"
+                  >
+                    <option value="Principiante">Principiante</option>
+                    <option value="Intermedio">Intermedio</option>
+                    <option value="Avanzado">Avanzado</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[#00BFFF] font-semibold mb-2">Género</label>
+                  <select
+                    value={editFormData.genero || 'masculino'}
+                    onChange={(e) => setEditFormData({...editFormData, genero: e.target.value})}
+                    className="w-full px-4 py-3 bg-[#111827] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:border-[#00BFFF] focus:outline-none"
+                  >
+                    <option value="masculino">Masculino</option>
+                    <option value="femenino">Femenino</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[#00BFFF] font-semibold mb-2">Teléfono</label>
+                  <input
+                    type="tel"
+                    value={editFormData.telefono || ''}
+                    onChange={(e) => setEditFormData({...editFormData, telefono: e.target.value})}
                     className="w-full px-4 py-3 bg-[#111827] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:border-[#00BFFF] focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[#00BFFF] font-semibold mb-2">Altura (cm)</label>
+                  <label className="block text-[#00BFFF] font-semibold mb-2">Email</label>
                   <input
-                    type="number"
-                    value={editFormData.altura || ''}
-                    onChange={(e) => setEditFormData({...editFormData, altura: e.target.value})}
+                    type="email"
+                    value={editFormData.email || ''}
+                    onChange={(e) => setEditFormData({...editFormData, email: e.target.value})}
                     className="w-full px-4 py-3 bg-[#111827] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:border-[#00BFFF] focus:outline-none"
                   />
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-[#00BFFF] font-semibold mb-2">Domicilio</label>
-                <input
-                  type="text"
-                  value={editFormData.domicilio || ''}
-                  onChange={(e) => setEditFormData({...editFormData, domicilio: e.target.value})}
-                  className="w-full px-4 py-3 bg-[#111827] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:border-[#00BFFF] focus:outline-none"
-                />
-              </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[#00BFFF] font-semibold mb-2">Peso (kg)</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      value={editFormData.peso || ''}
+                      onChange={(e) => setEditFormData({...editFormData, peso: e.target.value})}
+                      className="w-full px-4 py-3 bg-[#111827] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:border-[#00BFFF] focus:outline-none"
+                    />
+                  </div>
 
-              <div>
-                <label className="block text-[#00BFFF] font-semibold mb-2">Fecha de Nacimiento</label>
-                <input
-                  type="date"
-                  value={editFormData.fechaNacimiento || ''}
-                  onChange={(e) => setEditFormData({...editFormData, fechaNacimiento: e.target.value})}
-                  className="w-full px-4 py-3 bg-[#111827] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:border-[#00BFFF] focus:outline-none"
-                />
-              </div>
+                  <div>
+                    <label className="block text-[#00BFFF] font-semibold mb-2">Altura (cm)</label>
+                    <input
+                      type="number"
+                      value={editFormData.altura || ''}
+                      onChange={(e) => setEditFormData({...editFormData, altura: e.target.value})}
+                      className="w-full px-4 py-3 bg-[#111827] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:border-[#00BFFF] focus:outline-none"
+                    />
+                  </div>
+                </div>
 
-              <div className="flex space-x-3 mt-6">
-                <button
-                  type="button"
-                  onClick={() => setShowEditModal(false)}
-                  disabled={updatingStudent}
-                  className="flex-1 px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 active:scale-95 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={updatingStudent}
-                  className="flex-1 px-4 py-3 bg-[#00BFFF] text-[#111827] rounded-lg hover:bg-[#1E40AF] hover:text-[#00BFFF] active:scale-95 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  {updatingStudent ? (
-                    <>
-                      <Loader2 className="animate-spin" size={20} />
-                      Guardando...
-                    </>
-                  ) : (
-                    'Guardar'
-                  )}
-                </button>
-              </div>
-            </form>
+                <div>
+                  <label className="block text-[#00BFFF] font-semibold mb-2">Domicilio</label>
+                  <input
+                    type="text"
+                    value={editFormData.domicilio || ''}
+                    onChange={(e) => setEditFormData({...editFormData, domicilio: e.target.value})}
+                    className="w-full px-4 py-3 bg-[#111827] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:border-[#00BFFF] focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[#00BFFF] font-semibold mb-2">Fecha de Nacimiento</label>
+                  <input
+                    type="date"
+                    value={editFormData.fechaNacimiento || ''}
+                    onChange={(e) => setEditFormData({...editFormData, fechaNacimiento: e.target.value})}
+                    className="w-full px-4 py-3 bg-[#111827] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:border-[#00BFFF] focus:outline-none"
+                  />
+                </div>
+
+                <div className="flex space-x-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowEditModal(false)}
+                    disabled={updatingStudent}
+                    className="flex-1 px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 active:scale-95 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={updatingStudent}
+                    className="flex-1 px-4 py-3 bg-[#00BFFF] text-[#111827] rounded-lg hover:bg-[#1E40AF] hover:text-[#00BFFF] active:scale-95 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {updatingStudent ? (
+                      <>
+                        <Loader2 className="animate-spin" size={20} />
+                        Guardando...
+                      </>
+                    ) : (
+                      'Guardar'
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}

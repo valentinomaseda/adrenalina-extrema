@@ -210,9 +210,9 @@ export default function Profile() {
 
       {/* Modal de edición de perfil */}
       {showEditModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 p-4 animate-fade-in overflow-y-auto">
-          <div className="bg-gradient-to-br from-[#1a2942] to-[#0f1729] rounded-xl shadow-2xl max-w-md w-full my-8 mb-20 animate-scale-in border border-[#00BFFF]">
-            <div className="sticky top-0 bg-[#1E40AF] text-white p-6 flex items-center justify-between rounded-t-xl z-10">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 animate-fade-in">
+          <div className="bg-gradient-to-br from-[#1a2942] to-[#0f1729] rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] flex flex-col animate-scale-in border border-[#00BFFF]">
+            <div className="flex-shrink-0 bg-[#1E40AF] text-white p-6 flex items-center justify-between rounded-t-xl z-10">
               <h3 className="text-xl font-bold">Editar Perfil</h3>
               <button
                 onClick={() => setShowEditModal(false)}
@@ -222,7 +222,8 @@ export default function Profile() {
               </button>
             </div>
             
-            <form onSubmit={handleEditProfile} className="p-6 space-y-4 pb-8">
+            <div className="flex-1 overflow-y-auto">
+              <form onSubmit={handleEditProfile} className="p-6 space-y-4 pb-8">"
               <div>
                 <label className="block text-[#00BFFF] font-semibold mb-2">Nombre</label>
                 <input
@@ -402,6 +403,7 @@ export default function Profile() {
                 </button>
               </div>
             </form>
+            </div>
           </div>
         </div>
       )}
