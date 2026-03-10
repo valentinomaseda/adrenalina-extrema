@@ -199,7 +199,7 @@ export default function AddStudent() {
             <div className="flex gap-4 pt-4">
               <button
                 type="button"
-                onClick={() => setCurrentView('students')}
+                onClick={() => navigate('/alumnos')}
                 disabled={loading}
                 className="flex-1 bg-gray-700 text-[#F3F4F6] font-bold py-3 px-6 rounded-lg hover:bg-gray-600 transition disabled:opacity-50"
               >
