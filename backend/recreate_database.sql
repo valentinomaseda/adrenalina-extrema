@@ -151,7 +151,7 @@ CREATE TABLE `alumno_rutina` (
   `idRutina` INT UNSIGNED NOT NULL,
   `estado` VARCHAR(45) DEFAULT 'activa',
   `fechaAsignacion` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`idPersona`, `idRutina`),
+  PRIMARY KEY (`idPersona`, `idRutina`, `fechaAsignacion`),
   KEY `fk_alumno_rutina_rutina` (`idRutina`),
   CONSTRAINT `fk_alumno_rutina_alumno` 
     FOREIGN KEY (`idPersona`) 
@@ -171,6 +171,7 @@ CREATE TABLE `alumno_rutina_ejercicio` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `idPersona` INT UNSIGNED NOT NULL,
   `idRutina` INT UNSIGNED NOT NULL,
+  `fechaAsignacion` DATETIME NOT NULL,
   `idEjercicio` INT UNSIGNED NOT NULL,
   `cantSets` INT NOT NULL DEFAULT 3,
   `cantidad` INT NOT NULL DEFAULT 10,
@@ -180,12 +181,12 @@ CREATE TABLE `alumno_rutina_ejercicio` (
   `intensidad` TEXT DEFAULT NULL,
   `esCalentamiento` BOOLEAN DEFAULT FALSE,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_alumno_rutina_orden` (`idPersona`, `idRutina`, `orden`),
-  KEY `idx_alumno_rutina_ejercicio` (`idPersona`, `idRutina`, `idEjercicio`),
+  UNIQUE KEY `uk_alumno_rutina_orden` (`idPersona`, `idRutina`, `fechaAsignacion`, `orden`),
+  KEY `idx_alumno_rutina_ejercicio` (`idPersona`, `idRutina`, `fechaAsignacion`, `idEjercicio`),
   KEY `fk_are_ejercicio` (`idEjercicio`),
   CONSTRAINT `fk_are_alumno_rutina` 
-    FOREIGN KEY (`idPersona`, `idRutina`) 
-    REFERENCES `alumno_rutina` (`idPersona`, `idRutina`) 
+    FOREIGN KEY (`idPersona`, `idRutina`, `fechaAsignacion`) 
+    REFERENCES `alumno_rutina` (`idPersona`, `idRutina`, `fechaAsignacion`) 
     ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_are_ejercicio` 
     FOREIGN KEY (`idEjercicio`) 

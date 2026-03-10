@@ -116,9 +116,9 @@ export class Rutina {
       // 2. Copiar ejercicios de la plantilla con valores default
       await connection.query(
         `INSERT INTO alumno_rutina_ejercicio 
-         (idPersona, idRutina, idEjercicio, cantSets, cantidad, orden, 
+         (idPersona, idRutina, fechaAsignacion, idEjercicio, cantSets, cantidad, orden, 
           pausaSeries, intensidad, esCalentamiento)
-         SELECT ?, re.idRutina, re.idEjercicio, re.cantSets, re.cantidad, re.orden,
+         SELECT ?, re.idRutina, NOW(), re.idEjercicio, re.cantSets, re.cantidad, re.orden,
                 re.pausaSeries, re.intensidad, re.esCalentamiento
          FROM rutina_ejercicio re
          WHERE re.idRutina = ?`,
@@ -136,20 +136,54 @@ export class Rutina {
   }
 
   // Desasignar rutina de alumno
-  static async removeFromAlumno(idRutina, idPersona) {
-    const [result] = await pool.query(
-      'DELETE FROM alumno_rutina WHERE idRutina = ? AND idPersona = ?',
-      [idRutina, idPersona]
-    );
+  static async removeFromAlumno(idRutina, idPersona, fechaAsignacion = null) {
+    // Si se especifica fechaAsignacion, elimina solo esa asignación
+    // Si no, elimina la asignación más reciente
+    let query, params;
+    
+    if (fechaAsignacion) {
+      query = 'DELETE FROM alumno_rutina WHERE idRutina = ? AND idPersona = ? AND fechaAsignacion = ?';
+      params = [idRutina, idPersona, fechaAsignacion];
+    } else {
+      query = `DELETE FROM alumno_rutina 
+               WHERE idRutina = ? AND idPersona = ? 
+               AND fechaAsignacion = (
+                 SELECT fechaAsignacion FROM (
+                   SELECT fechaAsignacion FROM alumno_rutina 
+                   WHERE idRutina = ? AND idPersona = ?
+                   ORDER BY fechaAsignacion DESC LIMIT 1
+                 ) AS temp
+               )`;
+      params = [idRutina, idPersona, idRutina, idPersona];
+    }
+    
+    const [result] = await pool.query(query, params);
     return result;
   }
 
   // Actualizar estado de rutina asignada
-  static async updateEstadoAsignacion(idRutina, idPersona, estado) {
-    const [result] = await pool.query(
-      'UPDATE alumno_rutina SET estado = ? WHERE idRutina = ? AND idPersona = ?',
-      [estado, idRutina, idPersona]
-    );
+  static async updateEstadoAsignacion(idRutina, idPersona, estado, fechaAsignacion = null) {
+    // Si se especifica fechaAsignacion, actualiza solo esa asignación
+    // Si no, actualiza la asignación más reciente
+    let query, params;
+    
+    if (fechaAsignacion) {
+      query = 'UPDATE alumno_rutina SET estado = ? WHERE idRutina = ? AND idPersona = ? AND fechaAsignacion = ?';
+      params = [estado, idRutina, idPersona, fechaAsignacion];
+    } else {
+      query = `UPDATE alumno_rutina SET estado = ? 
+               WHERE idRutina = ? AND idPersona = ? 
+               AND fechaAsignacion = (
+                 SELECT fechaAsignacion FROM (
+                   SELECT fechaAsignacion FROM alumno_rutina 
+                   WHERE idRutina = ? AND idPersona = ?
+                   ORDER BY fechaAsignacion DESC LIMIT 1
+                 ) AS temp
+               )`;
+      params = [estado, idRutina, idPersona, idRutina, idPersona];
+    }
+    
+    const [result] = await pool.query(query, params);
     return result;
   }
 
