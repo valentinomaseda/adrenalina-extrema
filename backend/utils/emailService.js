@@ -91,7 +91,7 @@ export async function enviarEmailConfirmacion({ idPersona, email, nombre }) {
     
     // Enviar email
     const { data, error } = await resend.emails.send({
-      from: process.env.EMAIL_FROM || 'Adrenalina Extrema <onboarding@resend.dev>',
+      from: process.env.EMAIL_FROM || 'Adrenalina Extrema <contacto@adrenalinaextrema.com>',
       to: [email],
       subject: 'Confirma tu email - Adrenalina Extrema',
       html: emailHtml,
@@ -136,7 +136,7 @@ export async function enviarEmailRecuperacion({ idPersona, email, nombre }) {
     
     // Enviar email
     const { data, error } = await resend.emails.send({
-      from: process.env.EMAIL_FROM || 'Adrenalina Extrema <onboarding@resend.dev>',
+      from: process.env.EMAIL_FROM || 'Adrenalina Extrema <contacto@adrenalinaextrema.com>',
       to: [email],
       subject: 'Recuperación de contraseña - Adrenalina Extrema',
       html: emailHtml,
