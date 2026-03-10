@@ -33,13 +33,3 @@ router.post('/:id/alumnos/:idAlumno/ejercicios', authenticateToken, requireRole(
 router.delete('/:id/alumnos/:idAlumno/ejercicios/:idEjercicio', authenticateToken, requireRole('profesora', 'coach'), rutinaController.removeAlumnoEjercicio);
 
 export default router;
-
-// Rutas de personalización por alumno
-router.get('/:id/alumnos-personalizaciones', rutinaController.getAlumnosConPersonalizaciones);
-router.get('/:id/alumnos/:idAlumno/ejercicios', rutinaController.getAlumnoEjercicios);
-router.get('/:id/alumnos/:idAlumno/full', rutinaController.getFullRutinaAlumno);
-router.put('/:id/alumnos/:idAlumno/ejercicios/:idEjercicio', rutinaController.updateAlumnoEjercicio);
-router.post('/:id/alumnos/:idAlumno/ejercicios', rutinaController.addAlumnoEjercicio);
-router.delete('/:id/alumnos/:idAlumno/ejercicios/:idEjercicio', rutinaController.removeAlumnoEjercicio);
-
-export default router;
