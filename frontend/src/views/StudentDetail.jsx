@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ArrowLeft, TrendingUp, Calendar, CheckCircle2, XCircle, Send, Plus, ChevronDown, ChevronUp, Info, X, Phone, Mail, Weight, Ruler, MapPin, Cake, Trash2, Edit, Loader2 } from 'lucide-react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { useAppContext } from '../context/AppContext'
@@ -37,6 +37,13 @@ export default function StudentDetail() {
   const [assigningRoutine, setAssigningRoutine] = useState(false)
   const [deletingRoutine, setDeletingRoutine] = useState(false)
   const [updatingStudent, setUpdatingStudent] = useState(false)
+
+  // Hacer scroll hacia arriba cuando se abre el modal de edición
+  useEffect(() => {
+    if (showEditModal) {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }, [showEditModal])
 
   // Función para formatear rutina como texto plano para WhatsApp
   const formatRoutineForWhatsApp = (routine) => {
@@ -844,8 +851,8 @@ export default function StudentDetail() {
 
       {/* Modal de edición de alumno */}
       {showEditModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 animate-fade-in">
-          <div className="bg-gradient-to-br from-[#1a2942] to-[#0f1729] rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] flex flex-col animate-scale-in border border-[#00BFFF]">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 p-4 animate-fade-in overflow-y-auto">
+          <div className="bg-gradient-to-br from-[#1a2942] to-[#0f1729] rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] flex flex-col animate-scale-in border border-[#00BFFF] my-8">
             <div className="flex-shrink-0 bg-[#1E40AF] text-white p-6 flex items-center justify-between rounded-t-xl">
               <h3 className="text-xl font-bold">Editar Alumno</h3>
               <button
