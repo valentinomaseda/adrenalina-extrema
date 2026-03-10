@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowLeft, TrendingUp, Calendar, CheckCircle2, XCircle, Send, Plus, ChevronDown, ChevronUp, Info, X, Phone, Mail, Weight, Ruler, MapPin, Cake, Trash2, Edit } from 'lucide-react'
+import { ArrowLeft, TrendingUp, Calendar, CheckCircle2, XCircle, Send, Plus, ChevronDown, ChevronUp, Info, X, Phone, Mail, Weight, Ruler, MapPin, Cake, Trash2, Edit, Loader2 } from 'lucide-react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { useAppContext } from '../context/AppContext'
 import AchievementBadges from '../components/AchievementBadges'
@@ -31,6 +31,10 @@ export default function StudentDetail() {
   const [updatingRoutineStatus, setUpdatingRoutineStatus] = useState(null)
   const [showPersonalizeModal, setShowPersonalizeModal] = useState(false)
   const [routineToPersonalize, setRoutineToPersonalize] = useState(null)
+  const [expandedRoutine, setExpandedRoutine] = useState(null)
+  const [assigningRoutine, setAssigningRoutine] = useState(false)
+  const [deletingRoutine, setDeletingRoutine] = useState(false)
+  const [updatingStudent, setUpdatingStudent] = useState(false)
 
   // Función para formatear rutina como texto plano para WhatsApp
   const formatRoutineForWhatsApp = (routine) => {
@@ -61,11 +65,13 @@ export default function StudentDetail() {
       return
     }
     
+    setAssigningRoutine(true)
     const routine = savedRoutines.find(r => r.id === parseInt(selectedRoutineId))
     if (routine) {
       setRoutineToPersonalize(routine)
       setShowPersonalizeModal(true)
     }
+    setAssigningRoutine(false)
   }
 
   // Función para manejar después de guardar personalización
@@ -87,9 +93,17 @@ export default function StudentDetail() {
   // Función para eliminar rutina
   const handleDeleteRoutine = async () => {
     if (routineToDelete) {
-      await removeRoutineFromStudent(selectedStudent.id, routineToDelete.id, routineToDelete.fechaAsignacion)
-      setShowDeleteModal(false)
-      setRoutineToDelete(null)
+      setDeletingRoutine(true)
+      try {
+        await removeRoutineFromStudent(selectedStudent.id, routineToDelete.id, routineToDelete.fechaAsignacion)
+        showAlert('Rutina eliminada exitosamente', 'success')
+      } catch (error) {
+        showAlert('Error al eliminar la rutina', 'error')
+      } finally {
+        setDeletingRoutine(false)
+        setShowDeleteModal(false)
+        setRoutineToDelete(null)
+      }
     }
   }
 
@@ -97,12 +111,15 @@ export default function StudentDetail() {
   const handleEditStudent = async (e) => {
     e.preventDefault()
     
+    setUpdatingStudent(true)
     try {
       await updateStudent(selectedStudent.id, editFormData)
       setShowEditModal(false)
       showAlert('Alumno actualizado exitosamente', 'success')
     } catch (error) {
       showAlert(error.message || 'Error al actualizar el alumno', 'error')
+    } finally {
+      setUpdatingStudent(false)
     }
   }
 
@@ -433,9 +450,17 @@ export default function StudentDetail() {
             </select>
             <button
               onClick={handleAssignRoutine}
-              className="px-6 py-3 bg-[#00BFFF] text-[#111827] rounded-lg hover:bg-[#1E40AF] hover:text-[#00BFFF] active:scale-95 transition-all font-bold"
+              disabled={assigningRoutine}
+              className="px-6 py-3 bg-[#00BFFF] text-[#111827] rounded-lg hover:bg-[#1E40AF] hover:text-[#00BFFF] active:scale-95 transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
-              Asignar
+              {assigningRoutine ? (
+                <>
+                  <Loader2 className="animate-spin" size={20} />
+                  Asignando...
+                </>
+              ) : (
+                'Asignar'
+              )}
             </button>
           </div>
         )}
@@ -469,13 +494,26 @@ export default function StudentDetail() {
                     </div>
                     <div className="flex items-center space-x-2">
                       {routine.exercises && (
-                        <button
-                          onClick={() => handleSendWhatsApp(routine)}
-                          className="p-2 bg-[#00BFFF] text-[#111827] rounded-lg hover:bg-[#1E40AF] hover:text-[#00BFFF] active:scale-95 transition-all"
-                          title="Enviar por WhatsApp"
-                        >
-                          <Send size={20} strokeWidth={2.5} />
-                        </button>
+                        <>
+                          <button
+                            onClick={() => setExpandedRoutine(expandedRoutine === routine.id ? null : routine.id)}
+                            className="p-2 bg-[#1E40AF] text-[#00BFFF] rounded-lg hover:bg-[#00BFFF] hover:text-[#111827] active:scale-95 transition-all"
+                            title="Ver ejercicios"
+                          >
+                            {expandedRoutine === routine.id ? (
+                              <ChevronUp size={20} strokeWidth={2.5} />
+                            ) : (
+                              <ChevronDown size={20} strokeWidth={2.5} />
+                            )}
+                          </button>
+                          <button
+                            onClick={() => handleSendWhatsApp(routine)}
+                            className="p-2 bg-[#00BFFF] text-[#111827] rounded-lg hover:bg-[#1E40AF] hover:text-[#00BFFF] active:scale-95 transition-all"
+                            title="Enviar por WhatsApp"
+                          >
+                            <Send size={20} strokeWidth={2.5} />
+                          </button>
+                        </>
                       )}
                       <button
                         onClick={() => {
@@ -509,38 +547,125 @@ export default function StudentDetail() {
                     <button
                       onClick={() => handleUpdateRoutineStatus(routine.id, 'completada', routine.fechaAsignacion)}
                       disabled={updatingRoutineStatus === routine.id || routine.status === 'completada'}
-                      className={`px-2 py-2 rounded-lg font-semibold text-xs transition-all active:scale-95 ${
+                      className={`px-2 py-2 rounded-lg font-semibold text-xs transition-all active:scale-95 flex items-center justify-center gap-1 ${
                         routine.status === 'completada'
                           ? 'bg-green-600 text-white'
                           : 'bg-[#0a0f1a] text-[#F3F4F6] hover:bg-green-600 hover:text-white'
                       } disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
-                      ✓ Completada
+                      {updatingRoutineStatus === routine.id ? (
+                        <Loader2 className="animate-spin" size={16} />
+                      ) : (
+                        '✓'
+                      )} Completada
                     </button>
                     <button
                       onClick={() => handleUpdateRoutineStatus(routine.id, 'incompleta', routine.fechaAsignacion)}
                       disabled={updatingRoutineStatus === routine.id || routine.status === 'incompleta'}
-                      className={`px-2 py-2 rounded-lg font-semibold text-xs transition-all active:scale-95 ${
+                      className={`px-2 py-2 rounded-lg font-semibold text-xs transition-all active:scale-95 flex items-center justify-center gap-1 ${
                         routine.status === 'incompleta'
                           ? 'bg-yellow-600 text-white'
                           : 'bg-[#0a0f1a] text-[#F3F4F6] hover:bg-yellow-600 hover:text-white'
                       } disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
-                      ◐ Incompleta
+                      {updatingRoutineStatus === routine.id ? (
+                        <Loader2 className="animate-spin" size={16} />
+                      ) : (
+                        '◐'
+                      )} Incompleta
                     </button>
                     <button
                       onClick={() => handleUpdateRoutineStatus(routine.id, 'activa', routine.fechaAsignacion)}
                       disabled={updatingRoutineStatus === routine.id || routine.status === 'activa'}
-                      className={`px-2 py-2 rounded-lg font-semibold text-xs transition-all active:scale-95 ${
+                      className={`px-2 py-2 rounded-lg font-semibold text-xs transition-all active:scale-95 flex items-center justify-center gap-1 ${
                         routine.status === 'activa'
                           ? 'bg-gray-600 text-white'
                           : 'bg-[#0a0f1a] text-[#F3F4F6] hover:bg-gray-600 hover:text-white'
                       } disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
-                      ○ Pendiente
+                      {updatingRoutineStatus === routine.id ? (
+                        <Loader2 className="animate-spin" size={16} />
+                      ) : (
+                        '○'
+                      )} Pendiente
                     </button>
                   </div>
                 </div>
+
+                {/* Detalles de ejercicios (expandible) */}
+                {expandedRoutine === routine.id && routine.exercises && (
+                  <div className="border-t-2 border-[#111827] p-4 bg-[#111827]/30 animate-slide-in-up">
+                    <h4 className="text-lg font-bold text-[#00BFFF] mb-4">
+                      Ejercicios ({routine.exercises.length})
+                    </h4>
+                    <div className="space-y-3">
+                      {routine.exercises.map((exercise, idx) => (
+                        <div
+                          key={idx}
+                          className="bg-[#111827] rounded-lg p-4 border-2 border-[#1E40AF]"
+                        >
+                          {/* Header del ejercicio con indicador de calentamiento */}
+                          <div className="flex items-start justify-between mb-2">
+                            <h5 className="font-bold text-[#F3F4F6] flex items-center gap-2">
+                              {idx + 1}. {exercise.name}
+                              {exercise.esCalentamiento === 1 && (
+                                <span className="text-xs px-2 py-1 bg-orange-600 text-white rounded-full">
+                                  🔥 Calentamiento
+                                </span>
+                              )}
+                            </h5>
+                          </div>
+
+                          {/* Información principal: Sets y Cantidad */}
+                          <div className="flex flex-wrap gap-2 text-sm mb-3">
+                            <span className="px-2 py-1 bg-[#1E40AF] text-[#00BFFF] rounded font-semibold">
+                              {exercise.sets} {exercise.sets === 1 ? 'serie' : 'series'}
+                            </span>
+                            <span className="px-2 py-1 bg-[#1E40AF] text-[#00BFFF] rounded font-semibold">
+                              {exercise.value} {getUnitName(exercise.unidad || exercise.type)}
+                            </span>
+                            {exercise.pausaSeries && (
+                              <span className="px-2 py-1 bg-purple-600 text-white rounded font-semibold">
+                                ⏸️ Pausa: {exercise.pausaSeries}
+                              </span>
+                            )}
+                            {exercise.intensidad && (
+                              <span className="px-2 py-1 bg-red-600 text-white rounded font-semibold">
+                                ⚡ {exercise.intensidad}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Información del ejercicio base */}
+                          {(exercise.distancia || exercise.duracion || exercise.descripcionIntervalo) && (
+                            <div className="mb-3 p-2 bg-[#1E40AF]/20 rounded border border-[#00BFFF]/20">
+                              <p className="text-xs text-gray-400 font-semibold mb-1">📋 Info del ejercicio:</p>
+                              <div className="text-sm text-gray-300 space-y-1">
+                                {exercise.distancia && (
+                                  <div>📏 Distancia: <span className="text-[#00BFFF] font-semibold">{exercise.distancia}</span></div>
+                                )}
+                                {exercise.duracion && (
+                                  <div>⏱️ Duración: <span className="text-[#00BFFF] font-semibold">{exercise.duracion}</span></div>
+                                )}
+                                {exercise.descripcionIntervalo && (
+                                  <div className="italic text-[#00BFFF]">💭 "{exercise.descripcionIntervalo}"</div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Especificaciones personalizadas */}
+                          {exercise.especificaciones && (
+                            <div className="mt-2 p-2 bg-[#1E40AF]/30 rounded border border-[#00BFFF]/20">
+                              <p className="text-sm text-[#00BFFF] font-semibold mb-1">📝 Especificaciones personalizadas:</p>
+                              <p className="text-sm text-gray-300">{exercise.especificaciones}</p>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -683,15 +808,24 @@ export default function StudentDetail() {
                     setShowDeleteModal(false)
                     setRoutineToDelete(null)
                   }}
-                  className="flex-1 px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 active:scale-95 transition-all font-semibold"
+                  disabled={deletingRoutine}
+                  className="flex-1 px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 active:scale-95 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={handleDeleteRoutine}
-                  className="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 active:scale-95 transition-all font-semibold"
+                  disabled={deletingRoutine}
+                  className="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 active:scale-95 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  Eliminar
+                  {deletingRoutine ? (
+                    <>
+                      <Loader2 className="animate-spin" size={20} />
+                      Eliminando...
+                    </>
+                  ) : (
+                    'Eliminar'
+                  )}
                 </button>
               </div>
             </div>
@@ -817,15 +951,24 @@ export default function StudentDetail() {
                 <button
                   type="button"
                   onClick={() => setShowEditModal(false)}
-                  className="flex-1 px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 active:scale-95 transition-all font-semibold"
+                  disabled={updatingStudent}
+                  className="flex-1 px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 active:scale-95 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-3 bg-[#00BFFF] text-[#111827] rounded-lg hover:bg-[#1E40AF] hover:text-[#00BFFF] active:scale-95 transition-all font-semibold"
+                  disabled={updatingStudent}
+                  className="flex-1 px-4 py-3 bg-[#00BFFF] text-[#111827] rounded-lg hover:bg-[#1E40AF] hover:text-[#00BFFF] active:scale-95 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  Guardar
+                  {updatingStudent ? (
+                    <>
+                      <Loader2 className="animate-spin" size={20} />
+                      Guardando...
+                    </>
+                  ) : (
+                    'Guardar'
+                  )}
                 </button>
               </div>
             </form>
