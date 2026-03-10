@@ -765,7 +765,7 @@ export const AppProvider = ({ children }) => {
         rutinas.map(async (rutina) => {
           try {
             // Usar getAlumnoEjercicios para obtener los ejercicios personalizados
-            const ejercicios = await rutinasAPI.getAlumnoEjercicios(rutina.idRutina, userData.idPersona)
+            const ejercicios = await rutinasAPI.getAlumnoEjercicios(rutina.idRutina, userData.idPersona, rutina.fechaAsignacion)
             return {
               id: rutina.idRutina,
               name: rutina.nombre,

@@ -103,8 +103,11 @@ export const rutinaController = {
   async assignToAlumno(req, res) {
     try {
       const { idPersona, estado } = req.body;
-      await Rutina.assignToAlumno(req.params.id, idPersona, estado);
-      res.status(201).json({ message: 'Rutina asignada al alumno' });
+      const result = await Rutina.assignToAlumno(req.params.id, idPersona, estado);
+      res.status(201).json({ 
+        message: 'Rutina asignada al alumno',
+        fechaAsignacion: result.fechaAsignacion
+      });
     } catch (error) {
       console.error('Error al asignar rutina:', error);
       res.status(500).json({ error: 'Error al asignar rutina' });
@@ -167,11 +170,12 @@ export const rutinaController = {
   // ENDPOINTS DE PERSONALIZACIÓN POR ALUMNO
   // ============================================
 
-  // GET /api/rutinas/:id/alumnos/:idAlumno/ejercicios
+  // GET /api/rutinas/:id/alumnos/:idAlumno/ejercicios?fechaAsignacion=...
   async getAlumnoEjercicios(req, res) {
     try {
       const { id, idAlumno } = req.params;
-      const ejercicios = await Rutina.getAlumnoEjercicios(id, idAlumno);
+      const { fechaAsignacion } = req.query;
+      const ejercicios = await Rutina.getAlumnoEjercicios(id, idAlumno, fechaAsignacion);
       res.json(ejercicios);
     } catch (error) {
       console.error('Error al obtener ejercicios del alumno:', error);
@@ -194,12 +198,13 @@ export const rutinaController = {
     }
   },
 
-  // PUT /api/rutinas/:id/alumnos/:idAlumno/ejercicios/:idEjercicio
+  // PUT /api/rutinas/:id/alumnos/:idAlumno/ejercicios/:idEjercicio?fechaAsignacion=...
   async updateAlumnoEjercicio(req, res) {
     try {
       const { id, idAlumno, idEjercicio } = req.params;
+      const { fechaAsignacion } = req.query;
       const updates = req.body;
-      const result = await Rutina.updateAlumnoEjercicio(idAlumno, id, idEjercicio, updates);
+      const result = await Rutina.updateAlumnoEjercicio(idAlumno, id, idEjercicio, updates, fechaAsignacion);
       if (result.affectedRows === 0) {
         return res.status(404).json({ error: 'Ejercicio no encontrado para este alumno' });
       }

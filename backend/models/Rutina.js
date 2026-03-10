@@ -136,7 +136,7 @@ export class Rutina {
       );
       
       await connection.commit();
-      return { success: true };
+      return { success: true, fechaAsignacion };
     } catch (error) {
       await connection.rollback();
       throw error;
@@ -226,7 +226,7 @@ export class Rutina {
   // ============================================
 
   // Obtener ejercicios personalizados del alumno
-  static async getAlumnoEjercicios(idRutina, idPersona) {
+  static async getAlumnoEjercicios(idRutina, idPersona, fechaAsignacion) {
     const [rows] = await pool.query(
       `SELECT e.idEjercicio, e.nombre, e.tipoContador, e.unidad,
               e.distancia, e.duracion, e.descripcionIntervalo,
@@ -234,15 +234,15 @@ export class Rutina {
               are.pausaSeries, are.intensidad, are.esCalentamiento
        FROM ejercicio e
        INNER JOIN alumno_rutina_ejercicio are ON e.idEjercicio = are.idEjercicio
-       WHERE are.idRutina = ? AND are.idPersona = ?
+       WHERE are.idRutina = ? AND are.idPersona = ? AND are.fechaAsignacion = ?
        ORDER BY are.orden`,
-      [idRutina, idPersona]
+      [idRutina, idPersona, fechaAsignacion]
     );
     return rows;
   }
 
   // Actualizar ejercicio personalizado del alumno
-  static async updateAlumnoEjercicio(idPersona, idRutina, idEjercicio, updates) {
+  static async updateAlumnoEjercicio(idPersona, idRutina, idEjercicio, updates, fechaAsignacion) {
     const fields = [];
     const values = [];
     
@@ -281,10 +281,17 @@ export class Rutina {
     
     values.push(idPersona, idRutina, idEjercicio);
     
+    // Construir WHERE clause - incluir fechaAsignacion si se proporciona
+    let whereClause = 'WHERE idPersona = ? AND idRutina = ? AND idEjercicio = ?';
+    if (fechaAsignacion) {
+      whereClause += ' AND fechaAsignacion = ?';
+      values.push(fechaAsignacion);
+    }
+    
     const [result] = await pool.query(
       `UPDATE alumno_rutina_ejercicio 
        SET ${fields.join(', ')} 
-       WHERE idPersona = ? AND idRutina = ? AND idEjercicio = ?`,
+       ${whereClause}`,
       values
     );
     return result;
@@ -340,18 +347,20 @@ export class Rutina {
     const rutina = await this.findById(idRutina);
     if (!rutina) return null;
     
-    // Obtener estado de asignación
+    // Obtener estado de asignación (la más reciente)
     const [asignacion] = await pool.query(
       `SELECT estado, fechaAsignacion 
        FROM alumno_rutina 
-       WHERE idRutina = ? AND idPersona = ?`,
+       WHERE idRutina = ? AND idPersona = ?
+       ORDER BY fechaAsignacion DESC
+       LIMIT 1`,
       [idRutina, idPersona]
     );
     
     if (asignacion.length === 0) return null;
     
-    // Obtener ejercicios personalizados
-    const ejercicios = await this.getAlumnoEjercicios(idRutina, idPersona);
+    // Obtener ejercicios personalizados de esta asignación específica
+    const ejercicios = await this.getAlumnoEjercicios(idRutina, idPersona, asignacion[0].fechaAsignacion);
     
     return {
       ...rutina,

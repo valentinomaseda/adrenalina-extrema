@@ -195,17 +195,26 @@ export const rutinasAPI = {
   getAlumnosConPersonalizaciones: (rutinaId) => fetchAPI(`/rutinas/${rutinaId}/alumnos-personalizaciones`),
 
   // Obtener ejercicios personalizados del alumno
-  getAlumnoEjercicios: (rutinaId, alumnoId) => fetchAPI(`/rutinas/${rutinaId}/alumnos/${alumnoId}/ejercicios`),
+  getAlumnoEjercicios: (rutinaId, alumnoId, fechaAsignacion) => {
+    const url = fechaAsignacion 
+      ? `/rutinas/${rutinaId}/alumnos/${alumnoId}/ejercicios?fechaAsignacion=${encodeURIComponent(fechaAsignacion)}`
+      : `/rutinas/${rutinaId}/alumnos/${alumnoId}/ejercicios`;
+    return fetchAPI(url);
+  },
 
   // Obtener rutina completa del alumno con ejercicios personalizados
   getFullRutinaAlumno: (rutinaId, alumnoId) => fetchAPI(`/rutinas/${rutinaId}/alumnos/${alumnoId}/full`),
 
   // Actualizar ejercicio personalizado del alumno
-  updateAlumnoEjercicio: (rutinaId, alumnoId, ejercicioId, data) => 
-    fetchAPI(`/rutinas/${rutinaId}/alumnos/${alumnoId}/ejercicios/${ejercicioId}`, {
+  updateAlumnoEjercicio: (rutinaId, alumnoId, ejercicioId, data, fechaAsignacion) => {
+    const url = fechaAsignacion 
+      ? `/rutinas/${rutinaId}/alumnos/${alumnoId}/ejercicios/${ejercicioId}?fechaAsignacion=${encodeURIComponent(fechaAsignacion)}`
+      : `/rutinas/${rutinaId}/alumnos/${alumnoId}/ejercicios/${ejercicioId}`;
+    return fetchAPI(url, {
       method: 'PUT',
       body: JSON.stringify(data),
-    }),
+    });
+  },
 
   // Agregar ejercicio personalizado al alumno
   addAlumnoEjercicio: (rutinaId, alumnoId, ejercicioData) => 

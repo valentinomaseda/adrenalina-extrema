@@ -74,7 +74,8 @@ export default function PersonalizeRoutine({ routine, student, onClose, onSave, 
       setSaving(true)
       
       // 1. Primero asignar la rutina al alumno (esto copia los ejercicios)
-      await rutinasAPI.assignToPersona(routine.idRutina || routine.id, student.id)
+      const assignResult = await rutinasAPI.assignToPersona(routine.idRutina || routine.id, student.id)
+      const fechaAsignacion = assignResult.fechaAsignacion
       
       // 2. Luego actualizar cada ejercicio con las personalizaciones
       const updatePromises = exercises.map(exercise => 
@@ -89,7 +90,8 @@ export default function PersonalizeRoutine({ routine, student, onClose, onSave, 
             pausaSeries: exercise.pausaSeries || null,
             intensidad: exercise.intensidad || null,
             esCalentamiento: exercise.esCalentamiento ? 1 : 0
-          }
+          },
+          fechaAsignacion
         )
       )
       
