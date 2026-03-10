@@ -120,7 +120,7 @@ export default function PersonalizeRoutine({ routine, student, onClose, onSave, 
                 Personalizar Rutina
               </h3>
               <p className="text-[#00BFFF] mt-1">
-                "{routine.nombre}" para {student.nombre}
+                {routine.nombre} para {student.nombre}
               </p>
             </div>
             <button

@@ -56,7 +56,11 @@ const addAvatarToUser = (user) => {
   if (!user) return null
   return {
     ...user,
-    photo: generateAvatarUrl(user.idPersona, user.genero || 'masculino')
+    photo: generateAvatarUrl(user.idPersona, user.genero || 'masculino'),
+    // Asegurar que direccion esté disponible como domicilio también
+    domicilio: user.direccion || user.domicilio || '',
+    // Asegurar que fechaNacimiento esté disponible desde fechaNac
+    fechaNacimiento: user.fechaNac || user.fechaNacimiento || ''
   }
 }
 

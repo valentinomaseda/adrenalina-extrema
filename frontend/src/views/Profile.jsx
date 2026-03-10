@@ -96,12 +96,12 @@ export default function Profile() {
 
           {user?.rol === 'alumno' ? (
             <>
-              {user?.domicilio && (
+              {(user?.domicilio || user?.direccion) && (
                 <div className="flex items-center space-x-3 p-4 bg-[#111827] rounded-lg animate-slide-in-right delay-500">
                   <MapPin className="text-[#00BFFF]" size={24} />
                   <div>
                     <p className="text-xs text-[#00BFFF]">Dirección</p>
-                    <p className="font-semibold text-[#F3F4F6]">{user.domicilio}</p>
+                    <p className="font-semibold text-[#F3F4F6]">{user.domicilio || user.direccion}</p>
                   </div>
                 </div>
               )}
@@ -174,12 +174,23 @@ export default function Profile() {
         <div className="space-y-3">
           <button 
             onClick={() => {
+              // Formatear fechaNacimiento para input type="date" (YYYY-MM-DD)
+              let formattedDate = '';
+              if (user?.fechaNacimiento) {
+                const date = new Date(user.fechaNacimiento);
+                // Asegurarse de usar UTC para evitar problemas de zona horaria
+                const year = date.getUTCFullYear();
+                const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+                const day = String(date.getUTCDate()).padStart(2, '0');
+                formattedDate = `${year}-${month}-${day}`;
+              }
+
               setEditFormData({
                 nombre: user?.nombre || '',
                 mail: user?.mail || '',
                 tel: user?.tel || '',
-                domicilio: user?.domicilio || '',
-                fechaNacimiento: user?.fechaNacimiento || '',
+                domicilio: user?.direccion || user?.domicilio || '',
+                fechaNacimiento: formattedDate,
                 peso: user?.peso || '',
                 altura: user?.altura || '',
                 genero: user?.genero || 'masculino',
