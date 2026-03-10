@@ -1,4 +1,5 @@
 import { pool } from '../config/database.js';
+import { formatDateForMySQL } from '../utils/helpers.js';
 
 export class Rutina {
   static async findAll() {
@@ -152,8 +153,10 @@ export class Rutina {
     let query, params;
     
     if (fechaAsignacion) {
+      // Formatear fecha para MySQL
+      const formattedDate = formatDateForMySQL(fechaAsignacion);
       query = 'DELETE FROM alumno_rutina WHERE idRutina = ? AND idPersona = ? AND fechaAsignacion = ?';
-      params = [idRutina, idPersona, fechaAsignacion];
+      params = [idRutina, idPersona, formattedDate];
     } else {
       query = `DELETE FROM alumno_rutina 
                WHERE idRutina = ? AND idPersona = ? 
@@ -178,8 +181,10 @@ export class Rutina {
     let query, params;
     
     if (fechaAsignacion) {
+      // Formatear fecha para MySQL
+      const formattedDate = formatDateForMySQL(fechaAsignacion);
       query = 'UPDATE alumno_rutina SET estado = ? WHERE idRutina = ? AND idPersona = ? AND fechaAsignacion = ?';
-      params = [estado, idRutina, idPersona, fechaAsignacion];
+      params = [estado, idRutina, idPersona, formattedDate];
     } else {
       query = `UPDATE alumno_rutina SET estado = ? 
                WHERE idRutina = ? AND idPersona = ? 
@@ -227,6 +232,8 @@ export class Rutina {
 
   // Obtener ejercicios personalizados del alumno
   static async getAlumnoEjercicios(idRutina, idPersona, fechaAsignacion) {
+    // Formatear fecha para MySQL
+    const formattedDate = formatDateForMySQL(fechaAsignacion);
     const [rows] = await pool.query(
       `SELECT e.idEjercicio, e.nombre, e.tipoContador, e.unidad,
               e.distancia, e.duracion, e.descripcionIntervalo,
@@ -236,7 +243,7 @@ export class Rutina {
        INNER JOIN alumno_rutina_ejercicio are ON e.idEjercicio = are.idEjercicio
        WHERE are.idRutina = ? AND are.idPersona = ? AND are.fechaAsignacion = ?
        ORDER BY are.orden`,
-      [idRutina, idPersona, fechaAsignacion]
+      [idRutina, idPersona, formattedDate]
     );
     return rows;
   }
@@ -285,7 +292,9 @@ export class Rutina {
     let whereClause = 'WHERE idPersona = ? AND idRutina = ? AND idEjercicio = ?';
     if (fechaAsignacion) {
       whereClause += ' AND fechaAsignacion = ?';
-      values.push(fechaAsignacion);
+      // Formatear fecha para MySQL
+      const formattedDate = formatDateForMySQL(fechaAsignacion);
+      values.push(formattedDate);
     }
     
     const [result] = await pool.query(
