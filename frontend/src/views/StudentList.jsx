@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
 import { Search, Filter, UserPlus, ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
+import { useNavigate } from 'react-router-dom'
 import SkeletonLoader from '../components/SkeletonLoader'
 import { profesoraAPI } from '../services/api'
 
 export default function StudentList() {
-  const { setCurrentView, setSelectedStudent, loadStudentDetails, showAlert } = useAppContext()
+  const { setSelectedStudent, loadStudentDetails, showAlert } = useAppContext()
+  const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
   const [levelFilter, setLevelFilter] = useState('all')
   const [loading, setLoading] = useState(false)
@@ -214,7 +216,7 @@ export default function StudentList() {
 
       {/* Botón flotante para añadir alumno */}
       <button
-        onClick={() => setCurrentView('addStudent')}
+        onClick={() => navigate('/agregar-alumno')}
         className="fixed bottom-20 md:bottom-8 right-8 bg-gradient-to-r from-[#00BFFF] to-[#1E40AF] text-white px-4 py-3 rounded-full shadow-2xl hover:scale-110 transition-all z-50 flex items-center gap-2"
         title="Agregar Alumno"
       >

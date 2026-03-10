@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Plus, Trash2, Save, Dumbbell, List } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
+import { useNavigate } from 'react-router-dom'
 import Modal from '../components/Modal'
 
 // Helper para formatear el nombre del tipo de ejercicio
@@ -43,7 +44,8 @@ const getUnitShort = (type) => {
 }
 
 export default function RoutineBuilder() {
-  const { exercises, saveRoutine, deleteRoutine, savedRoutines, setCurrentView, showAlert } = useAppContext()
+  const { exercises, saveRoutine, deleteRoutine, savedRoutines, showAlert } = useAppContext()
+  const navigate = useNavigate()
   const [routineName, setRoutineName] = useState('')
   const [exerciseInstances, setExerciseInstances] = useState([])
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, routineId: null, routineName: '' })
@@ -351,7 +353,7 @@ export default function RoutineBuilder() {
 
       {/* Botón flotante para añadir ejercicio */}
       <button
-        onClick={() => setCurrentView('addExercise')}
+        onClick={() => navigate('/agregar-ejercicio')}
         className="fixed bottom-20 md:bottom-8 right-8 bg-gradient-to-r from-[#00BFFF] to-[#1E40AF] text-white px-4 py-3 rounded-full shadow-2xl hover:scale-110 transition-all z-50 flex items-center gap-2"
         title="Agregar Ejercicio"
       >

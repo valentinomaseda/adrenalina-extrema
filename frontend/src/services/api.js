@@ -4,19 +4,53 @@ const API_BASE_URL = import.meta.env.VITE_API_URL
   ? `${import.meta.env.VITE_API_URL}/api` 
   : 'http://localhost:3000/api';
 
+// Helper para obtener el token JWT desde localStorage
+const getAuthToken = () => {
+  const user = localStorage.getItem('user');
+  if (user) {
+    try {
+      const userData = JSON.parse(user);
+      return userData.token;
+    } catch (error) {
+      console.error('Error parsing user data:', error);
+      return null;
+    }
+  }
+  return null;
+};
+
 // Helper para hacer peticiones HTTP
 const fetchAPI = async (endpoint, options = {}) => {
   try {
+    // Obtener token de autenticación
+    const token = getAuthToken();
+    
+    // Construir headers
+    const headers = {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    };
+    
+    // Agregar token si existe
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
+      headers,
       ...options,
     })
 
     if (!response.ok) {
       const errorData = await response.json()
+      
+      // Si es un error de token expirado, limpiar localStorage y redirigir al login
+      if (response.status === 401 && errorData.error?.includes('Token expirado')) {
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+        throw new Error('Sesión expirada. Por favor, inicia sesión nuevamente.');
+      }
+      
       // Si es un error de email no verificado, lanzar un error con información adicional
       if (errorData.errorCode === 'EMAIL_NOT_VERIFIED') {
         const error = new Error(errorData.error || 'Email no verificado')
@@ -25,6 +59,7 @@ const fetchAPI = async (endpoint, options = {}) => {
         error.nombre = errorData.nombre
         throw error
       }
+      
       throw new Error(errorData.error || `HTTP error! status: ${response.status}`)
     }
 

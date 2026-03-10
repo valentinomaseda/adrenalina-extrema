@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Lock, Eye, EyeOff, Loader2, CheckCircle, XCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-const ResetPassword = ({ onBackToLogin, onGoToForgotPassword }) => {
+const ResetPassword = () => {
+  const navigate = useNavigate();
   const [token, setToken] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -139,10 +141,7 @@ const ResetPassword = ({ onBackToLogin, onGoToForgotPassword }) => {
                 <p className="text-gray-300">{mensaje}</p>
               </div>
               <button
-                onClick={() => {
-                  // Navegar al root y recargar para limpiar estado
-                  window.location.href = '/';
-                }}
+                onClick={() => navigate('/login')}
                 className="w-full bg-[#00BFFF] hover:bg-[#0099CC] text-[#0a0e1a] font-bold py-3 px-6 rounded-lg transition-all duration-200 active:scale-95"
               >
                 Volver al Login
@@ -168,10 +167,7 @@ const ResetPassword = ({ onBackToLogin, onGoToForgotPassword }) => {
               </div>
               <div className="flex flex-col space-y-3 w-full">
                 <button
-                  onClick={() => {
-                    window.history.replaceState({}, document.title, '/');
-                    onGoToForgotPassword();
-                  }}
+                  onClick={() => navigate('/forgot-password')}
                   className="w-full bg-[#00BFFF] hover:bg-[#0099CC] text-[#0a0e1a] font-bold py-3 px-6 rounded-lg transition-all duration-200 active:scale-95"
                 >
                   Solicitar Nuevo Enlace
@@ -306,10 +302,7 @@ const ResetPassword = ({ onBackToLogin, onGoToForgotPassword }) => {
           <p className="text-sm text-gray-400">
             ¿Problemas?{' '}
             <button
-              onClick={() => {
-                window.history.replaceState({}, document.title, '/');
-                onGoToForgotPassword();
-              }}
+              onClick={() => navigate('/forgot-password')}
               className="text-[#00BFFF] hover:underline font-semibold"
             >
               Solicitar Nuevo Enlace

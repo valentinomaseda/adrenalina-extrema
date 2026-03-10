@@ -1,11 +1,12 @@
 import { Users, ClipboardList, UserCircle, LogOut, TrendingUp } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
+import { Link, useLocation } from 'react-router-dom'
 
 export default function Sidebar() {
-  const { currentView, setCurrentView, setSelectedStudent, logout, user, showConfirm } = useAppContext()
+  const { setSelectedStudent, logout, user, showConfirm } = useAppContext()
+  const location = useLocation()
 
-  const handleNavigation = (view) => {
-    setCurrentView(view)
+  const handleNavigation = () => {
     setSelectedStudent(null)
   }
 
@@ -19,21 +20,28 @@ export default function Sidebar() {
 
   // Opciones de navegación para alumnos
   const studentNavItems = [
-    { id: 'studentRoutines', label: 'Mis Rutinas', icon: ClipboardList },
-    { id: 'studentProgress', label: 'Mi Progreso', icon: TrendingUp },
-    { id: 'profile', label: 'Perfil', icon: UserCircle },
+    { id: 'studentRoutines', label: 'Mis Rutinas', icon: ClipboardList, path: '/mis-rutinas' },
+    { id: 'studentProgress', label: 'Mi Progreso', icon: TrendingUp, path: '/mi-progreso' },
+    { id: 'profile', label: 'Perfil', icon: UserCircle, path: '/perfil' },
   ]
 
   // Opciones de navegación para coaches
   const coachNavItems = [
-    { id: 'students', label: 'Alumnos', icon: Users },
-    { id: 'routines', label: 'Rutinas', icon: ClipboardList },
-    { id: 'profile', label: 'Perfil', icon: UserCircle },
+    { id: 'students', label: 'Alumnos', icon: Users, path: '/alumnos' },
+    { id: 'routines', label: 'Rutinas', icon: ClipboardList, path: '/rutinas' },
+    { id: 'profile', label: 'Perfil', icon: UserCircle, path: '/perfil' },
   ]
 
   const navItems = user?.rol === 'alumno' ? studentNavItems : coachNavItems
   const dashboardTitle = user?.rol === 'alumno' ? 'Mi Dashboard' : 'Dashboard Coach'
   const userFallback = user?.rol === 'alumno' ? 'Alumno' : 'Coach Admin'
+
+  const isActive = (path) => {
+    if (path === '/alumnos') {
+      return location.pathname === '/alumnos' || location.pathname.startsWith('/alumnos/')
+    }
+    return location.pathname === path
+  }
 
   return (
     <aside className="hidden md:flex flex-col w-64 bg-[#111827] border-r border-[#1E40AF] shadow-sm h-[calc(100vh-4rem)] fixed left-0 top-16 animate-slide-in-left">
@@ -45,12 +53,13 @@ export default function Sidebar() {
       </div>
 
       <nav className="flex-1 p-4 space-y-2">
-        {navItems.map(({ id, label, icon: Icon }, index) => (
-          <button
+        {navItems.map(({ id, label, icon: Icon, path }, index) => (
+          <Link
             key={id}
-            onClick={() => handleNavigation(id)}
+            to={path}
+            onClick={handleNavigation}
             className={`flex items-center space-x-3 w-full px-4 py-3 rounded-lg transition-all hover:scale-105 active:scale-95 animate-slide-in-left ${
-              currentView === id
+              isActive(path)
                 ? 'bg-[#00BFFF] text-[#111827] shadow-md'
                 : 'text-[#F3F4F6] hover:bg-[#1E40AF]'
             }`}
@@ -58,7 +67,7 @@ export default function Sidebar() {
           >
             <Icon size={22} strokeWidth={2.5} />
             <span className="font-semibold">{label}</span>
-          </button>
+          </Link>
         ))}
       </nav>
 

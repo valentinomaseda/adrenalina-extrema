@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { Dumbbell, ArrowLeft, Loader2 } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
+import { useNavigate } from 'react-router-dom'
 
 export default function AddExercise() {
-  const { addExercise, setCurrentView, showAlert } = useAppContext()
+  const { addExercise, showAlert } = useAppContext()
+  const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
   
   const [formData, setFormData] = useState({
@@ -29,7 +31,7 @@ export default function AddExercise() {
     try {
       await addExercise(formData)
       showAlert('Ejercicio creado exitosamente', 'success')
-      setCurrentView('routines')
+      navigate('/rutinas')
     } catch (err) {
       showAlert(err.message || 'Error al crear el ejercicio', 'error')
     } finally {
@@ -43,7 +45,7 @@ export default function AddExercise() {
         {/* Header */}
         <div className="mb-6">
           <button
-            onClick={() => setCurrentView('routines')}
+            onClick={() => navigate('/rutinas')}
             className="flex items-center gap-2 text-[#1E40AF] hover:text-[#00BFFF] transition mb-4"
           >
             <ArrowLeft size={20} />

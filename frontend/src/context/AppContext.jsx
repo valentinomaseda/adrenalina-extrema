@@ -101,16 +101,14 @@ export const AppProvider = ({ children }) => {
   // Estados de datos
   const [students, setStudents] = useState([])
   const [exercises, setExercises] = useState([])
-  const [currentView, setCurrentView] = useState('students')
   const [selectedStudent, setSelectedStudent] = useState(null)
   const [savedRoutines, setSavedRoutines] = useState([])
   const [loading, setLoading] = useState(false)
   
   // Estados para alumno
   const [myRoutines, setMyRoutines] = useState([])
-  const [showRegister, setShowRegister] = useState(false)
-  const [authView, setAuthView] = useState('login') // 'login', 'register', 'forgot-password', 'reset-password', 'verify-email', 'pending-verification'
   const [pendingEmailData, setPendingEmailData] = useState({ email: '', nombre: '' }) // Para almacenar datos cuando email no está verificado
+  const [navigationCallback, setNavigationCallback] = useState(null) // Callback para navegación
 
   // Estado para toast notifications
   const [toastState, setToastState] = useState({
@@ -314,7 +312,10 @@ export const AppProvider = ({ children }) => {
       // Si el error es por email no verificado, cambiar a vista de verificación pendiente
       if (error.code === 'EMAIL_NOT_VERIFIED') {
         setPendingEmailData({ email: error.email, nombre: error.nombre })
-        setAuthView('pending-verification')
+        // Navegar a pending-verification usando el callback
+        if (navigationCallback) {
+          navigationCallback('/pending-verification')
+        }
         throw new Error('Por favor verifica tu email antes de iniciar sesión')
       }
       throw error
@@ -329,7 +330,6 @@ export const AppProvider = ({ children }) => {
     setStudents([])
     setExercises([])
     setSavedRoutines([])
-    setCurrentView('students')
     setSelectedStudent(null)
   }
 
@@ -734,7 +734,10 @@ export const AppProvider = ({ children }) => {
       // Si el registro requiere verificación de email
       if (response.requiresEmailVerification) {
         setPendingEmailData({ email: response.email, nombre: studentData.name })
-        setAuthView('pending-verification')
+        // Navegar a pending-verification usando el callback
+        if (navigationCallback) {
+          navigationCallback('/pending-verification')
+        }
         return true
       }
       
@@ -857,8 +860,6 @@ export const AppProvider = ({ children }) => {
     students,
     setStudents,
     exercises,
-    currentView,
-    setCurrentView,
     selectedStudent,
     setSelectedStudent,
     savedRoutines,
@@ -866,12 +867,9 @@ export const AppProvider = ({ children }) => {
     
     // Alumno
     myRoutines,
-    showRegister,
-    setShowRegister,
-    authView,
-    setAuthView,
     pendingEmailData,
     setPendingEmailData,
+    setNavigationCallback,
     
     // Funciones
     saveRoutine,

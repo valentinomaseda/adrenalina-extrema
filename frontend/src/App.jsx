@@ -1,4 +1,6 @@
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { AppProvider, useAppContext } from './context/AppContext'
+import { useEffect } from 'react'
 import Sidebar from './components/Sidebar'
 import BottomNavbar from './components/BottomNavbar'
 import Header from './components/Header'
@@ -17,137 +19,100 @@ import ForgotPassword from './views/ForgotPassword'
 import ResetPassword from './views/ResetPassword'
 import PendingEmailVerification from './views/PendingEmailVerification'
 
-function AppContent() {
-  const { currentView, isAuthenticated, user, showRegister, authView, setAuthView, pendingEmailData } = useAppContext()
-
-  // Si no está autenticado, mostrar vistas de autenticación
-  if (!isAuthenticated) {
-    // Verificar si hay un token en la URL para verificación de email o reset
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get('token');
-    const pathname = window.location.pathname;
-    
-    // Detectar reset-password PRIMERO por la ruta (tiene prioridad)
-    if (token && pathname.includes('reset-password')) {
-      return <ResetPassword 
-        onBackToLogin={() => {
-          window.history.replaceState({}, document.title, '/');
-          setAuthView('login');
-        }} 
-        onGoToForgotPassword={() => {
-          window.history.replaceState({}, document.title, '/');
-          setAuthView('forgot-password');
-        }} 
-      />;
-    }
-    
-    // Detectar verify-email por la ruta
-    if (token && pathname.includes('verify-email')) {
-      return <VerifyEmail onBackToLogin={() => {
-        window.history.replaceState({}, document.title, '/');
-        setAuthView('login');
-      }} />;
-    }
-    
-    // Si hay un token pero no está en una ruta específica, y authView indica verificación
-    if (token && authView !== 'login' && authView !== 'register' && authView !== 'forgot-password') {
-      // Si authView es reset-password, mostrar ResetPassword
-      if (authView === 'reset-password') {
-        return <ResetPassword 
-          onBackToLogin={() => {
-            window.history.replaceState({}, document.title, '/');
-            setAuthView('login');
-          }} 
-          onGoToForgotPassword={() => {
-            window.history.replaceState({}, document.title, '/');
-            setAuthView('forgot-password');
-          }} 
-        />;
-      }
-      // Por defecto, mostrar VerifyEmail
-      return <VerifyEmail onBackToLogin={() => {
-        window.history.replaceState({}, document.title, '/');
-        setAuthView('login');
-      }} />;
-    }
-    
-    switch (authView) {
-      case 'register':
-        return <Register />;
-      case 'forgot-password':
-        return <ForgotPassword onBackToLogin={() => setAuthView('login')} />;
-      case 'reset-password':
-        return <ResetPassword 
-          onBackToLogin={() => {
-            window.history.replaceState({}, document.title, '/');
-            setAuthView('login');
-          }} 
-          onGoToForgotPassword={() => {
-            window.history.replaceState({}, document.title, '/');
-            setAuthView('forgot-password');
-          }} 
-        />;
-      case 'verify-email':
-        return <VerifyEmail onBackToLogin={() => {
-          window.history.replaceState({}, document.title, '/');
-          setAuthView('login');
-        }} />;
-      case 'pending-verification':
-        return <PendingEmailVerification 
-          email={pendingEmailData.email}
-          nombre={pendingEmailData.nombre}
-          onBackToLogin={() => setAuthView('login')} 
-        />;
-      default:
-        return showRegister ? <Register /> : <Login />;
-    }
-  }
-
-  // Renderizado basado en el rol del usuario
-  const renderView = () => {
-    // Vistas para alumnos
+// Componente para proteger rutas por rol
+function RoleProtectedRoute({ children, allowedRoles }) {
+  const { user } = useAppContext()
+  
+  // Verificar si el usuario tiene un rol permitido
+  if (!user?.rol || !allowedRoles.includes(user.rol)) {
+    // Redirigir según el rol del usuario
     if (user?.rol === 'alumno') {
-      switch (currentView) {
-        case 'studentRoutines':
-          return <StudentRoutines />
-        case 'studentProgress':
-          return <StudentProgress />
-        case 'profile':
-          return <Profile />
-        default:
-          return <StudentRoutines />
-      }
+      return <Navigate to="/mis-rutinas" replace />
     }
-    
-    // Vistas para coaches/entrenadores
-    switch (currentView) {
-      case 'students':
-        return <StudentList />
-      case 'studentDetail':
-        return <StudentDetail />
-      case 'routines':
-        return <RoutineBuilder />
-      case 'profile':
-        return <Profile />
-      case 'addStudent':
-        return <AddStudent />
-      case 'addExercise':
-        return <AddExercise />
-      default:
-        return <StudentList />
-    }
+    return <Navigate to="/alumnos" replace />
   }
+  
+  return children
+}
+
+// Layout para rutas autenticadas
+function AuthenticatedLayout() {
+  const { user } = useAppContext()
 
   return (
     <div className="flex h-screen bg-[#0a0e1a]">
-      {/* Header fijo en la parte superior */}
       <Header />
-      
       {user && <Sidebar />}
       
       <main className={`flex-1 ${user ? 'md:ml-64' : ''} overflow-y-auto pt-16`}>
         <div className="max-w-7xl mx-auto">
-          {renderView()}
+          <Routes>
+            {/* Rutas exclusivas para alumnos */}
+            <Route 
+              path="/mis-rutinas" 
+              element={
+                <RoleProtectedRoute allowedRoles={['alumno']}>
+                  <StudentRoutines />
+                </RoleProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/mi-progreso" 
+              element={
+                <RoleProtectedRoute allowedRoles={['alumno']}>
+                  <StudentProgress />
+                </RoleProtectedRoute>
+              } 
+            />
+            
+            {/* Rutas exclusivas para coaches/profesores */}
+            <Route 
+              path="/alumnos" 
+              element={
+                <RoleProtectedRoute allowedRoles={['profesora', 'coach']}>
+                  <StudentList />
+                </RoleProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/alumnos/:id" 
+              element={
+                <RoleProtectedRoute allowedRoles={['profesora', 'coach']}>
+                  <StudentDetail />
+                </RoleProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/rutinas" 
+              element={
+                <RoleProtectedRoute allowedRoles={['profesora', 'coach']}>
+                  <RoutineBuilder />
+                </RoleProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/agregar-alumno" 
+              element={
+                <RoleProtectedRoute allowedRoles={['profesora', 'coach']}>
+                  <AddStudent />
+                </RoleProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/agregar-ejercicio" 
+              element={
+                <RoleProtectedRoute allowedRoles={['profesora', 'coach']}>
+                  <AddExercise />
+                </RoleProtectedRoute>
+              } 
+            />
+            
+            {/* Rutas compartidas por todos los roles autenticados */}
+            <Route path="/perfil" element={<Profile />} />
+            
+            {/* Redirección por defecto según rol */}
+            <Route path="*" element={<DefaultRedirect />} />
+          </Routes>
         </div>
       </main>
 
@@ -156,10 +121,57 @@ function AppContent() {
   )
 }
 
+// Componente para redirección por defecto según rol
+function DefaultRedirect() {
+  const { user } = useAppContext()
+  
+  if (user?.rol === 'alumno') {
+    return <Navigate to="/mis-rutinas" replace />
+  }
+  
+  return <Navigate to="/alumnos" replace />
+}
+
+// Componente principal con rutas
+function AppContent() {
+  const { isAuthenticated, user, pendingEmailData, setNavigationCallback } = useAppContext()
+  const navigate = useNavigate()
+
+  // Establecer el callback de navegación en el contexto
+  useEffect(() => {
+    setNavigationCallback(() => navigate)
+  }, [navigate, setNavigationCallback])
+
+  // Si no está autenticado, mostrar rutas públicas
+  if (!isAuthenticated) {
+    return (
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/pending-verification" element={
+          <PendingEmailVerification 
+            email={pendingEmailData?.email || ''}
+            nombre={pendingEmailData?.nombre || ''}
+          />
+        } />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    )
+  }
+
+  // Si está autenticado, mostrar rutas protegidas
+  return <AuthenticatedLayout />
+}
+
 export default function App() {
   return (
-    <AppProvider>
-      <AppContent />
-    </AppProvider>
+    <BrowserRouter>
+      <AppProvider>
+        <AppContent />
+      </AppProvider>
+    </BrowserRouter>
   )
 }

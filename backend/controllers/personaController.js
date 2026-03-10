@@ -1,5 +1,6 @@
 import { Persona } from '../models/Persona.js';
 import { enviarEmailConfirmacion } from '../utils/emailService.js';
+import { generateToken } from '../middleware/common.js';
 import bcrypt from 'bcrypt';
 
 export const personaController = {
@@ -117,9 +118,16 @@ export const personaController = {
         
         if (hasDefaultPassword) {
           const claimedPersona = await Persona.claimAccount(email, password);
+          
+          // Generar token JWT para la cuenta reclamada
+          const token = generateToken(claimedPersona);
+          
           return res.status(200).json({ 
             message: 'Cuenta reclamada exitosamente',
-            persona: claimedPersona
+            persona: {
+              ...claimedPersona,
+              token
+            }
           });
         } else {
           // Si ya tiene contraseña personalizada, es un duplicado
@@ -195,7 +203,14 @@ export const personaController = {
         return res.status(401).json({ error: 'Credenciales inválidas' });
       }
 
-      res.json(resultado.persona);
+      // Generar token JWT
+      const token = generateToken(resultado.persona);
+
+      // Devolver persona con token
+      res.json({
+        ...resultado.persona,
+        token
+      });
     } catch (error) {
       console.error('Error en login:', error);
       res.status(500).json({ error: 'Error al iniciar sesión' });

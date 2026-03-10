@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { UserPlus, ArrowLeft, Loader2 } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
+import { useNavigate } from 'react-router-dom'
 
 export default function AddStudent() {
-  const { addStudent, setCurrentView, showAlert } = useAppContext()
+  const { addStudent, showAlert } = useAppContext()
+  const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
   
   const [formData, setFormData] = useState({
@@ -31,7 +33,7 @@ export default function AddStudent() {
     try {
       await addStudent(formData)
       showAlert('Alumno creado exitosamente', 'success')
-      setCurrentView('students')
+      navigate('/alumnos')
     } catch (err) {
       showAlert(err.message || 'Error al crear el alumno', 'error')
     } finally {
@@ -45,7 +47,7 @@ export default function AddStudent() {
         {/* Header */}
         <div className="mb-6">
           <button
-            onClick={() => setCurrentView('students')}
+            onClick={() => navigate('/alumnos')}
             className="flex items-center gap-2 text-[#1E40AF] hover:text-[#00BFFF] transition mb-4"
           >
             <ArrowLeft size={20} />

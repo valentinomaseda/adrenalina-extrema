@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { UserPlus, ArrowLeft, Loader2, Mail, Lock, User, Phone, Calendar, MapPin, Eye, EyeOff } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
+import { useNavigate } from 'react-router-dom'
 
 export default function Register() {
-  const { register, setShowRegister, showAlert } = useAppContext()
+  const { register, showAlert } = useAppContext()
+  const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -62,7 +64,7 @@ export default function Register() {
         {/* Header */}
         <div className="text-center mb-8">
           <button
-            onClick={() => setShowRegister(false)}
+            onClick={() => navigate('/login')}
             className="flex items-center gap-2 text-[#00BFFF] hover:text-[#1E40AF] transition mb-6 mx-auto"
           >
             <ArrowLeft size={20} />
@@ -311,7 +313,7 @@ export default function Register() {
             <p className="text-sm text-gray-400 text-center">
               ¿Ya tienes una cuenta?{' '}
               <button
-                onClick={() => setShowRegister(false)}
+                onClick={() => navigate('/login')}
                 className="text-[#00BFFF] hover:text-[#1E40AF] font-semibold transition"
               >
                 Inicia sesión aquí

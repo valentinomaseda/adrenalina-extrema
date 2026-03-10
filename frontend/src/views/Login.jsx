@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { Lock, Mail, Loader2, Eye, EyeOff } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
+import { useNavigate } from 'react-router-dom'
 
 export default function Login() {
-  const { login, setShowRegister, setAuthView, showAlert } = useAppContext()
+  const { login, showAlert } = useAppContext()
+  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -124,7 +126,7 @@ export default function Login() {
             <p className="text-sm text-gray-300">
               ¿No tienes cuenta?{' '}
               <button
-                onClick={() => setShowRegister(true)}
+                onClick={() => navigate('/register')}
                 className="text-[#00BFFF] hover:text-[#1E40AF] font-semibold transition-colors"
               >
                 Regístrate aquí

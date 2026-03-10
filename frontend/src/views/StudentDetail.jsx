@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { ArrowLeft, TrendingUp, Calendar, CheckCircle2, XCircle, Send, Plus, ChevronDown, ChevronUp, Info, X, Phone, Mail, Weight, Ruler, MapPin, Cake, Trash2, Edit, Loader2 } from 'lucide-react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { useAppContext } from '../context/AppContext'
+import { useNavigate } from 'react-router-dom'
 import AchievementBadges from '../components/AchievementBadges'
 import StreakDisplay from '../components/StreakDisplay'
 import PersonalizeRoutine from '../components/PersonalizeRoutine'
@@ -20,7 +21,8 @@ const getUnitName = (type) => {
 }
 
 export default function StudentDetail() {
-  const { selectedStudent, setCurrentView, setSelectedStudent, savedRoutines, assignRoutineToStudent, removeRoutineFromStudent, updateStudent, updateStudentRoutineStatus, showAlert, refreshStudents } = useAppContext()
+  const { selectedStudent, setSelectedStudent, savedRoutines, assignRoutineToStudent, removeRoutineFromStudent, updateStudent, updateStudentRoutineStatus, showAlert, refreshStudents } = useAppContext()
+  const navigate = useNavigate()
   const [selectedRoutineId, setSelectedRoutineId] = useState('')
   const [showProgress, setShowProgress] = useState(false)
   const [showInfoModal, setShowInfoModal] = useState(false)
@@ -170,7 +172,7 @@ export default function StudentDetail() {
 
   const handleBack = () => {
     setSelectedStudent(null)
-    setCurrentView('students')
+    navigate('/alumnos')
   }
 
   // Preparar datos para el gráfico usando routineHistory con status

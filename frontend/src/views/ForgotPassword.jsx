@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Mail, ArrowLeft, Loader2, CheckCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-const ForgotPassword = ({ onBackToLogin }) => {
+const ForgotPassword = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [estado, setEstado] = useState('formulario'); // 'formulario', 'enviando', 'enviado'
   const [error, setError] = useState('');
@@ -74,7 +76,7 @@ const ForgotPassword = ({ onBackToLogin }) => {
               </div>
 
               <button
-                onClick={onBackToLogin}
+                onClick={() => navigate('/login')}
                 className="w-full bg-[#00BFFF] hover:bg-[#0099CC] text-[#0a0e1a] font-bold py-3 px-6 rounded-lg transition-all duration-200 active:scale-95"
               >
                 Volver al Login
@@ -159,7 +161,7 @@ const ForgotPassword = ({ onBackToLogin }) => {
             {/* Botón Volver */}
             <button
               type="button"
-              onClick={onBackToLogin}
+              onClick={() => navigate('/login')}
               className="w-full flex items-center justify-center space-x-2 bg-[#1E40AF] hover:bg-[#1e3a8a] text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 active:scale-95"
             >
               <ArrowLeft className="w-5 h-5" />
@@ -173,7 +175,7 @@ const ForgotPassword = ({ onBackToLogin }) => {
           <p className="text-sm text-gray-400">
             ¿Recordaste tu contraseña?{' '}
             <button
-              onClick={onBackToLogin}
+              onClick={() => navigate('/login')}
               className="text-[#00BFFF] hover:underline font-semibold"
             >
               Inicia Sesión

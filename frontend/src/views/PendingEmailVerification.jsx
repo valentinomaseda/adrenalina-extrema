@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Mail, Loader2, ArrowLeft, RefreshCw, CheckCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-export default function PendingEmailVerification({ email, nombre, onBackToLogin }) {
+export default function PendingEmailVerification({ email, nombre }) {
+  const navigate = useNavigate();
   const [enviandoDeNuevo, setEnviandoDeNuevo] = useState(false);
   const [emailEnviado, setEmailEnviado] = useState(false);
 
@@ -108,8 +110,8 @@ export default function PendingEmailVerification({ email, nombre, onBackToLogin 
               onClick={() => {
                 // Limpiar la URL si hay un token
                 window.history.replaceState({}, document.title, '/');
-                if (onBackToLogin) {
-                  onBackToLogin();
+                if (navigate) {
+                  navigate('/login');
                 }
               }}
               className="w-full flex items-center justify-center gap-2 bg-[#111827] hover:bg-[#1a2332] text-[#F3F4F6] font-semibold py-3 px-6 rounded-lg transition-all duration-200 active:scale-95 border border-gray-700"
@@ -132,7 +134,7 @@ export default function PendingEmailVerification({ email, nombre, onBackToLogin 
           <p className="text-sm text-gray-400">
             ¿Problemas con la verificación?{' '}
             <button
-              onClick={() => alert('Contacta a soporte: soporte@adrenalina-extrema.com')}
+              onClick={() => alert('Contacta a soporte: valentinomaseda@outlook.com')}
               className="text-[#00BFFF] hover:underline font-semibold"
             >
               Contacta Soporte

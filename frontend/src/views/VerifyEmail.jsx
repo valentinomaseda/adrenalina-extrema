@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { CheckCircle, XCircle, Mail, Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-const VerifyEmail = ({ onBackToLogin }) => {
+const VerifyEmail = () => {
+  const navigate = useNavigate();
   const [estado, setEstado] = useState('verificando'); // 'verificando', 'exito', 'error'
   const [mensaje, setMensaje] = useState('');
   const [enviandoDeNuevo, setEnviandoDeNuevo] = useState(false);
@@ -32,8 +34,6 @@ const VerifyEmail = ({ onBackToLogin }) => {
         if (response.ok && data.success) {
           setEstado('exito');
           setMensaje(data.message);
-          // Limpiar la URL
-          window.history.replaceState({}, document.title, '/');
         } else {
           setEstado('error');
           setMensaje(data.message || 'Error al verificar el email');
@@ -46,7 +46,7 @@ const VerifyEmail = ({ onBackToLogin }) => {
     };
 
     verificarEmail();
-  }, [onBackToLogin]);
+  }, []);
 
   const reenviarEmail = async () => {
     setEnviandoDeNuevo(true);
@@ -108,7 +108,7 @@ const VerifyEmail = ({ onBackToLogin }) => {
                   <p className="text-lg sm:text-xl font-bold text-white">¡Email Verificado!</p>
                   <p className="text-sm sm:text-base text-gray-300">{mensaje}</p>
                   <button
-                    onClick={onBackToLogin}
+                    onClick={() => navigate('/login')}
                     className="w-full mt-4 px-6 py-3 bg-[#00BFFF] text-[#0a0e1a] rounded-lg hover:bg-[#0099CC] active:scale-95 transition-all font-semibold"
                   >
                     Ir al Login
@@ -140,13 +140,7 @@ const VerifyEmail = ({ onBackToLogin }) => {
                     </button>
 
                     <button
-                      onClick={() => {
-                        // Limpiar la URL del token
-                        window.history.replaceState({}, document.title, '/');
-                        if (onBackToLogin) {
-                          onBackToLogin();
-                        }
-                      }}
+                      onClick={() => navigate('/login')}
                       className="bg-[#1E40AF] hover:bg-[#1e3a8a] text-white font-bold py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg transition-all duration-200 active:scale-95 text-sm sm:text-base"
                     >
                       Ir al Login
