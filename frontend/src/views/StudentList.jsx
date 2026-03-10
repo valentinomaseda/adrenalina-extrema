@@ -52,7 +52,7 @@ export default function StudentList() {
       // Cargar detalles completos del alumno desde el servidor
       const studentDetails = await loadStudentDetails(student.idPersona)
       setSelectedStudent(studentDetails)
-      navigate(`/alumno/${student.idPersona}`)
+      navigate(`/alumnos/${student.idPersona}`)
     } catch (error) {
       console.error('Error al cargar detalles del alumno:', error)
       showAlert('Error al cargar los detalles del alumno', 'error')
