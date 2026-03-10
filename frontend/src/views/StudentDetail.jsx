@@ -43,7 +43,11 @@ export default function StudentDetail() {
     routine.exercises.forEach((exercise, index) => {
       text += `${index + 1}. *${exercise.name}*\n`
       text += `   • ${exercise.value} ${getUnitName(exercise.type)}\n`
-      text += `   • ${exercise.sets} ${exercise.sets === 1 ? 'serie' : 'series'}\n\n`
+      // Solo mostrar series para ejercicios de tipo 'reps'
+      if (exercise.type === 'reps' && exercise.sets > 1) {
+        text += `   • ${exercise.sets} ${exercise.sets === 1 ? 'serie' : 'series'}\n`
+      }
+      text += `\n`
     })
     
     text += '💪 _¡Vamos con todo!_'
@@ -618,9 +622,12 @@ export default function StudentDetail() {
 
                           {/* Información principal: Sets y Cantidad */}
                           <div className="flex flex-wrap gap-2 text-sm mb-3">
-                            <span className="px-2 py-1 bg-[#1E40AF] text-[#00BFFF] rounded font-semibold">
-                              {exercise.sets} {exercise.sets === 1 ? 'serie' : 'series'}
-                            </span>
+                            {/* Solo mostrar series para ejercicios de tipo 'reps' */}
+                            {(exercise.unidad === 'reps' || exercise.type === 'reps') && (
+                              <span className="px-2 py-1 bg-[#1E40AF] text-[#00BFFF] rounded font-semibold">
+                                {exercise.sets} {exercise.sets === 1 ? 'serie' : 'series'}
+                              </span>
+                            )}
                             <span className="px-2 py-1 bg-[#1E40AF] text-[#00BFFF] rounded font-semibold">
                               {exercise.value} {getUnitName(exercise.unidad || exercise.type)}
                             </span>

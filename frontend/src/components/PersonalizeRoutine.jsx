@@ -24,7 +24,7 @@ export default function PersonalizeRoutine({ routine, student, onClose, onSave, 
         distancia: ej.distancia,
         duracion: ej.duracion,
         descripcionIntervalo: ej.descripcionIntervalo,
-        cantSets: ej.cantSets,
+        cantSets: ej.unidad === 'reps' ? ej.cantSets : 1, // Solo reps tiene múltiples series
         cantidad: ej.cantidad,
         orden: ej.orden,
         especificaciones: '',
@@ -60,8 +60,9 @@ export default function PersonalizeRoutine({ routine, student, onClose, onSave, 
   const handleSave = async () => {
     // Validar que todos los valores sean >= 1
     for (const exercise of exercises) {
-      if (!exercise.cantSets || exercise.cantSets < 1) {
-        showAlert('Todos los ejercicios deben tener al menos 1 serie', 'warning')
+      // Solo validar sets para ejercicios de tipo 'reps'
+      if (exercise.unidad === 'reps' && (!exercise.cantSets || exercise.cantSets < 1)) {
+        showAlert('Los ejercicios de repeticiones deben tener al menos 1 serie', 'warning')
         return
       }
       if (!exercise.cantidad || exercise.cantidad < 1) {
@@ -84,7 +85,7 @@ export default function PersonalizeRoutine({ routine, student, onClose, onSave, 
           student.id,
           exercise.idEjercicio,
           {
-            cantSets: parseInt(exercise.cantSets),
+            cantSets: exercise.unidad === 'reps' ? parseInt(exercise.cantSets) : 1,
             cantidad: parseInt(exercise.cantidad),
             especificaciones: exercise.especificaciones || null,
             pausaSeries: exercise.pausaSeries || null,
@@ -181,20 +182,22 @@ export default function PersonalizeRoutine({ routine, student, onClose, onSave, 
                     </label>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                    {/* Sets */}
-                    <div>
-                      <label className="block text-sm text-gray-400 mb-1">
-                        Sets
-                      </label>
-                      <input
-                        type="number"
-                        value={exercise.cantSets}
-                        onChange={(e) => handleExerciseChange(index, 'cantSets', e.target.value)}
-                        className="w-full px-3 py-2 bg-[#1a1f3a] border border-gray-600 rounded-lg text-[#F3F4F6] focus:outline-none focus:border-[#00BFFF] transition-colors"
-                        disabled={saving}
-                      />
-                    </div>
+                  <div className={`grid grid-cols-1 ${exercise.unidad === 'reps' ? 'md:grid-cols-2' : ''} gap-3 mb-3`}>
+                    {/* Sets - Solo para ejercicios de repeticiones */}
+                    {exercise.unidad === 'reps' && (
+                      <div>
+                        <label className="block text-sm text-gray-400 mb-1">
+                          Sets
+                        </label>
+                        <input
+                          type="number"
+                          value={exercise.cantSets}
+                          onChange={(e) => handleExerciseChange(index, 'cantSets', e.target.value)}
+                          className="w-full px-3 py-2 bg-[#1a1f3a] border border-gray-600 rounded-lg text-[#F3F4F6] focus:outline-none focus:border-[#00BFFF] transition-colors"
+                          disabled={saving}
+                        />
+                      </div>
+                    )}
 
                     {/* Cantidad */}
                     <div>

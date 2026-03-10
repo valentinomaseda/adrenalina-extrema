@@ -56,7 +56,7 @@ export default function RoutineBuilder() {
       name: firstExercise.name,
       type: firstExercise.defaultType,
       value: firstExercise.defaultType === 'reps' ? 10 : 30,
-      sets: 3,
+      sets: firstExercise.defaultType === 'reps' ? 3 : 1, // Solo ejercicios de reps tienen múltiples series
     }
     setExerciseInstances([...exerciseInstances, newInstance])
   }
@@ -86,6 +86,7 @@ export default function RoutineBuilder() {
               name: selectedExercise.name,
               type: selectedExercise.defaultType,
               value: selectedExercise.defaultType === 'reps' ? 10 : 30,
+              sets: selectedExercise.defaultType === 'reps' ? 3 : 1, // Ajustar sets según el tipo
             }
           }
           return { ...ex, [field]: value }
@@ -111,8 +112,9 @@ export default function RoutineBuilder() {
         showAlert('Todos los ejercicios deben tener valores mayores o iguales a 1', 'warning')
         return
       }
-      if (!exercise.sets || exercise.sets < 1) {
-        showAlert('Todos los ejercicios deben tener al menos 1 serie', 'warning')
+      // Solo validar sets para ejercicios de tipo 'reps'
+      if (exercise.type === 'reps' && (!exercise.sets || exercise.sets < 1)) {
+        showAlert('Los ejercicios de repeticiones deben tener al menos 1 serie', 'warning')
         return
       }
     }
@@ -238,7 +240,7 @@ export default function RoutineBuilder() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className={`grid ${instance.type === 'reps' ? 'grid-cols-2' : 'grid-cols-1'} gap-3`}>
                     {/* Valor */}
                     <div>
                       <label className="block text-xs font-semibold text-[#F3F4F6] mb-1">
@@ -254,18 +256,20 @@ export default function RoutineBuilder() {
                       />
                     </div>
 
-                    {/* Sets */}
-                    <div>
-                      <label className="block text-xs font-semibold text-[#F3F4F6] mb-1">Series</label>
-                      <input
-                        type="number"
-                        value={instance.sets}
-                        onChange={(e) =>
-                          updateExercise(instance.id, 'sets', e.target.value === '' ? '' : parseInt(e.target.value))
-                        }
-                        className="w-full px-3 py-2 border-2 border-[#1E40AF] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent bg-[#1E40AF] text-[#F3F4F6]"
-                      />
-                    </div>
+                    {/* Sets - Solo para ejercicios de repeticiones */}
+                    {instance.type === 'reps' && (
+                      <div>
+                        <label className="block text-xs font-semibold text-[#F3F4F6] mb-1">Series</label>
+                        <input
+                          type="number"
+                          value={instance.sets}
+                          onChange={(e) =>
+                            updateExercise(instance.id, 'sets', e.target.value === '' ? '' : parseInt(e.target.value))
+                          }
+                          className="w-full px-3 py-2 border-2 border-[#1E40AF] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent bg-[#1E40AF] text-[#F3F4F6]"
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
@@ -313,8 +317,10 @@ export default function RoutineBuilder() {
                           <span>{exercise.name}</span>
                           <span className="text-gray-400">•</span>
                           <span className="text-gray-300">
-                            {exercise.sets} sets × {exercise.value}{' '}
-                            {getUnitShort(exercise.type)}
+                            {exercise.type === 'reps' 
+                              ? `${exercise.sets} sets × ${exercise.value} ${getUnitShort(exercise.type)}`
+                              : `${exercise.value} ${getUnitShort(exercise.type)}`
+                            }
                           </span>
                         </div>
                       ))}
