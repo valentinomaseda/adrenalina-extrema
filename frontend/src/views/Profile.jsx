@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { UserCircle, Mail, Phone, Award, LogOut, X, Edit, MapPin, Cake, Weight, Ruler, User, Eye, EyeOff } from 'lucide-react'
+import { UserCircle, Mail, Phone, Award, LogOut, X, Edit, MapPin, Cake, Weight, Ruler, User, Eye, EyeOff, Loader2 } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
 
 export default function Profile() {
@@ -9,6 +9,7 @@ export default function Profile() {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [updating, setUpdating] = useState(false)
 
   const handleLogout = () => {
     showConfirm(
@@ -41,6 +42,7 @@ export default function Profile() {
       }
     }
     
+    setUpdating(true)
     try {
       await updateProfile(editFormData)
       setShowEditModal(false)
@@ -50,6 +52,8 @@ export default function Profile() {
       showAlert('Perfil actualizado exitosamente', 'success')
     } catch (error) {
       showAlert(error.message || 'Error al actualizar el perfil', 'error')
+    } finally {
+      setUpdating(false)
     }
   }
 
@@ -402,15 +406,24 @@ export default function Profile() {
                 <button
                   type="button"
                   onClick={() => setShowEditModal(false)}
-                  className="flex-1 px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 active:scale-95 transition-all font-semibold"
+                  disabled={updating}
+                  className="flex-1 px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 active:scale-95 transition-all font-semibold disabled:opacity-50"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-3 bg-[#00BFFF] text-[#111827] rounded-lg hover:bg-[#1E40AF] hover:text-[#00BFFF] active:scale-95 transition-all font-semibold"
+                  disabled={updating}
+                  className="flex-1 px-4 py-3 bg-[#00BFFF] text-[#111827] rounded-lg hover:bg-[#1E40AF] hover:text-[#00BFFF] active:scale-95 transition-all font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  Guardar
+                  {updating ? (
+                    <>
+                      <Loader2 className="animate-spin" size={20} />
+                      Guardando...
+                    </>
+                  ) : (
+                    'Guardar'
+                  )}
                 </button>
               </div>
             </form>

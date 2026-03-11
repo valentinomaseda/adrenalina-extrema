@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, Trash2, Save, Dumbbell, List } from 'lucide-react'
+import { Plus, Trash2, Save, Dumbbell, List, Loader2 } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
 import { useNavigate } from 'react-router-dom'
 import Modal from '../components/Modal'
@@ -49,6 +49,8 @@ export default function RoutineBuilder() {
   const [routineName, setRoutineName] = useState('')
   const [exerciseInstances, setExerciseInstances] = useState([])
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, routineId: null, routineName: '' })
+  const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   const addExercise = () => {
     const firstExercise = exercises[0]
@@ -121,6 +123,7 @@ export default function RoutineBuilder() {
       }
     }
 
+    setSaving(true)
     try {
       const routine = {
         name: routineName,
@@ -140,6 +143,8 @@ export default function RoutineBuilder() {
     } catch (error) {
       console.error('Error al guardar rutina:', error)
       showAlert('Error al guardar la rutina: ' + (error.message || 'Error desconocido'), 'error')
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -148,14 +153,17 @@ export default function RoutineBuilder() {
   }
 
   const confirmDeleteRoutine = async () => {
+    setDeleting(true)
     try {
       await deleteRoutine(deleteModal.routineId)
       setDeleteModal({ isOpen: false, routineId: null, routineName: '' })
       showAlert('Rutina eliminada exitosamente', 'success')
     } catch (error) {
       console.error('Error al eliminar rutina:', error)
-      setDeleteModal({ isOpen: false, routineId: null, routineName: '' })
       showAlert('Error al eliminar la rutina: ' + (error.message || 'Error desconocido'), 'error')
+    } finally {
+      setDeleting(false)
+      setDeleteModal({ isOpen: false, routineId: null, routineName: '' })
     }
   }
 
@@ -282,10 +290,15 @@ export default function RoutineBuilder() {
         {/* Botón guardar */}
         <button
           onClick={handleSave}
-          className="w-full flex items-center justify-center space-x-2 px-6 py-4 bg-[#00BFFF] text-[#111827] rounded-lg hover:bg-[#1E40AF] hover:text-[#00BFFF] active:scale-95 transition-all font-bold text-lg shadow-md"
+          disabled={saving}
+          className="w-full flex items-center justify-center space-x-2 px-6 py-4 bg-[#00BFFF] text-[#111827] rounded-lg hover:bg-[#1E40AF] hover:text-[#00BFFF] active:scale-95 transition-all font-bold text-lg shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#00BFFF] disabled:hover:text-[#111827]"
         >
-          <Save size={24} strokeWidth={2.5} />
-          <span>Guardar Rutina</span>
+          {saving ? (
+            <Loader2 className="animate-spin" size={24} strokeWidth={2.5} />
+          ) : (
+            <Save size={24} strokeWidth={2.5} />
+          )}
+          <span>{saving ? 'Guardando...' : 'Guardar Rutina'}</span>
         </button>
       </div>
 
@@ -374,12 +387,14 @@ export default function RoutineBuilder() {
           {
             label: 'Cancelar',
             onClick: cancelDeleteRoutine,
-            variant: 'secondary'
+            variant: 'secondary',
+            disabled: deleting
           },
           {
-            label: 'Eliminar',
+            label: deleting ? 'Eliminando...' : 'Eliminar',
             onClick: confirmDeleteRoutine,
-            variant: 'danger'
+            variant: 'danger',
+            loading: deleting
           }
         ]}
       />

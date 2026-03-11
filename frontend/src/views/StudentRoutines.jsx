@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Dumbbell, CheckCircle2, XCircle, Clock, ChevronDown, ChevronUp } from 'lucide-react'
+import { Dumbbell, CheckCircle2, XCircle, Clock, ChevronDown, ChevronUp, Loader2 } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
 import Confetti from '../components/Confetti'
 
@@ -179,35 +179,47 @@ export default function StudentRoutines() {
                   <button
                     onClick={() => handleStatusUpdate(routine.id, 'completada', routine.fechaAsignacion)}
                     disabled={updatingStatus === routine.id || routine.status === 'completada'}
-                    className={`px-3 py-2 rounded-lg font-semibold text-sm transition-all active:scale-95 ${
+                    className={`px-3 py-2 rounded-lg font-semibold text-sm transition-all active:scale-95 flex items-center justify-center gap-1 ${
                       routine.status === 'completada'
                         ? 'bg-green-600 text-white'
                         : 'bg-[#111827] text-[#F3F4F6] hover:bg-green-600 hover:text-white'
                     } disabled:opacity-50 disabled:cursor-not-allowed`}
                   >
-                    ✓ Completada
+                    {updatingStatus === routine.id ? (
+                      <Loader2 className="animate-spin" size={16} />
+                    ) : (
+                      '✓ Completada'
+                    )}
                   </button>
                   <button
                     onClick={() => handleStatusUpdate(routine.id, 'incompleta', routine.fechaAsignacion)}
                     disabled={updatingStatus === routine.id || routine.status === 'incompleta'}
-                    className={`px-3 py-2 rounded-lg font-semibold text-sm transition-all active:scale-95 ${
+                    className={`px-3 py-2 rounded-lg font-semibold text-sm transition-all active:scale-95 flex items-center justify-center gap-1 ${
                       routine.status === 'incompleta'
                         ? 'bg-yellow-600 text-white'
                         : 'bg-[#111827] text-[#F3F4F6] hover:bg-yellow-600 hover:text-white'
                     } disabled:opacity-50 disabled:cursor-not-allowed`}
                   >
-                    ◐ Incompleta
+                    {updatingStatus === routine.id ? (
+                      <Loader2 className="animate-spin" size={16} />
+                    ) : (
+                      '◐ Incompleta'
+                    )}
                   </button>
                   <button
                     onClick={() => handleStatusUpdate(routine.id, 'activa', routine.fechaAsignacion)}
                     disabled={updatingStatus === routine.id || routine.status === 'activa'}
-                    className={`px-3 py-2 rounded-lg font-semibold text-sm transition-all active:scale-95 ${
+                    className={`px-3 py-2 rounded-lg font-semibold text-sm transition-all active:scale-95 flex items-center justify-center gap-1 ${
                       routine.status === 'activa'
                         ? 'bg-gray-600 text-white'
                         : 'bg-[#111827] text-[#F3F4F6] hover:bg-gray-600 hover:text-white'
                     } disabled:opacity-50 disabled:cursor-not-allowed`}
                   >
-                    ○ Pendiente
+                    {updatingStatus === routine.id ? (
+                      <Loader2 className="animate-spin" size={16} />
+                    ) : (
+                      '○ Pendiente'
+                    )}
                   </button>
                 </div>
               </div>
