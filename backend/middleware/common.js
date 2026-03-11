@@ -72,8 +72,28 @@ export const requireRole = (...allowedRoles) => {
       });
     }
 
+    // Log para debugging
+    console.log('[requireRole] User:', req.user.email, 'Role:', req.user.rol, 'Allowed:', allowedRoles);
+
+    // Normalizar el rol para soportar variantes (profe, profesora, coach)
+    const normalizedUserRole = req.user.rol?.toLowerCase();
+    const normalizedAllowedRoles = allowedRoles.map(r => r.toLowerCase());
+    
+    // Mapeo de roles equivalentes
+    const roleAliases = {
+      'profe': 'profesora',
+      'profesor': 'profesora',
+      'teacher': 'profesora',
+      'entrenador': 'coach',
+      'trainer': 'coach'
+    };
+    
+    // Obtener el rol normalizado o su alias
+    const effectiveRole = roleAliases[normalizedUserRole] || normalizedUserRole;
+    
     // Verificar si el rol del usuario está en los roles permitidos
-    if (!allowedRoles.includes(req.user.rol)) {
+    if (!normalizedAllowedRoles.includes(effectiveRole)) {
+      console.log('[requireRole] DENIED - User role:', req.user.rol, 'Normalized:', effectiveRole, 'Required:', allowedRoles);
       return res.status(403).json({ 
         error: 'No tienes permisos para acceder a este recurso.',
         requiredRoles: allowedRoles,
