@@ -61,6 +61,9 @@ export default function RoutineBuilder() {
       type: firstExercise.defaultType,
       value: firstExercise.defaultType === 'reps' ? 10 : 30,
       sets: firstExercise.defaultType === 'reps' ? 3 : 1, // Solo ejercicios de reps tienen múltiples series
+      distancia: firstExercise.distancia || null,
+      duracion: firstExercise.duracion || null,
+      descripcionIntervalo: firstExercise.descripcionIntervalo || null
     }
     setExerciseInstances([...exerciseInstances, newInstance])
   }
@@ -91,6 +94,9 @@ export default function RoutineBuilder() {
               type: selectedExercise.defaultType,
               value: selectedExercise.defaultType === 'reps' ? 10 : 30,
               sets: selectedExercise.defaultType === 'reps' ? 3 : 1, // Ajustar sets según el tipo
+              distancia: selectedExercise.distancia || null,
+              duracion: selectedExercise.duracion || null,
+              descripcionIntervalo: selectedExercise.descripcionIntervalo || null
             }
           }
           return { ...ex, [field]: value }
@@ -281,6 +287,28 @@ export default function RoutineBuilder() {
                       </div>
                     )}
                   </div>
+
+                  {/* Información adicional del ejercicio */}
+                  {(instance.distancia || instance.duracion || instance.descripcionIntervalo) && (
+                    <div className="mt-3 pt-3 border-t border-[#1E40AF] space-y-2">
+                      <p className="text-xs font-semibold text-[#00BFFF]">Información del Ejercicio:</p>
+                      {instance.distancia && (
+                        <p className="text-xs text-[#F3F4F6]">
+                          <span className="font-semibold">Distancia predeterminada:</span> {instance.distancia}
+                        </p>
+                      )}
+                      {instance.duracion && (
+                        <p className="text-xs text-[#F3F4F6]">
+                          <span className="font-semibold">Duración:</span> {instance.duracion}
+                        </p>
+                      )}
+                      {instance.descripcionIntervalo && (
+                        <p className="text-xs text-[#F3F4F6]">
+                          <span className="font-semibold">Intervalos:</span> {instance.descripcionIntervalo}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

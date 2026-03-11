@@ -69,7 +69,10 @@ const transformEjercicioToExercise = (ejercicio) => {
     id: ejercicio.idEjercicio,
     name: ejercicio.nombre,
     defaultType: ejercicio.unidad || ejercicio.tipoContador || 'reps',
-    unidad: ejercicio.unidad || ejercicio.tipoContador || 'reps'
+    unidad: ejercicio.unidad || ejercicio.tipoContador || 'reps',
+    distancia: ejercicio.distancia || null,
+    duracion: ejercicio.duracion || null,
+    descripcionIntervalo: ejercicio.descripcionIntervalo || null
   }
 }
 
@@ -87,7 +90,10 @@ const transformRutinaToRoutine = (rutina, ejercicios = []) => {
         sets: ej.cantSets || 3,
         value: ej.cantidad || 10,
         type: ej.unidad || ej.tipoContador || 'reps',
-        unidad: ej.unidad || ej.tipoContador || 'reps'
+        unidad: ej.unidad || ej.tipoContador || 'reps',
+        distancia: ej.distancia || null,
+        duracion: ej.duracion || null,
+        descripcionIntervalo: ej.descripcionIntervalo || null
       }
     })
   }
@@ -241,7 +247,10 @@ export const AppProvider = ({ children }) => {
                       sets: ej.cantSets || 3,
                       value: ej.cantidad || 10,
                       type: ej.unidad || ej.tipoContador || 'reps',
-                      unidad: ej.unidad || ej.tipoContador || 'reps'
+                      unidad: ej.unidad || ej.tipoContador || 'reps',
+                      distancia: ej.distancia || null,
+                      duracion: ej.duracion || null,
+                      descripcionIntervalo: ej.descripcionIntervalo || null
                     }))
                   }
                 } catch (error) {
@@ -366,7 +375,10 @@ export const AppProvider = ({ children }) => {
                       sets: ej.cantSets || 3,
                       value: ej.cantidad || 10,
                       type: ej.unidad || ej.tipoContador || 'reps',
-                      unidad: ej.unidad || ej.tipoContador || 'reps'
+                      unidad: ej.unidad || ej.tipoContador || 'reps',
+                      distancia: ej.distancia || null,
+                      duracion: ej.duracion || null,
+                      descripcionIntervalo: ej.descripcionIntervalo || null
                     }))
                   }
                 } catch (error) {
