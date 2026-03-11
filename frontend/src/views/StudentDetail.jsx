@@ -490,9 +490,12 @@ export default function StudentDetail() {
           <p className="text-[#F3F4F6] text-center py-8">No hay rutinas asignadas aún</p>
         ) : (
           <div className="space-y-3">
-            {selectedStudent.routineHistory.map((routine, index) => (
+            {selectedStudent.routineHistory.map((routine, index) => {
+              // Crear un ID único que incluya la fecha de asignación
+              const uniqueId = `${routine.id}-${routine.fechaAsignacion || routine.date}`;
+              return (
               <div
-                key={`${routine.id}-${routine.date}-${index}`}
+                key={uniqueId}
                 className={`bg-[#111827] rounded-lg border-2 ${getStatusColor(routine.status)} hover:border-[#00BFFF] transition-colors overflow-hidden`}
               >
                 {/* Header de la rutina */}
@@ -509,11 +512,11 @@ export default function StudentDetail() {
                       {routine.exercises && (
                         <>
                           <button
-                            onClick={() => setExpandedRoutine(expandedRoutine === routine.id ? null : routine.id)}
+                            onClick={() => setExpandedRoutine(expandedRoutine === uniqueId ? null : uniqueId)}
                             className="p-2 bg-[#1E40AF] text-[#00BFFF] rounded-lg hover:bg-[#00BFFF] hover:text-[#111827] active:scale-95 transition-all"
                             title="Ver ejercicios"
                           >
-                            {expandedRoutine === routine.id ? (
+                            {expandedRoutine === uniqueId ? (
                               <ChevronUp size={20} strokeWidth={2.5} />
                             ) : (
                               <ChevronDown size={20} strokeWidth={2.5} />
@@ -606,7 +609,7 @@ export default function StudentDetail() {
                 </div>
 
                 {/* Detalles de ejercicios (expandible) */}
-                {expandedRoutine === routine.id && routine.exercises && (
+                {expandedRoutine === uniqueId && routine.exercises && (
                   <div className="border-t-2 border-[#111827] p-4 bg-[#111827]/30 animate-slide-in-up">
                     <h4 className="text-lg font-bold text-[#00BFFF] mb-4">
                       Ejercicios ({routine.exercises.length})
@@ -683,7 +686,8 @@ export default function StudentDetail() {
                   </div>
                 )}
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
