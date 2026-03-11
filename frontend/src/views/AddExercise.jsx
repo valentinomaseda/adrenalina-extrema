@@ -115,10 +115,10 @@ export default function AddExercise() {
                   value={formData.distancia}
                   onChange={handleChange}
                   className="text-[#F3F4F6] bg-[#0f1729] w-full px-4 py-3 border-2 border-[#1E40AF] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg"
-                  placeholder={`Ej: 5 ${formData.unidad}, 10 ${formData.unidad}...`}
+                  placeholder="Ej: 5, 10, 21..."
                 />
                 <p className="text-sm text-[#9CA3AF] mt-2">
-                  Opcional: Define una distancia por defecto para este ejercicio
+                  Opcional: Define una distancia por defecto (solo número, sin unidad)
                 </p>
               </div>
             )}
@@ -136,10 +136,10 @@ export default function AddExercise() {
                   value={formData.duracion}
                   onChange={handleChange}
                   className="text-[#F3F4F6] bg-[#0f1729] w-full px-4 py-3 border-2 border-[#1E40AF] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg"
-                  placeholder={`Ej: 30 ${formData.unidad}, 5 ${formData.unidad}...`}
+                  placeholder="Ej: 30, 5, 90..."
                 />
                 <p className="text-sm text-[#9CA3AF] mt-2">
-                  Opcional: Define una duración por defecto para este ejercicio
+                  Opcional: Define una duración por defecto (solo número, sin unidad)
                 </p>
               </div>
             )}
@@ -182,12 +182,16 @@ export default function AddExercise() {
                 </p>
                 {formData.distancia && (
                   <p className="text-base text-gray-300">
-                    Distancia: <span className="font-semibold text-[#00BFFF]">{formData.distancia}</span>
+                    Distancia: <span className="font-semibold text-[#00BFFF]">
+                      {formData.distancia} {formData.unidad === 'km' ? 'km' : 'metros'}
+                    </span>
                   </p>
                 )}
                 {formData.duracion && (
                   <p className="text-base text-gray-300">
-                    Duración: <span className="font-semibold text-[#00BFFF]">{formData.duracion}</span>
+                    Duración: <span className="font-semibold text-[#00BFFF]">
+                      {formData.duracion} {formData.unidad === 'segundos' ? 'segundos' : formData.unidad === 'minutos' ? 'minutos' : 'horas'}
+                    </span>
                   </p>
                 )}
                 {formData.descripcionIntervalo && (

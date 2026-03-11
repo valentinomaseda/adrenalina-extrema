@@ -43,6 +43,16 @@ const getUnitShort = (type) => {
   return units[type] || type
 }
 
+// Helper para extraer solo el número de un string como "5 km" -> 5
+const parseNumericValue = (value) => {
+  if (!value) return null
+  // Si es un número, retornarlo
+  if (typeof value === 'number') return value
+  // Si es string, extraer solo los dígitos
+  const match = String(value).match(/\d+/)
+  return match ? parseInt(match[0]) : null
+}
+
 export default function RoutineBuilder() {
   const { exercises, saveRoutine, deleteRoutine, savedRoutines, showAlert } = useAppContext()
   const navigate = useNavigate()
@@ -54,12 +64,21 @@ export default function RoutineBuilder() {
 
   const addExercise = () => {
     const firstExercise = exercises[0]
+    
+    // Intentar usar distancia/duracion predeterminada, sino usar valor por defecto
+    let defaultValue = 10 // Valor por defecto para reps
+    if (firstExercise.defaultType !== 'reps') {
+      const distanciaValue = parseNumericValue(firstExercise.distancia)
+      const duracionValue = parseNumericValue(firstExercise.duracion)
+      defaultValue = distanciaValue || duracionValue || 30
+    }
+    
     const newInstance = {
       id: Date.now(),
       exerciseId: firstExercise.id,
       name: firstExercise.name,
       type: firstExercise.defaultType,
-      value: firstExercise.defaultType === 'reps' ? 10 : 30,
+      value: defaultValue,
       sets: firstExercise.defaultType === 'reps' ? 3 : 1, // Solo ejercicios de reps tienen múltiples series
       distancia: firstExercise.distancia || null,
       duracion: firstExercise.duracion || null,
@@ -87,12 +106,21 @@ export default function RoutineBuilder() {
         if (ex.id === id) {
           if (field === 'exerciseId') {
             const selectedExercise = exercises.find((e) => e.id === parseInt(value))
+            
+            // Calcular valor por defecto según tipo de ejercicio
+            let defaultValue = 10
+            if (selectedExercise.defaultType !== 'reps') {
+              const distanciaValue = parseNumericValue(selectedExercise.distancia)
+              const duracionValue = parseNumericValue(selectedExercise.duracion)
+              defaultValue = distanciaValue || duracionValue || 30
+            }
+            
             return {
               ...ex,
               exerciseId: selectedExercise.id,
               name: selectedExercise.name,
               type: selectedExercise.defaultType,
-              value: selectedExercise.defaultType === 'reps' ? 10 : 30,
+              value: defaultValue,
               sets: selectedExercise.defaultType === 'reps' ? 3 : 1, // Ajustar sets según el tipo
               distancia: selectedExercise.distancia || null,
               duracion: selectedExercise.duracion || null,
@@ -294,12 +322,16 @@ export default function RoutineBuilder() {
                       <p className="text-xs font-semibold text-[#00BFFF]">Información del Ejercicio:</p>
                       {instance.distancia && (
                         <p className="text-xs text-[#F3F4F6]">
-                          <span className="font-semibold">Distancia predeterminada:</span> {instance.distancia}
+                          <span className="font-semibold">Distancia predeterminada:</span> {instance.distancia} {instance.type === 'km' ? 'km' : 'metros'}
                         </p>
                       )}
                       {instance.duracion && (
                         <p className="text-xs text-[#F3F4F6]">
-                          <span className="font-semibold">Duración:</span> {instance.duracion}
+                          <span className="font-semibold">Duración:</span> {instance.duracion} {
+                            instance.type === 'segundos' ? 'segundos' : 
+                            instance.type === 'minutos' ? 'minutos' : 
+                            'horas'
+                          }
                         </p>
                       )}
                       {instance.descripcionIntervalo && (

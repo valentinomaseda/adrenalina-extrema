@@ -2,6 +2,16 @@ import { useState, useEffect } from 'react'
 import { X, Save, Dumbbell } from 'lucide-react'
 import { rutinasAPI } from '../services/api'
 
+// Helper para extraer solo el número de un string como "5 km" -> 5
+const parseNumericValue = (value) => {
+  if (!value) return null
+  // Si es un número, retornarlo
+  if (typeof value === 'number') return value
+  // Si es string, extraer solo los dígitos
+  const match = String(value).match(/\d+/)
+  return match ? parseInt(match[0]) : null
+}
+
 export default function PersonalizeRoutine({ routine, student, onClose, onSave, showAlert }) {
   const [exercises, setExercises] = useState([])
   const [loading, setLoading] = useState(true)
@@ -17,21 +27,31 @@ export default function PersonalizeRoutine({ routine, student, onClose, onSave, 
       // Obtener los ejercicios de la rutina plantilla
       const ejercicios = await rutinasAPI.getEjercicios(routine.idRutina || routine.id)
       // Inicializar el estado con los valores de la plantilla
-      setExercises(ejercicios.map(ej => ({
-        idEjercicio: ej.idEjercicio,
-        nombre: ej.nombre,
-        unidad: ej.unidad,
-        distancia: ej.distancia,
-        duracion: ej.duracion,
-        descripcionIntervalo: ej.descripcionIntervalo,
-        cantSets: ej.unidad === 'reps' ? ej.cantSets : 1, // Solo reps tiene múltiples series
-        cantidad: ej.cantidad,
-        orden: ej.orden,
-        especificaciones: '',
-        pausaSeries: ej.pausaSeries || '',
-        intensidad: ej.intensidad || '',
-        esCalentamiento: ej.esCalentamiento || 0
-      })))
+      setExercises(ejercicios.map(ej => {
+        // Calcular cantidad inicial: primero ej.cantidad, luego distancia/duracion parseada, luego default
+        let cantidadInicial = ej.cantidad
+        if (!cantidadInicial || cantidadInicial === 0) {
+          const distanciaValue = parseNumericValue(ej.distancia)
+          const duracionValue = parseNumericValue(ej.duracion)
+          cantidadInicial = distanciaValue || duracionValue || (ej.unidad === 'reps' ? 10 : 30)
+        }
+        
+        return {
+          idEjercicio: ej.idEjercicio,
+          nombre: ej.nombre,
+          unidad: ej.unidad,
+          distancia: ej.distancia,
+          duracion: ej.duracion,
+          descripcionIntervalo: ej.descripcionIntervalo,
+          cantSets: ej.unidad === 'reps' ? ej.cantSets : 1, // Solo reps tiene múltiples series
+          cantidad: cantidadInicial,
+          orden: ej.orden,
+          especificaciones: '',
+          pausaSeries: ej.pausaSeries || '',
+          intensidad: ej.intensidad || '',
+          esCalentamiento: ej.esCalentamiento || 0
+        }
+      }))
     } catch (error) {
       console.error('Error loading exercises:', error)
       showAlert('Error al cargar ejercicios', 'error')
@@ -161,8 +181,16 @@ export default function PersonalizeRoutine({ routine, student, onClose, onSave, 
                       {/* Mostrar info del ejercicio base */}
                       <div className="mt-1 text-sm text-gray-400 space-y-1">
                         <div>Unidad: {exercise.unidad}</div>
-                        {exercise.distancia && <div>Distancia: {exercise.distancia}</div>}
-                        {exercise.duracion && <div>Duración: {exercise.duracion}</div>}
+                        {exercise.distancia && (
+                          <div>Distancia: {exercise.distancia} {exercise.unidad === 'km' ? 'km' : 'metros'}</div>
+                        )}
+                        {exercise.duracion && (
+                          <div>Duración: {exercise.duracion} {
+                            exercise.unidad === 'segundos' ? 'segundos' : 
+                            exercise.unidad === 'minutos' ? 'minutos' : 
+                            'horas'
+                          }</div>
+                        )}
                         {exercise.descripcionIntervalo && (
                           <div className="text-[#00BFFF] italic">"{exercise.descripcionIntervalo}"</div>
                         )}
