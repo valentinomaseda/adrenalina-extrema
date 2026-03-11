@@ -131,7 +131,7 @@ export class Persona {
         p.direccion,
         MAX(ar.fechaAsignacion) AS ultima_asignacion,
         CASE 
-          WHEN ar_future.idPersona IS NULL THEN 1
+          WHEN ar_active.idPersona IS NULL THEN 1
           ELSE 0
         END AS necesita_rutina
       FROM persona p
@@ -139,8 +139,9 @@ export class Persona {
       LEFT JOIN (
         SELECT DISTINCT idPersona
         FROM alumno_rutina
-        WHERE fechaAsignacion >= CURDATE()
-      ) ar_future ON p.idPersona = ar_future.idPersona
+        WHERE estado IN ('activa', 'incompleta')
+           OR (estado = 'completada' AND fechaAsignacion >= DATE_SUB(CURDATE(), INTERVAL 7 DAY))
+      ) ar_active ON p.idPersona = ar_active.idPersona
       WHERE p.rol = 'alumno'
       GROUP BY p.idPersona
       ORDER BY ultima_asignacion DESC, p.nombre ASC
