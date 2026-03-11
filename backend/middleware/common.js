@@ -105,6 +105,43 @@ export const requireRole = (...allowedRoles) => {
   };
 };
 
+// Middleware especial: permite a coaches ver cualquier alumno, o a un alumno ver solo sus propios datos
+export const requireCoachOrSelf = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ 
+      error: 'Usuario no autenticado.' 
+    });
+  }
+
+  const normalizedUserRole = req.user.rol?.toLowerCase();
+  const roleAliases = {
+    'profe': 'profesora',
+    'profesor': 'profesora',
+    'teacher': 'profesora',
+    'entrenador': 'coach',
+    'trainer': 'coach'
+  };
+  const effectiveRole = roleAliases[normalizedUserRole] || normalizedUserRole;
+
+  // Si es coach o profesora, permitir acceso a cualquier alumno
+  if (effectiveRole === 'profesora' || effectiveRole === 'coach') {
+    console.log('[requireCoachOrSelf] ALLOWED - User is coach/profesora');
+    return next();
+  }
+
+  // Si es alumno, solo permitir acceso a sus propios datos
+  const idAlumno = parseInt(req.params.idAlumno);
+  if (req.user.idPersona === idAlumno) {
+    console.log('[requireCoachOrSelf] ALLOWED - User accessing own data');
+    return next();
+  }
+
+  console.log('[requireCoachOrSelf] DENIED - User:', req.user.idPersona, 'trying to access:', idAlumno);
+  return res.status(403).json({ 
+    error: 'No tienes permisos para acceder a este recurso.'
+  });
+};
+
 // Función helper para generar JWT
 export const generateToken = (persona) => {
   return jwt.sign(

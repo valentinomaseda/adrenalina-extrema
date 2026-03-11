@@ -1,6 +1,6 @@
 import express from 'express';
 import { rutinaController } from '../controllers/rutinaController.js';
-import { authenticateToken, requireRole } from '../middleware/common.js';
+import { authenticateToken, requireRole, requireCoachOrSelf } from '../middleware/common.js';
 
 const router = express.Router();
 
@@ -24,10 +24,12 @@ router.delete('/:id/ejercicios/:rutinaEjercicioId', authenticateToken, requireRo
 // Alumnos pueden actualizar el estado de sus propias rutinas
 router.put('/:id/estado', authenticateToken, rutinaController.updateEstado);
 
-// Rutas de personalización por alumno - Solo profesora/coach
+// Rutas de personalización por alumno
+// GET: Coach puede ver cualquier alumno, o alumno puede ver sus propios datos
 router.get('/:id/alumnos-personalizaciones', authenticateToken, requireRole('profesora', 'coach'), rutinaController.getAlumnosConPersonalizaciones);
-router.get('/:id/alumnos/:idAlumno/ejercicios', authenticateToken, requireRole('profesora', 'coach'), rutinaController.getAlumnoEjercicios);
-router.get('/:id/alumnos/:idAlumno/full', authenticateToken, requireRole('profesora', 'coach'), rutinaController.getFullRutinaAlumno);
+router.get('/:id/alumnos/:idAlumno/ejercicios', authenticateToken, requireCoachOrSelf, rutinaController.getAlumnoEjercicios);
+router.get('/:id/alumnos/:idAlumno/full', authenticateToken, requireCoachOrSelf, rutinaController.getFullRutinaAlumno);
+// PUT/POST/DELETE: Solo coaches pueden modificar
 router.put('/:id/alumnos/:idAlumno/ejercicios/:idEjercicio', authenticateToken, requireRole('profesora', 'coach'), rutinaController.updateAlumnoEjercicio);
 router.post('/:id/alumnos/:idAlumno/ejercicios', authenticateToken, requireRole('profesora', 'coach'), rutinaController.addAlumnoEjercicio);
 router.delete('/:id/alumnos/:idAlumno/ejercicios/:idEjercicio', authenticateToken, requireRole('profesora', 'coach'), rutinaController.removeAlumnoEjercicio);
