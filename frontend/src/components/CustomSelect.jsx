@@ -103,7 +103,7 @@ const CustomSelect = ({
       {isOpen && !disabled && (
         <div 
           className="
-            absolute z-50 w-full mt-2 
+            absolute z-[9999] w-full mt-2 
             bg-[#0f1729] 
             border-2 border-[#00BFFF] 
             rounded-lg 
