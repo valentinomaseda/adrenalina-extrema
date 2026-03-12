@@ -714,6 +714,38 @@ export default function StudentDetail() {
                               <p className="text-sm text-gray-300">{exercise.especificaciones}</p>
                             </div>
                           )}
+
+                          {/* Estado del ejercicio y feedback del alumno */}
+                          {(exercise.ejercicioCompletado !== undefined || exercise.feedbackAlumno) && (
+                            <div className="mt-2 p-3 bg-gradient-to-r from-[#0f172a] to-[#1a2942] rounded-lg border-2 border-[#00BFFF]/40">
+                              {/* Indicador de completado */}
+                              {exercise.ejercicioCompletado !== undefined && (
+                                <div className="flex items-center gap-2 mb-2">
+                                  {exercise.ejercicioCompletado ? (
+                                    <>
+                                      <CheckCircle2 className="text-green-400" size={20} />
+                                      <span className="text-sm font-semibold text-green-400">✓ Completado por el alumno</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <XCircle className="text-gray-400" size={20} />
+                                      <span className="text-sm font-semibold text-gray-400">Pendiente</span>
+                                    </>
+                                  )}
+                                </div>
+                              )}
+
+                              {/* Feedback del alumno */}
+                              {exercise.feedbackAlumno && (
+                                <div className="mt-2 p-2 bg-[#0a0f1a] rounded border border-[#1E40AF]/50">
+                                  <p className="text-xs text-[#00BFFF] font-semibold mb-1 flex items-center gap-1">
+                                    <span>💬</span> Comentario del alumno:
+                                  </p>
+                                  <p className="text-sm text-gray-200 italic">"{exercise.feedbackAlumno}"</p>
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>

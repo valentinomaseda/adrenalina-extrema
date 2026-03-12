@@ -94,9 +94,9 @@ export default function RoutineBuilder() {
   const updateExercise = (id, field, value) => {
     // Validar valores numéricos
     if ((field === 'value' || field === 'sets') && value !== '') {
-      const numValue = parseInt(value)
-      if (!isNaN(numValue) && numValue < 1) {
-        showAlert('El valor debe ser mayor o igual a 1', 'warning')
+      const numValue = field === 'value' ? parseFloat(value) : parseInt(value)
+      if (!isNaN(numValue) && numValue < (field === 'value' ? 0 : 1)) {
+        showAlert(`El valor debe ser mayor o igual a ${field === 'value' ? 0 : 1}`, 'warning')
         return
       }
     }
@@ -144,10 +144,10 @@ export default function RoutineBuilder() {
       return
     }
 
-    // Validar que todos los valores sean >= 1
+    // Validar que todos los valores sean válidos
     for (const exercise of exerciseInstances) {
-      if (!exercise.value || exercise.value < 1) {
-        showAlert('Todos los ejercicios deben tener valores mayores o iguales a 1', 'warning')
+      if (!exercise.value || exercise.value <= 0) {
+        showAlert('Todos los ejercicios deben tener valores mayores a 0', 'warning')
         return
       }
       // Solo validar sets para ejercicios de tipo 'reps'
@@ -292,9 +292,11 @@ export default function RoutineBuilder() {
                       </label>
                       <input
                         type="number"
+                        step="0.1"
+                        min="0"
                         value={instance.value}
                         onChange={(e) =>
-                          updateExercise(instance.id, 'value', e.target.value === '' ? '' : parseInt(e.target.value))
+                          updateExercise(instance.id, 'value', e.target.value === '' ? '' : parseFloat(e.target.value))
                         }
                         className="w-full px-3 py-2 border-2 border-[#1E40AF] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent bg-[#1E40AF] text-[#F3F4F6]"
                       />
@@ -306,6 +308,7 @@ export default function RoutineBuilder() {
                         <label className="block text-xs font-semibold text-[#F3F4F6] mb-1">Series</label>
                         <input
                           type="number"
+                          min="1"
                           value={instance.sets}
                           onChange={(e) =>
                             updateExercise(instance.id, 'sets', e.target.value === '' ? '' : parseInt(e.target.value))

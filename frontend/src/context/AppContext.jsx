@@ -386,7 +386,10 @@ export const AppProvider = ({ children }) => {
                       pausaSeries: ej.pausaSeries || null,
                       intensidad: ej.intensidad || null,
                       especificaciones: ej.especificaciones || null,
-                      esCalentamiento: ej.esCalentamiento || false
+                      esCalentamiento: ej.esCalentamiento || false,
+                      ejercicioCompletado: ej.ejercicioCompletado || false,
+                      feedbackAlumno: ej.feedbackAlumno || '',
+                      orden: ej.orden
                     }))
                   }
                 } catch (error) {
@@ -474,7 +477,11 @@ export const AppProvider = ({ children }) => {
                 pausaSeries: ej.pausaSeries,
                 intensidad: ej.intensidad,
                 especificaciones: ej.especificaciones,
-                esCalentamiento: ej.esCalentamiento
+                esCalentamiento: ej.esCalentamiento,
+                // Campos para el alumno
+                ejercicioCompletado: ej.ejercicioCompletado || false,
+                feedbackAlumno: ej.feedbackAlumno || '',
+                orden: ej.orden
               }))
             }
           } catch (error) {

@@ -238,7 +238,8 @@ export class Rutina {
       `SELECT e.idEjercicio, e.nombre, e.tipoContador, e.unidad,
               e.distancia, e.duracion, e.descripcionIntervalo,
               are.cantSets, are.cantidad, are.especificaciones, are.orden,
-              are.pausaSeries, are.intensidad, are.esCalentamiento
+              are.pausaSeries, are.intensidad, are.esCalentamiento,
+              are.ejercicioCompletado, are.feedbackAlumno
        FROM ejercicio e
        INNER JOIN alumno_rutina_ejercicio are ON e.idEjercicio = are.idEjercicio
        WHERE are.idRutina = ? AND are.idPersona = ? AND are.fechaAsignacion = ?
@@ -280,6 +281,14 @@ export class Rutina {
     if (updates.orden !== undefined) {
       fields.push('orden = ?');
       values.push(updates.orden);
+    }
+    if (updates.ejercicioCompletado !== undefined) {
+      fields.push('ejercicioCompletado = ?');
+      values.push(updates.ejercicioCompletado);
+    }
+    if (updates.feedbackAlumno !== undefined) {
+      fields.push('feedbackAlumno = ?');
+      values.push(updates.feedbackAlumno);
     }
     
     if (fields.length === 0) {

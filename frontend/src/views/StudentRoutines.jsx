@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { Dumbbell, CheckCircle2, XCircle, Clock, ChevronDown, ChevronUp, Loader2 } from 'lucide-react'
+import { Dumbbell, CheckCircle2, XCircle, Clock, ChevronDown, ChevronUp, Loader2, Save, MessageSquare, Check } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
+import { rutinasAPI } from '../services/api'
 import Confetti from '../components/Confetti'
 
 // Helper para obtener el nombre de la unidad
@@ -21,6 +22,8 @@ export default function StudentRoutines() {
   const [expandedRoutine, setExpandedRoutine] = useState(null)
   const [updatingStatus, setUpdatingStatus] = useState(null)
   const [showConfetti, setShowConfetti] = useState(false)
+  const [exerciseStates, setExerciseStates] = useState({}) // Estado local de ejercicios
+  const [savingExercises, setSavingExercises] = useState({}) // Estado de guardado por ejercicio
 
   // Cargar rutinas cuando el componente se monte
   useEffect(() => {
@@ -28,6 +31,75 @@ export default function StudentRoutines() {
       loadMyRoutines(user)
     }
   }, [user])
+
+  // Inicializar estados de ejercicios cuando myRoutines cambie
+  useEffect(() => {
+    if (myRoutines && myRoutines.length > 0) {
+      const initialStates = {}
+      myRoutines.forEach(routine => {
+        routine.exercises?.forEach(exercise => {
+          const key = `${routine.id}-${routine.fechaAsignacion}-${exercise.orden}`
+          initialStates[key] = {
+            ejercicioCompletado: exercise.ejercicioCompletado || false,
+            feedbackAlumno: exercise.feedbackAlumno || ''
+          }
+        })
+      })
+      setExerciseStates(initialStates)
+    }
+  }, [myRoutines])
+
+  const handleExerciseToggle = (routineId, fechaAsignacion, orden) => {
+    const key = `${routineId}-${fechaAsignacion}-${orden}`
+    setExerciseStates(prev => ({
+      ...prev,
+      [key]: {
+        ...prev[key],
+        ejercicioCompletado: !prev[key]?.ejercicioCompletado
+      }
+    }))
+  }
+
+  const handleFeedbackChange = (routineId, fechaAsignacion, orden, feedback) => {
+    const key = `${routineId}-${fechaAsignacion}-${orden}`
+    setExerciseStates(prev => ({
+      ...prev,
+      [key]: {
+        ...prev[key],
+        feedbackAlumno: feedback
+      }
+    }))
+  }
+
+  const handleSaveExercise = async (routine, exercise) => {
+    const key = `${routine.id}-${routine.fechaAsignacion}-${exercise.orden}`
+    setSavingExercises(prev => ({ ...prev, [key]: true }))
+    
+    try {
+      const state = exerciseStates[key]
+      await rutinasAPI.updateAlumnoEjercicio(
+        routine.id,
+        user.idPersona,
+        exercise.id,
+        {
+          ejercicioCompletado: state.ejercicioCompletado ? 1 : 0,
+          feedbackAlumno: state.feedbackAlumno || null
+        },
+        routine.fechaAsignacion,
+        exercise.orden
+      )
+      
+      showAlert('Ejercicio actualizado exitosamente', 'success')
+      
+      // Recargar rutinas para reflejar cambios
+      await loadMyRoutines(user)
+    } catch (error) {
+      console.error('Error updating exercise:', error)
+      showAlert('Error al actualizar el ejercicio', 'error')
+    } finally {
+      setSavingExercises(prev => ({ ...prev, [key]: false }))
+    }
+  }
 
   const handleStatusUpdate = async (routineId, newStatus, fechaAsignacion) => {
     setUpdatingStatus(routineId)
@@ -232,14 +304,24 @@ export default function StudentRoutines() {
                   </h4>
                   <div className="space-y-3">
                     {routine.exercises && routine.exercises.length > 0 ? (
-                      routine.exercises.map((exercise, idx) => (
+                      routine.exercises.map((exercise, idx) => {
+                        const key = `${routine.id}-${routine.fechaAsignacion}-${exercise.orden}`
+                        const exerciseState = exerciseStates[key] || {
+                          ejercicioCompletado: exercise.ejercicioCompletado || false,
+                          feedbackAlumno: exercise.feedbackAlumno || ''
+                        }
+                        const isSaving = savingExercises[key]
+                        
+                        return (
                         <div
                           key={idx}
-                          className="bg-[#111827] rounded-lg p-4 border-2 border-[#1E40AF]"
+                          className={`bg-[#111827] rounded-lg p-4 border-2 ${
+                            exerciseState.ejercicioCompletado ? 'border-green-500' : 'border-[#1E40AF]'
+                          }`}
                         >
-                          {/* Header del ejercicio con indicador de calentamiento */}
-                          <div className="flex items-start justify-between mb-2">
-                            <h5 className="font-bold text-[#F3F4F6] flex items-center gap-2">
+                          {/* Header del ejercicio con checkbox y calentamiento */}
+                          <div className="flex items-start justify-between mb-3">
+                            <h5 className="font-bold text-[#F3F4F6] flex items-center gap-2 flex-1">
                               {idx + 1}. {exercise.name}
                               {exercise.esCalentamiento === 1 && (
                                 <span className="text-xs px-2 py-1 bg-orange-600 text-white rounded-full">
@@ -247,13 +329,30 @@ export default function StudentRoutines() {
                                 </span>
                               )}
                             </h5>
+                            
+                            {/* Toggle de completado */}
+                            <button
+                              onClick={() => handleExerciseToggle(routine.id, routine.fechaAsignacion, exercise.orden)}
+                              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all active:scale-95 ${
+                                exerciseState.ejercicioCompletado
+                                  ? 'bg-green-600 text-white'
+                                  : 'bg-gray-600 text-gray-300'
+                              }`}
+                            >
+                              <Check size={16} />
+                              <span className="text-xs font-semibold">
+                                {exerciseState.ejercicioCompletado ? 'Completado' : 'Marcar'}
+                              </span>
+                            </button>
                           </div>
 
                           {/* Información principal: Sets y Cantidad */}
                           <div className="flex flex-wrap gap-2 text-sm mb-3">
-                            <span className="px-2 py-1 bg-[#1E40AF] text-[#00BFFF] rounded font-semibold">
-                              {exercise.sets} {exercise.sets === 1 ? 'serie' : 'series'}
-                            </span>
+                            {(exercise.unidad === 'reps' || exercise.type === 'reps') && (
+                              <span className="px-2 py-1 bg-[#1E40AF] text-[#00BFFF] rounded font-semibold">
+                                {exercise.sets} {exercise.sets === 1 ? 'serie' : 'series'}
+                              </span>
+                            )}
                             <span className="px-2 py-1 bg-[#1E40AF] text-[#00BFFF] rounded font-semibold">
                               {exercise.value} {getUnitName(exercise.unidad || exercise.type)}
                             </span>
@@ -294,8 +393,42 @@ export default function StudentRoutines() {
                               <p className="text-sm text-gray-300">{exercise.especificaciones}</p>
                             </div>
                           )}
+
+                          {/* Feedback del alumno */}
+                          <div className="mt-3 space-y-2">
+                            <label className="flex items-center gap-2 text-sm font-semibold text-[#00BFFF]">
+                              <MessageSquare size={16} />
+                              Feedback para el entrenador:
+                            </label>
+                            <textarea
+                              value={exerciseState.feedbackAlumno}
+                              onChange={(e) => handleFeedbackChange(routine.id, routine.fechaAsignacion, exercise.orden, e.target.value)}
+                              placeholder="Escribe tus comentarios sobre este ejercicio..."
+                              className="w-full px-3 py-2 bg-[#0a0f1a] border border-[#1E40AF] rounded-lg text-[#F3F4F6] placeholder-gray-500 focus:outline-none focus:border-[#00BFFF] transition-colors resize-none"
+                              rows="2"
+                            />
+                            
+                            {/* Botón de guardar */}
+                            <button
+                              onClick={() => handleSaveExercise(routine, exercise)}
+                              disabled={isSaving}
+                              className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-[#00BFFF] text-[#111827] rounded-lg hover:bg-[#1E40AF] hover:text-[#00BFFF] active:scale-95 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {isSaving ? (
+                                <>
+                                  <Loader2 className="animate-spin" size={16} />
+                                  Guardando...
+                                </>
+                              ) : (
+                                <>
+                                  <Save size={16} />
+                                  Guardar cambios
+                                </>
+                              )}
+                            </button>
+                          </div>
                         </div>
-                      ))
+                      )})
                     ) : (
                       <p className="text-gray-400 text-center py-4">
                         No hay ejercicios en esta rutina

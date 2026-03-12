@@ -106,7 +106,7 @@ export default function PersonalizeRoutine({ routine, student, onClose, onSave, 
           exercise.idEjercicio,
           {
             cantSets: exercise.unidad === 'reps' ? parseInt(exercise.cantSets) : 1,
-            cantidad: parseInt(exercise.cantidad),
+            cantidad: parseFloat(exercise.cantidad),
             especificaciones: exercise.especificaciones || null,
             pausaSeries: exercise.pausaSeries || null,
             intensidad: exercise.intensidad || null,
@@ -235,6 +235,8 @@ export default function PersonalizeRoutine({ routine, student, onClose, onSave, 
                       </label>
                       <input
                         type="number"
+                        step="0.1"
+                        min="0"
                         value={exercise.cantidad}
                         onChange={(e) => handleExerciseChange(index, 'cantidad', e.target.value)}
                         className="w-full px-3 py-2 bg-[#1a1f3a] border border-gray-600 rounded-lg text-[#F3F4F6] focus:outline-none focus:border-[#00BFFF] transition-colors"
