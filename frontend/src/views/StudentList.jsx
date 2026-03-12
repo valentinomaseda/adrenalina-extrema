@@ -79,11 +79,11 @@ export default function StudentList() {
   }
 
   return (
-    <div className="space-y-4 p-4 pb-32 md:pb-6 animate-fade-in">
+    <div className="space-y-4 p-4 pb-32 md:pb-6 animate-fade-in max-w-full overflow-hidden">
       <div className="flex flex-col md:flex-row gap-3 animate-slide-in-left relative z-30">
         {/* Buscador */}
         <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#00BFFF]" size={20} />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#00BFFF] z-10" size={20} />
           <input
             type="text"
             placeholder="Buscar alumno..."
@@ -94,8 +94,8 @@ export default function StudentList() {
         </div>
 
         {/* Filtro de nivel */}
-        <div className="relative">
-          <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#00BFFF] z-10 pointer-events-none" size={20} />
+        <div className="relative w-full md:w-auto md:min-w-[12rem]">
+          <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-[#00BFFF] z-10 pointer-events-none" size={20} />
           <CustomSelect
             value={levelFilter}
             onChange={(e) => setLevelFilter(e.target.value)}
@@ -105,7 +105,7 @@ export default function StudentList() {
               { value: 'Intermedio', label: 'Intermedio' },
               { value: 'Avanzado', label: 'Avanzado' }
             ]}
-            className="w-full md:w-48 pl-10 text-lg"
+            className="w-full pl-10 text-lg"
           />
         </div>
       </div>
