@@ -47,19 +47,53 @@ export default function StudentDetail() {
 
   // Función para formatear rutina como texto plano para WhatsApp
   const formatRoutineForWhatsApp = (routine) => {
-    let text = `🏃 *${routine.name}*\n\n`
+    let text = `*${routine.name}*\n\n`
     
     routine.exercises.forEach((exercise, index) => {
       text += `${index + 1}. *${exercise.name}*\n`
-      text += `   • ${exercise.value} ${getUnitName(exercise.type)}\n`
-      // Solo mostrar series para ejercicios de tipo 'reps'
-      if (exercise.type === 'reps' && exercise.sets > 1) {
-        text += `   • ${exercise.sets} ${exercise.sets === 1 ? 'serie' : 'series'}\n`
+      
+      // Valor y unidad principal
+      text += `   - ${exercise.value} ${getUnitName(exercise.unidad || exercise.type)}\n`
+      
+      // Series (solo para ejercicios de tipo 'reps')
+      if ((exercise.unidad === 'reps' || exercise.type === 'reps') && exercise.sets) {
+        text += `   - ${exercise.sets} ${exercise.sets === 1 ? 'serie' : 'series'}\n`
       }
+      
+      // Pausa entre series
+      if (exercise.pausaSeries) {
+        text += `   - Pausa entre series: ${exercise.pausaSeries}\n`
+      }
+      
+      // Intensidad
+      if (exercise.intensidad) {
+        text += `   - Intensidad: ${exercise.intensidad}\n`
+      }
+      
+      // Distancia
+      if (exercise.distancia) {
+        text += `   - Distancia: ${exercise.distancia}\n`
+      }
+      
+      // Duración
+      if (exercise.duracion) {
+        text += `   - Duracion: ${exercise.duracion}\n`
+      }
+      
+      // Descripción del intervalo
+      if (exercise.descripcionIntervalo) {
+        text += `   - Intervalo: ${exercise.descripcionIntervalo}\n`
+      }
+      
+      // Especificaciones personalizadas
+      if (exercise.especificaciones) {
+        text += `   - Especificaciones: ${exercise.especificaciones}\n`
+      }
+      
       text += `\n`
     })
     
-    text += '💪 _¡Vamos con todo!_'
+    text += '_Vamos con todo!_'
     return text
   }
 
