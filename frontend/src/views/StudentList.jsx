@@ -4,6 +4,7 @@ import { useAppContext } from '../context/AppContext'
 import { useNavigate } from 'react-router-dom'
 import SkeletonLoader from '../components/SkeletonLoader'
 import { profesoraAPI } from '../services/api'
+import CustomSelect from '../components/CustomSelect'
 
 export default function StudentList() {
   const { setSelectedStudent, loadStudentDetails, showAlert } = useAppContext()
@@ -94,17 +95,18 @@ export default function StudentList() {
 
         {/* Filtro de nivel */}
         <div className="relative">
-          <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#00BFFF]" size={20} />
-          <select
+          <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#00BFFF] z-10 pointer-events-none" size={20} />
+          <CustomSelect
             value={levelFilter}
             onChange={(e) => setLevelFilter(e.target.value)}
-            className="w-full md:w-48 pl-10 py-3 border-2 border-[#1E40AF] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg bg-[#0f1729] text-[#F3F4F6] cursor-pointer"
-          >
-            <option value="all">Todos los niveles</option>
-            <option value="Principiante">Principiante</option>
-            <option value="Intermedio">Intermedio</option>
-            <option value="Avanzado">Avanzado</option>
-          </select>
+            options={[
+              { value: 'all', label: 'Todos los niveles' },
+              { value: 'Principiante', label: 'Principiante' },
+              { value: 'Intermedio', label: 'Intermedio' },
+              { value: 'Avanzado', label: 'Avanzado' }
+            ]}
+            className="w-full md:w-48 pl-10 text-lg"
+          />
         </div>
       </div>
 

@@ -3,6 +3,7 @@ import { Plus, Trash2, Save, Dumbbell, List, Loader2 } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
 import { useNavigate } from 'react-router-dom'
 import Modal from '../components/Modal'
+import CustomSelect from '../components/CustomSelect'
 
 // Helper para formatear el nombre del tipo de ejercicio
 const getTypeLabel = (type) => {
@@ -267,17 +268,15 @@ export default function RoutineBuilder() {
                       Ejercicio
                     </label>
                     <div className="flex items-center gap-2">
-                      <select
+                      <CustomSelect
                         value={instance.exerciseId}
                         onChange={(e) => updateExercise(instance.id, 'exerciseId', e.target.value)}
-                        className="flex-1 px-3 py-2 border-2 border-[#1E40AF] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent bg-[#0f1729] text-[#F3F4F6]"
-                      >
-                        {exercises.map((ex) => (
-                          <option key={ex.id} value={ex.id}>
-                            {ex.name}
-                          </option>
-                        ))}
-                      </select>
+                        options={exercises.map(ex => ({
+                          value: ex.id,
+                          label: ex.name
+                        }))}
+                        className="flex-1"
+                      />
                       <span className="px-3 py-2 bg-[#00BFFF] text-[#111827] rounded-lg text-xs font-bold whitespace-nowrap">
                         {getTypeLabel(instance.type)}
                       </span>

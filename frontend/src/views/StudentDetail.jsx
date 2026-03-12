@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import AchievementBadges from '../components/AchievementBadges'
 import StreakDisplay from '../components/StreakDisplay'
 import PersonalizeRoutine from '../components/PersonalizeRoutine'
+import CustomSelect from '../components/CustomSelect'
 
 // Helper para obtener el nombre de la unidad
 const getUnitName = (type) => {
@@ -483,18 +484,19 @@ export default function StudentDetail() {
           <p className="text-[#F3F4F6] text-center py-8">No hay rutinas guardadas. Crea una rutina en la sección "Rutinas".</p>
         ) : (
           <div className="flex flex-col md:flex-row gap-3">
-            <select
+            <CustomSelect
               value={selectedRoutineId}
               onChange={(e) => setSelectedRoutineId(e.target.value)}
-              className="flex-1 px-4 py-3 border-2 border-[#1E40AF] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg bg-[#0f1729] text-[#F3F4F6]"
-            >
-              <option value="">Selecciona una rutina...</option>
-              {savedRoutines.map((routine) => (
-                <option key={routine.id} value={routine.id}>
-                  {routine.name} ({routine.exercises.length} ejercicios)
-                </option>
-              ))}
-            </select>
+              options={[
+                { value: '', label: 'Selecciona una rutina...' },
+                ...savedRoutines.map(routine => ({
+                  value: routine.id,
+                  label: `${routine.name} (${routine.exercises.length} ejercicios)`
+                }))
+              ]}
+              placeholder="Selecciona una rutina..."
+              className="flex-1 text-lg"
+            />
             <button
               onClick={handleAssignRoutine}
               disabled={assigningRoutine}
@@ -948,27 +950,27 @@ export default function StudentDetail() {
 
                 <div>
                   <label className="block text-[#00BFFF] font-semibold mb-2">Nivel</label>
-                  <select
+                  <CustomSelect
                     value={editFormData.nivel || 'Intermedio'}
                     onChange={(e) => setEditFormData({...editFormData, nivel: e.target.value})}
-                    className="w-full px-4 py-3 bg-[#0f1729] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent"
-                  >
-                    <option value="Principiante">Principiante</option>
-                    <option value="Intermedio">Intermedio</option>
-                    <option value="Avanzado">Avanzado</option>
-                  </select>
+                    options={[
+                      { value: 'Principiante', label: 'Principiante' },
+                      { value: 'Intermedio', label: 'Intermedio' },
+                      { value: 'Avanzado', label: 'Avanzado' }
+                    ]}
+                  />
                 </div>
 
                 <div>
                   <label className="block text-[#00BFFF] font-semibold mb-2">Género</label>
-                  <select
+                  <CustomSelect
                     value={editFormData.genero || 'masculino'}
                     onChange={(e) => setEditFormData({...editFormData, genero: e.target.value})}
-                    className="w-full px-4 py-3 bg-[#0f1729] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent"
-                  >
-                    <option value="masculino">Masculino</option>
-                    <option value="femenino">Femenino</option>
-                  </select>
+                    options={[
+                      { value: 'masculino', label: 'Masculino' },
+                      { value: 'femenino', label: 'Femenino' }
+                    ]}
+                  />
                 </div>
 
                 <div>

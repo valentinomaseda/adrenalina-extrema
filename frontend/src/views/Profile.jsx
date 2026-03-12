@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { UserCircle, Mail, Phone, Award, LogOut, X, Edit, MapPin, Cake, Weight, Ruler, User, Eye, EyeOff, Loader2 } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
+import CustomSelect from '../components/CustomSelect'
 
 export default function Profile() {
   const { user, students, logout, updateProfile, showConfirm, showAlert } = useAppContext()
@@ -275,14 +276,14 @@ export default function Profile() {
                 <>
                   <div>
                     <label className="block text-[#00BFFF] font-semibold mb-2">Género</label>
-                    <select
+                    <CustomSelect
                       value={editFormData.genero || 'masculino'}
                       onChange={(e) => setEditFormData({...editFormData, genero: e.target.value})}
-                      className="w-full px-4 py-3 bg-[#0f1729] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent"
-                    >
-                      <option value="masculino">Masculino</option>
-                      <option value="femenino">Femenino</option>
-                    </select>
+                      options={[
+                        { value: 'masculino', label: 'Masculino' },
+                        { value: 'femenino', label: 'Femenino' }
+                      ]}
+                    />
                   </div>
 
                   <div>

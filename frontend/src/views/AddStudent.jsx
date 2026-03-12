@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { UserPlus, ArrowLeft, Loader2 } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
 import { useNavigate } from 'react-router-dom'
+import CustomSelect from '../components/CustomSelect'
 
 export default function AddStudent() {
   const { addStudent, showAlert } = useAppContext()
@@ -101,17 +102,18 @@ export default function AddStudent() {
               <label htmlFor="gender" className="block text-sm font-semibold text-[#F3F4F6] mb-2">
                 Género *
               </label>
-              <select
+              <CustomSelect
                 id="gender"
                 name="gender"
                 value={formData.gender}
                 onChange={handleChange}
+                options={[
+                  { value: 'masculino', label: 'Masculino' },
+                  { value: 'femenino', label: 'Femenino' }
+                ]}
                 required
-                className="text-[#F3F4F6] bg-[#0f1729] w-full px-4 py-3 border-2 border-[#1E40AF] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg"
-              >
-                <option value="masculino">Masculino</option>
-                <option value="femenino">Femenino</option>
-              </select>
+                className="text-lg"
+              />
             </div>
 
             {/* Teléfono */}

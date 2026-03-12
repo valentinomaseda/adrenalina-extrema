@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Dumbbell, ArrowLeft, Loader2 } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
 import { useNavigate } from 'react-router-dom'
+import CustomSelect from '../components/CustomSelect'
 
 export default function AddExercise() {
   const { addExercise, showAlert } = useAppContext()
@@ -82,21 +83,22 @@ export default function AddExercise() {
               <label htmlFor="unidad" className="block text-sm font-semibold text-[#F3F4F6] mb-2">
                 Unidad de Medida *
               </label>
-              <select
+              <CustomSelect
                 id="unidad"
                 name="unidad"
                 value={formData.unidad}
                 onChange={handleChange}
+                options={[
+                  { value: 'reps', label: 'Repeticiones' },
+                  { value: 'segundos', label: 'Segundos' },
+                  { value: 'minutos', label: 'Minutos' },
+                  { value: 'horas', label: 'Horas' },
+                  { value: 'km', label: 'Kilómetros' },
+                  { value: 'metros', label: 'Metros' }
+                ]}
                 required
-                className="text-[#F3F4F6] bg-[#0f1729] w-full px-4 py-3 border-2 border-[#1E40AF] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg"
-              >
-                <option value="reps">Repeticiones</option>
-                <option value="segundos">Segundos</option>
-                <option value="minutos">Minutos</option>
-                <option value="horas">Horas</option>
-                <option value="km">Kilómetros</option>
-                <option value="metros">Metros</option>
-              </select>
+                className="text-lg"
+              />
               <p className="text-sm text-[#9CA3AF] mt-2">
                 Selecciona la unidad principal para este ejercicio. Las cantidades específicas se asignarán al agregar el ejercicio a una rutina.
               </p>

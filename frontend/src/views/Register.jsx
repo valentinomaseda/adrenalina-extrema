@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { UserPlus, ArrowLeft, Loader2, Mail, Lock, User, Phone, Calendar, MapPin, Eye, EyeOff } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
 import { useNavigate } from 'react-router-dom'
+import CustomSelect from '../components/CustomSelect'
 
 export default function Register() {
   const { register, showAlert } = useAppContext()
@@ -126,18 +127,18 @@ export default function Register() {
               <label htmlFor="gender" className="block text-sm font-semibold text-[#F3F4F6] mb-2">
                 Género *
               </label>
-              <select
+              <CustomSelect
                 id="gender"
                 name="gender"
                 value={formData.gender}
                 onChange={handleChange}
-                required
+                options={[
+                  { value: 'masculino', label: 'Masculino' },
+                  { value: 'femenino', label: 'Femenino' }
+                ]}
                 disabled={loading}
-                className="w-full px-4 py-3 border-2 border-[#1E40AF] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent bg-[#0f1729] text-[#F3F4F6] disabled:opacity-50"
-              >
-                <option value="masculino">Masculino</option>
-                <option value="femenino">Femenino</option>
-              </select>
+                required
+              />
             </div>
 
             {/* Contraseñas */}
