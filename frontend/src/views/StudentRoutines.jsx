@@ -91,6 +91,34 @@ export default function StudentRoutines() {
         newCompletedState ? '✓ Ejercicio marcado como completado' : 'Ejercicio desmarcado', 
         'success'
       )
+      
+      // Verificar si TODOS los ejercicios de la rutina están completados
+      if (newCompletedState) {
+        const allExercisesCompleted = routine.exercises.every((ex, exIdx) => {
+          const exOrden = ex.orden !== null && ex.orden !== undefined ? ex.orden : exIdx
+          const exKey = `${routine.id}-${routine.fechaAsignacion}-${exOrden}`
+          
+          // Si es el ejercicio actual (recién marcado), ya sabemos que está completado
+          if (exKey === key) return true
+          
+          // Para los demás, verificar el estado
+          return exerciseStates[exKey]?.ejercicioCompletado === true
+        })
+        
+        // Si todos están completados, marcar la rutina como completada
+        if (allExercisesCompleted && routine.status !== 'completada') {
+          try {
+            await updateRoutineStatus(routine.id, 'completada', routine.fechaAsignacion)
+            setShowConfetti(true)
+            showAlert('¡Felicitaciones! Rutina completada 🎉', 'success', '¡Genial!')
+            
+            // Recargar rutinas para actualizar el estado visual
+            await loadMyRoutines(user)
+          } catch (error) {
+            console.error('Error updating routine status:', error)
+          }
+        }
+      }
     } catch (error) {
       console.error('Error updating exercise:', error)
       
