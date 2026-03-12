@@ -75,13 +75,18 @@ export default function StudentRoutines() {
   }
 
   const handleSaveExercise = async (routine, exercise, idx) => {
-    // Usar orden si existe, sino usar índice como fallback
-    const orden = exercise.orden !== null && exercise.orden !== undefined ? exercise.orden : idx
-    const key = `${routine.id}-${routine.fechaAsignacion}-${orden}`
+    // Usar orden si existe, sino usar índice como fallback SOLO para la key interna
+    const ordenForKey = exercise.orden !== null && exercise.orden !== undefined ? exercise.orden : idx
+    const key = `${routine.id}-${routine.fechaAsignacion}-${ordenForKey}`
     setSavingExercises(prev => ({ ...prev, [key]: true }))
     
     try {
       const state = exerciseStates[key]
+      
+      // IMPORTANTE: Solo enviar orden al backend si existe en el ejercicio
+      // Si es null/undefined, no enviar para que el backend no lo use en el WHERE
+      const ordenForBackend = exercise.orden !== null && exercise.orden !== undefined ? exercise.orden : null
+      
       await rutinasAPI.updateAlumnoEjercicio(
         routine.id,
         user.idPersona,
@@ -91,7 +96,7 @@ export default function StudentRoutines() {
           feedbackAlumno: state.feedbackAlumno || null
         },
         routine.fechaAsignacion,
-        orden
+        ordenForBackend
       )
       
       showAlert('Ejercicio actualizado exitosamente', 'success')
