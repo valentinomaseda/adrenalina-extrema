@@ -41,6 +41,14 @@ export default function StudentRoutines() {
           // Usar orden si existe, sino usar índice como fallback para ejercicios duplicados
           const orden = exercise.orden !== null && exercise.orden !== undefined ? exercise.orden : idx
           const key = `${routine.id}-${routine.fechaAsignacion}-${orden}`
+          
+          // DEBUG: Ver qué valores se están inicializando
+          console.log('🎯 Inicializando estado para:', exercise.name, {
+            key,
+            ejercicioCompletado: exercise.ejercicioCompletado,
+            feedbackAlumno: exercise.feedbackAlumno
+          });
+          
           initialStates[key] = {
             ejercicioCompletado: exercise.ejercicioCompletado || false,
             feedbackAlumno: exercise.feedbackAlumno || '',
