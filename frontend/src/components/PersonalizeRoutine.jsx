@@ -112,7 +112,8 @@ export default function PersonalizeRoutine({ routine, student, onClose, onSave, 
             intensidad: exercise.intensidad || null,
             esCalentamiento: exercise.esCalentamiento ? 1 : 0
           },
-          fechaAsignacion
+          fechaAsignacion,
+          exercise.orden  // Pasar el orden para identificar ejercicios repetidos
         )
       )
       

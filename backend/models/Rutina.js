@@ -249,7 +249,7 @@ export class Rutina {
   }
 
   // Actualizar ejercicio personalizado del alumno
-  static async updateAlumnoEjercicio(idPersona, idRutina, idEjercicio, updates, fechaAsignacion) {
+  static async updateAlumnoEjercicio(idPersona, idRutina, idEjercicio, updates, fechaAsignacion, orden = null) {
     const fields = [];
     const values = [];
     
@@ -288,13 +288,19 @@ export class Rutina {
     
     values.push(idPersona, idRutina, idEjercicio);
     
-    // Construir WHERE clause - incluir fechaAsignacion si se proporciona
+    // Construir WHERE clause - IMPORTANTE: incluir orden para distinguir ejercicios repetidos
     let whereClause = 'WHERE idPersona = ? AND idRutina = ? AND idEjercicio = ?';
     if (fechaAsignacion) {
       whereClause += ' AND fechaAsignacion = ?';
       // Formatear fecha para MySQL
       const formattedDate = formatDateForMySQL(fechaAsignacion);
       values.push(formattedDate);
+    }
+    
+    // Si se proporciona orden, usarlo para identificar el ejercicio específico
+    if (orden !== null && orden !== undefined) {
+      whereClause += ' AND orden = ?';
+      values.push(orden);
     }
     
     const [result] = await pool.query(

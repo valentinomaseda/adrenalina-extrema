@@ -452,12 +452,6 @@ export const AppProvider = ({ children }) => {
               ra.fechaAsignacion
             )
             
-            console.log('=== EJERCICIOS PERSONALIZADOS DEL ALUMNO ===')
-            console.log('Rutina:', ra.nombre, 'ID:', ra.idRutina)
-            console.log('Alumno:', idPersona)
-            console.log('Fecha:', ra.fechaAsignacion)
-            console.log('Ejercicios recibidos:', ejercicios)
-            
             return {
               id: ra.idRutina,
               name: ra.nombre,
@@ -465,27 +459,23 @@ export const AppProvider = ({ children }) => {
               fechaAsignacion: ra.fechaAsignacion,
               status: ra.estado || 'activa',
               completed: ra.estado === 'completada',
-              exercises: ejercicios.map(ej => {
-                const mappedExercise = {
-                  exerciseId: ej.idEjercicio,
-                  id: ej.idEjercicio,
-                  name: ej.nombre,
-                  sets: ej.cantSets || 3,
-                  value: ej.cantidad || 10,
-                  type: ej.unidad || ej.tipoContador || 'reps',
-                  unidad: ej.unidad || ej.tipoContador || 'reps',
-                  // Campos adicionales para personalizaciones
-                  distancia: ej.distancia,
-                  duracion: ej.duracion,
-                  descripcionIntervalo: ej.descripcionIntervalo,
-                  pausaSeries: ej.pausaSeries,
-                  intensidad: ej.intensidad,
-                  especificaciones: ej.especificaciones,
-                  esCalentamiento: ej.esCalentamiento
-                }
-                console.log('Ejercicio mapeado:', mappedExercise)
-                return mappedExercise
-              })
+              exercises: ejercicios.map(ej => ({
+                exerciseId: ej.idEjercicio,
+                id: ej.idEjercicio,
+                name: ej.nombre,
+                sets: ej.cantSets || 3,
+                value: ej.cantidad || 10,
+                type: ej.unidad || ej.tipoContador || 'reps',
+                unidad: ej.unidad || ej.tipoContador || 'reps',
+                // Campos adicionales para personalizaciones
+                distancia: ej.distancia,
+                duracion: ej.duracion,
+                descripcionIntervalo: ej.descripcionIntervalo,
+                pausaSeries: ej.pausaSeries,
+                intensidad: ej.intensidad,
+                especificaciones: ej.especificaciones,
+                esCalentamiento: ej.esCalentamiento
+              }))
             }
           } catch (error) {
             console.error(`Error loading exercises for routine ${ra.idRutina}:`, error)

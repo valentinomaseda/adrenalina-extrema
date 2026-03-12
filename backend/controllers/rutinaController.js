@@ -175,13 +175,7 @@ export const rutinaController = {
     try {
       const { id, idAlumno } = req.params;
       const { fechaAsignacion } = req.query;
-      console.log('=== GET ALUMNO EJERCICIOS ===');
-      console.log('Rutina ID:', id);
-      console.log('Alumno ID:', idAlumno);
-      console.log('Fecha Asignacion:', fechaAsignacion);
       const ejercicios = await Rutina.getAlumnoEjercicios(id, idAlumno, fechaAsignacion);
-      console.log('Ejercicios encontrados:', ejercicios.length);
-      console.log('Datos:', JSON.stringify(ejercicios, null, 2));
       res.json(ejercicios);
     } catch (error) {
       console.error('Error al obtener ejercicios del alumno:', error);
@@ -204,13 +198,13 @@ export const rutinaController = {
     }
   },
 
-  // PUT /api/rutinas/:id/alumnos/:idAlumno/ejercicios/:idEjercicio?fechaAsignacion=...
+  // PUT /api/rutinas/:id/alumnos/:idAlumno/ejercicios/:idEjercicio?fechaAsignacion=...&orden=...
   async updateAlumnoEjercicio(req, res) {
     try {
       const { id, idAlumno, idEjercicio } = req.params;
-      const { fechaAsignacion } = req.query;
+      const { fechaAsignacion, orden } = req.query;
       const updates = req.body;
-      const result = await Rutina.updateAlumnoEjercicio(idAlumno, id, idEjercicio, updates, fechaAsignacion);
+      const result = await Rutina.updateAlumnoEjercicio(idAlumno, id, idEjercicio, updates, fechaAsignacion, orden);
       if (result.affectedRows === 0) {
         return res.status(404).json({ error: 'Ejercicio no encontrado para este alumno' });
       }

@@ -241,10 +241,16 @@ export const rutinasAPI = {
   getFullRutinaAlumno: (rutinaId, alumnoId) => fetchAPI(`/rutinas/${rutinaId}/alumnos/${alumnoId}/full`),
 
   // Actualizar ejercicio personalizado del alumno
-  updateAlumnoEjercicio: (rutinaId, alumnoId, ejercicioId, data, fechaAsignacion) => {
-    const url = fechaAsignacion 
+  updateAlumnoEjercicio: (rutinaId, alumnoId, ejercicioId, data, fechaAsignacion, orden = null) => {
+    let url = fechaAsignacion 
       ? `/rutinas/${rutinaId}/alumnos/${alumnoId}/ejercicios/${ejercicioId}?fechaAsignacion=${encodeURIComponent(fechaAsignacion)}`
       : `/rutinas/${rutinaId}/alumnos/${alumnoId}/ejercicios/${ejercicioId}`;
+    
+    // Agregar orden a la URL si se proporciona
+    if (orden !== null && orden !== undefined) {
+      url += fechaAsignacion ? `&orden=${orden}` : `?orden=${orden}`;
+    }
+    
     return fetchAPI(url, {
       method: 'PUT',
       body: JSON.stringify(data),

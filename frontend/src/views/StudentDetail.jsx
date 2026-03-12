@@ -47,14 +47,9 @@ export default function StudentDetail() {
 
   // Función para formatear rutina como texto plano para WhatsApp
   const formatRoutineForWhatsApp = (routine) => {
-    console.log('=== FORMATEANDO RUTINA PARA WHATSAPP ===')
-    console.log('Rutina:', routine)
-    console.log('Ejercicios:', routine.exercises)
-    
     let text = `*${routine.name}*\n\n`
     
     routine.exercises.forEach((exercise, index) => {
-      console.log(`Ejercicio ${index + 1}:`, exercise)
       text += `${index + 1}. *${exercise.name}*\n`
       
       // Valor y unidad principal
