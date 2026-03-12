@@ -318,6 +318,16 @@ export class Rutina {
        ${whereClause}`,
       values
     );
+    
+    // VALIDACIÓN: Advertir si se actualizan múltiples filas (ejercicios duplicados)
+    if (result.affectedRows > 1) {
+      console.error(`🚨 [updateAlumnoEjercicio] ¡Se actualizaron ${result.affectedRows} ejercicios a la vez!`);
+      console.error(`    Alumno: ${idPersona}, Rutina: ${idRutina}, Ejercicio: ${idEjercicio}`);
+      console.error(`    fechaAsignacion: ${fechaAsignacion}, orden: ${orden}`);
+      console.error(`    ⚠️  PROBLEMA: Hay ejercicios repetidos sin orden único`);
+      console.error(`    ✅ SOLUCIÓN: Ejecutar fix_orden_null.sql en Railway MySQL`);
+    }
+    
     return result;
   }
 

@@ -832,7 +832,11 @@ export const AppProvider = ({ children }) => {
                 pausaSeries: ej.pausaSeries || null,
                 intensidad: ej.intensidad || null,
                 esCalentamiento: ej.esCalentamiento || 0,
-                especificaciones: ej.especificaciones || null
+                especificaciones: ej.especificaciones || null,
+                // Campos de seguimiento del alumno
+                ejercicioCompletado: ej.ejercicioCompletado || false,
+                feedbackAlumno: ej.feedbackAlumno || null,
+                orden: ej.orden
               }))
             }
           } catch (error) {
