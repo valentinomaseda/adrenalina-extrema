@@ -474,7 +474,7 @@ export default function StudentDetail() {
       )}
 
       {/* Asignar nueva rutina */}
-      <div className="bg-gradient-to-br from-[#1E40AF] to-[#152e6b] rounded-xl shadow-lg p-6 animate-slide-in-up delay-200 border border-[#00BFFF]/20">
+      <div className="bg-gradient-to-br from-[#1E40AF] to-[#152e6b] rounded-xl shadow-lg p-6 animate-slide-in-up delay-200 border border-[#00BFFF]/20 relative z-20">
         <div className="flex items-center space-x-2 mb-4">
           <Plus className="text-[#00BFFF]" size={20} />
           <h4 className="text-lg font-semibold text-[#F3F4F6]">Asignar Nueva Rutina</h4>

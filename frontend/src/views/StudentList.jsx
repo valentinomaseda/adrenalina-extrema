@@ -94,7 +94,7 @@ export default function StudentList() {
         </div>
 
         {/* Filtro de nivel */}
-        <div className="relative">
+        <div className="relative z-10">
           <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#00BFFF] z-10 pointer-events-none" size={20} />
           <CustomSelect
             value={levelFilter}
