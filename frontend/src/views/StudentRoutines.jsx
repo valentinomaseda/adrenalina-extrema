@@ -37,11 +37,14 @@ export default function StudentRoutines() {
     if (myRoutines && myRoutines.length > 0) {
       const initialStates = {}
       myRoutines.forEach(routine => {
-        routine.exercises?.forEach(exercise => {
-          const key = `${routine.id}-${routine.fechaAsignacion}-${exercise.orden}`
+        routine.exercises?.forEach((exercise, idx) => {
+          // Usar orden si existe, sino usar índice como fallback para ejercicios duplicados
+          const orden = exercise.orden !== null && exercise.orden !== undefined ? exercise.orden : idx
+          const key = `${routine.id}-${routine.fechaAsignacion}-${orden}`
           initialStates[key] = {
             ejercicioCompletado: exercise.ejercicioCompletado || false,
-            feedbackAlumno: exercise.feedbackAlumno || ''
+            feedbackAlumno: exercise.feedbackAlumno || '',
+            orden: orden // Guardar el orden usado
           }
         })
       })
@@ -71,8 +74,10 @@ export default function StudentRoutines() {
     }))
   }
 
-  const handleSaveExercise = async (routine, exercise) => {
-    const key = `${routine.id}-${routine.fechaAsignacion}-${exercise.orden}`
+  const handleSaveExercise = async (routine, exercise, idx) => {
+    // Usar orden si existe, sino usar índice como fallback
+    const orden = exercise.orden !== null && exercise.orden !== undefined ? exercise.orden : idx
+    const key = `${routine.id}-${routine.fechaAsignacion}-${orden}`
     setSavingExercises(prev => ({ ...prev, [key]: true }))
     
     try {
@@ -86,7 +91,7 @@ export default function StudentRoutines() {
           feedbackAlumno: state.feedbackAlumno || null
         },
         routine.fechaAsignacion,
-        exercise.orden
+        orden
       )
       
       showAlert('Ejercicio actualizado exitosamente', 'success')
@@ -305,7 +310,9 @@ export default function StudentRoutines() {
                   <div className="space-y-3">
                     {routine.exercises && routine.exercises.length > 0 ? (
                       routine.exercises.map((exercise, idx) => {
-                        const key = `${routine.id}-${routine.fechaAsignacion}-${exercise.orden}`
+                        // Usar orden si existe, sino usar índice como fallback
+                        const orden = exercise.orden !== null && exercise.orden !== undefined ? exercise.orden : idx
+                        const key = `${routine.id}-${routine.fechaAsignacion}-${orden}`
                         const exerciseState = exerciseStates[key] || {
                           ejercicioCompletado: exercise.ejercicioCompletado || false,
                           feedbackAlumno: exercise.feedbackAlumno || ''
@@ -332,7 +339,7 @@ export default function StudentRoutines() {
                             
                             {/* Toggle de completado */}
                             <button
-                              onClick={() => handleExerciseToggle(routine.id, routine.fechaAsignacion, exercise.orden)}
+                              onClick={() => handleExerciseToggle(routine.id, routine.fechaAsignacion, orden)}
                               className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all active:scale-95 ${
                                 exerciseState.ejercicioCompletado
                                   ? 'bg-green-600 text-white'
@@ -402,7 +409,7 @@ export default function StudentRoutines() {
                             </label>
                             <textarea
                               value={exerciseState.feedbackAlumno}
-                              onChange={(e) => handleFeedbackChange(routine.id, routine.fechaAsignacion, exercise.orden, e.target.value)}
+                              onChange={(e) => handleFeedbackChange(routine.id, routine.fechaAsignacion, orden, e.target.value)}
                               placeholder="Escribe tus comentarios sobre este ejercicio..."
                               className="w-full px-3 py-2 bg-[#0a0f1a] border border-[#1E40AF] rounded-lg text-[#F3F4F6] placeholder-gray-500 focus:outline-none focus:border-[#00BFFF] transition-colors resize-none"
                               rows="2"
@@ -410,7 +417,7 @@ export default function StudentRoutines() {
                             
                             {/* Botón de guardar */}
                             <button
-                              onClick={() => handleSaveExercise(routine, exercise)}
+                              onClick={() => handleSaveExercise(routine, exercise, idx)}
                               disabled={isSaving}
                               className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-[#00BFFF] text-[#111827] rounded-lg hover:bg-[#1E40AF] hover:text-[#00BFFF] active:scale-95 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                             >

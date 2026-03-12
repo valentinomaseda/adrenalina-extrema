@@ -29,8 +29,8 @@ router.put('/:id/estado', authenticateToken, rutinaController.updateEstado);
 router.get('/:id/alumnos-personalizaciones', authenticateToken, requireRole('profesora', 'coach'), rutinaController.getAlumnosConPersonalizaciones);
 router.get('/:id/alumnos/:idAlumno/ejercicios', authenticateToken, requireCoachOrSelf, rutinaController.getAlumnoEjercicios);
 router.get('/:id/alumnos/:idAlumno/full', authenticateToken, requireCoachOrSelf, rutinaController.getFullRutinaAlumno);
-// PUT/POST/DELETE: Solo coaches pueden modificar
-router.put('/:id/alumnos/:idAlumno/ejercicios/:idEjercicio', authenticateToken, requireRole('profesora', 'coach'), rutinaController.updateAlumnoEjercicio);
+// PUT/POST/DELETE: Solo coaches pueden modificar, EXCEPTO alumno puede actualizar sus propios ejercicios (completado/feedback)
+router.put('/:id/alumnos/:idAlumno/ejercicios/:idEjercicio', authenticateToken, requireCoachOrSelf, rutinaController.updateAlumnoEjercicio);
 router.post('/:id/alumnos/:idAlumno/ejercicios', authenticateToken, requireRole('profesora', 'coach'), rutinaController.addAlumnoEjercicio);
 router.delete('/:id/alumnos/:idAlumno/ejercicios/:idEjercicio', authenticateToken, requireRole('profesora', 'coach'), rutinaController.removeAlumnoEjercicio);
 
