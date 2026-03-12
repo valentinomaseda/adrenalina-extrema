@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext, useState, useEffect, useRef } from 'react'
 import { personasAPI, ejerciciosAPI, rutinasAPI } from '../services/api'
 import Modal from '../components/Modal'
 import Toast from '../components/Toast'
@@ -116,6 +116,9 @@ export const AppProvider = ({ children }) => {
   const [pendingEmailData, setPendingEmailData] = useState({ email: '', nombre: '' }) // Para almacenar datos cuando email no está verificado
   const [navigationCallback, setNavigationCallback] = useState(null) // Callback para navegación
 
+  // Ref para mantener referencia actualizada de myRoutines sin causar re-renders
+  const myRoutinesRef = useRef([])
+
   // Estado para toast notifications
   const [toastState, setToastState] = useState({
     isOpen: false,
@@ -200,6 +203,128 @@ export const AppProvider = ({ children }) => {
       }
     }
   }, [])
+
+  // Polling automático para actualizar rutinas (solo para alumnos)
+  useEffect(() => {
+    // Solo activar polling si el usuario es alumno y está autenticado
+    if (!user || user.rol !== 'alumno' || !isAuthenticated) {
+      return
+    }
+
+    // Intervalo de actualización: 30 segundos
+    const POLLING_INTERVAL = 30000 // 30 segundos
+
+    let intervalId = null
+    let isTabVisible = !document.hidden
+    let isFirstCheck = true // Para evitar notificar en la primera verificación
+
+    // Función mejorada para verificar y actualizar rutinas
+    const checkForUpdates = async () => {
+      // Solo actualizar si la pestaña está visible
+      if (!isTabVisible || !user) return
+
+      try {
+        const rutinas = await personasAPI.getRutinas(user.idPersona)
+        
+        // Crear un mapa de rutinas actuales para comparación eficiente
+        const currentRoutinesMap = new Map(
+          myRoutinesRef.current.map(r => [
+            `${r.id}-${r.fechaAsignacion}`, 
+            { estado: r.status, nombre: r.name }
+          ])
+        )
+        
+        // Verificar si hay cambios reales
+        let hasNewRoutine = false
+        let hasStatusChange = false
+        
+        for (const rutina of rutinas) {
+          const key = `${rutina.idRutina}-${rutina.fechaAsignacion}`
+          const existing = currentRoutinesMap.get(key)
+          
+          if (!existing) {
+            hasNewRoutine = true
+            break
+          }
+          
+          if (existing.estado !== rutina.estado) {
+            hasStatusChange = true
+            break
+          }
+        }
+        
+        // También verificar si se eliminó alguna rutina
+        const hasRemovedRoutine = rutinas.length < myRoutinesRef.current.length
+
+        const hasChanges = hasNewRoutine || hasStatusChange || hasRemovedRoutine
+
+        // Si hay cambios, recargar las rutinas completas
+        if (hasChanges) {
+          console.log('[Auto-update] ¡Cambios detectados! Recargando rutinas...')
+          await loadMyRoutines(user)
+          
+          // Solo notificar si no es la primera verificación
+          if (!isFirstCheck) {
+            if (hasNewRoutine) {
+              showAlert('¡Te han asignado una nueva rutina!', 'success')
+            } else if (hasStatusChange) {
+              showAlert('Se actualizó el estado de tus rutinas', 'info')
+            } else if (hasRemovedRoutine) {
+              showAlert('Se actualizaron tus rutinas', 'info')
+            }
+          }
+        }
+        
+        // Marcar que ya no es la primera verificación
+        isFirstCheck = false
+        
+      } catch (error) {
+        console.error('[Auto-update] Error verificando actualizaciones:', error)
+        // No mostrar error al usuario para no interrumpir la experiencia
+      }
+    }
+
+    // Manejar cambios de visibilidad de la pestaña
+    const handleVisibilityChange = () => {
+      isTabVisible = !document.hidden
+      
+      // Si la pestaña se vuelve visible, verificar actualizaciones inmediatamente
+      if (isTabVisible) {
+        console.log('[Auto-update] Pestaña activa, verificando actualizaciones...')
+        checkForUpdates()
+      }
+    }
+
+    // Manejar evento focus de la ventana
+    const handleWindowFocus = () => {
+      console.log('[Auto-update] Ventana enfocada, verificando actualizaciones...')
+      checkForUpdates()
+    }
+
+    // Configurar el polling
+    intervalId = setInterval(checkForUpdates, POLLING_INTERVAL)
+
+    // Escuchar cambios de visibilidad y focus
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('focus', handleWindowFocus)
+
+    console.log('[Auto-update] Sistema de actualización automática activado')
+
+    // Limpiar al desmontar o cuando cambie el usuario
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId)
+        console.log('[Auto-update] Sistema de actualización automática desactivado')
+      }
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('focus', handleWindowFocus)
+    }
+  }, [user, isAuthenticated]) // Removido myRoutines de las dependencias
+
+  // Mantener la referencia de myRoutines actualizada
+  useEffect(() => {
+    myRoutinesRef.current = myRoutines
+  }, [myRoutines])
 
   // Cargar datos del backend
   const loadData = async (currentUser = null) => {
