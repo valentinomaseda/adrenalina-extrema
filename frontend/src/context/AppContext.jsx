@@ -819,36 +819,25 @@ export const AppProvider = ({ children }) => {
               date: rutina.fechaAsignacion ? new Date(rutina.fechaAsignacion).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
               fechaAsignacion: rutina.fechaAsignacion,
               status: rutina.estado || 'activa',
-              exercises: ejercicios.map(ej => {
-                // DEBUG: Verificar qué valores vienen de la BD
-                console.log('🔍 Ejercicio desde BD:', {
-                  nombre: ej.nombre,
-                  ejercicioCompletado: ej.ejercicioCompletado,
-                  tipo: typeof ej.ejercicioCompletado,
-                  feedbackAlumno: ej.feedbackAlumno,
-                  orden: ej.orden
-                });
-                
-                return {
-                  id: ej.idEjercicio,
-                  name: ej.nombre,
-                  sets: ej.cantSets || 3,
-                  value: ej.cantidad || 10,
-                  type: ej.tipoContador || 'reps',
-                  unidad: ej.unidad || ej.tipoContador || 'reps',
-                  distancia: ej.distancia || null,
-                  duracion: ej.duracion || null,
-                  descripcionIntervalo: ej.descripcionIntervalo || null,
-                  pausaSeries: ej.pausaSeries || null,
-                  intensidad: ej.intensidad || null,
-                  esCalentamiento: ej.esCalentamiento || 0,
-                  especificaciones: ej.especificaciones || null,
-                  // Campos de seguimiento - CONVERSIÓN EXPLÍCITA
-                  ejercicioCompletado: ej.ejercicioCompletado === 1 || ej.ejercicioCompletado === true,
-                  feedbackAlumno: ej.feedbackAlumno || '',
-                  orden: ej.orden
-                };
-              })
+              exercises: ejercicios.map(ej => ({
+                id: ej.idEjercicio,
+                name: ej.nombre,
+                sets: ej.cantSets || 3,
+                value: ej.cantidad || 10,
+                type: ej.tipoContador || 'reps',
+                unidad: ej.unidad || ej.tipoContador || 'reps',
+                distancia: ej.distancia || null,
+                duracion: ej.duracion || null,
+                descripcionIntervalo: ej.descripcionIntervalo || null,
+                pausaSeries: ej.pausaSeries || null,
+                intensidad: ej.intensidad || null,
+                esCalentamiento: ej.esCalentamiento || 0,
+                especificaciones: ej.especificaciones || null,
+                // Campos de seguimiento - CONVERSIÓN EXPLÍCITA de TINYINT(1) a Boolean
+                ejercicioCompletado: ej.ejercicioCompletado === 1 || ej.ejercicioCompletado === true,
+                feedbackAlumno: ej.feedbackAlumno || '',
+                orden: ej.orden
+              }))
             }
           } catch (error) {
             console.error(`Error loading exercises for routine ${rutina.idRutina}:`, error)

@@ -42,13 +42,6 @@ export default function StudentRoutines() {
           const orden = exercise.orden !== null && exercise.orden !== undefined ? exercise.orden : idx
           const key = `${routine.id}-${routine.fechaAsignacion}-${orden}`
           
-          // DEBUG: Ver qué valores se están inicializando
-          console.log('🎯 Inicializando estado para:', exercise.name, {
-            key,
-            ejercicioCompletado: exercise.ejercicioCompletado,
-            feedbackAlumno: exercise.feedbackAlumno
-          });
-          
           initialStates[key] = {
             ejercicioCompletado: exercise.ejercicioCompletado || false,
             feedbackAlumno: exercise.feedbackAlumno || '',
@@ -60,15 +53,58 @@ export default function StudentRoutines() {
     }
   }, [myRoutines])
 
-  const handleExerciseToggle = (routineId, fechaAsignacion, orden) => {
-    const key = `${routineId}-${fechaAsignacion}-${orden}`
+  const handleExerciseToggle = async (routine, exercise, idx) => {
+    // Usar orden si existe, sino usar índice como fallback
+    const orden = exercise.orden !== null && exercise.orden !== undefined ? exercise.orden : idx
+    const key = `${routine.id}-${routine.fechaAsignacion}-${orden}`
+    
+    // Obtener el nuevo estado (invertido)
+    const newCompletedState = !exerciseStates[key]?.ejercicioCompletado
+    
+    // Actualizar estado local inmediatamente para feedback visual
     setExerciseStates(prev => ({
       ...prev,
       [key]: {
         ...prev[key],
-        ejercicioCompletado: !prev[key]?.ejercicioCompletado
+        ejercicioCompletado: newCompletedState
       }
     }))
+    
+    // Guardar automáticamente en el backend
+    try {
+      const ordenForBackend = exercise.orden !== null && exercise.orden !== undefined ? exercise.orden : null
+      
+      await rutinasAPI.updateAlumnoEjercicio(
+        routine.id,
+        user.idPersona,
+        exercise.id,
+        {
+          ejercicioCompletado: newCompletedState ? 1 : 0,
+          feedbackAlumno: exerciseStates[key]?.feedbackAlumno || null
+        },
+        routine.fechaAsignacion,
+        ordenForBackend
+      )
+      
+      // Mostrar confirmación sutil
+      showAlert(
+        newCompletedState ? '✓ Ejercicio marcado como completado' : 'Ejercicio desmarcado', 
+        'success'
+      )
+    } catch (error) {
+      console.error('Error updating exercise:', error)
+      
+      // Revertir el estado local si falla
+      setExerciseStates(prev => ({
+        ...prev,
+        [key]: {
+          ...prev[key],
+          ejercicioCompletado: !newCompletedState
+        }
+      }))
+      
+      showAlert('Error al guardar el cambio', 'error')
+    }
   }
 
   const handleFeedbackChange = (routineId, fechaAsignacion, orden, feedback) => {
@@ -352,7 +388,7 @@ export default function StudentRoutines() {
                             
                             {/* Toggle de completado */}
                             <button
-                              onClick={() => handleExerciseToggle(routine.id, routine.fechaAsignacion, orden)}
+                              onClick={() => handleExerciseToggle(routine, exercise, idx)}
                               className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all active:scale-95 ${
                                 exerciseState.ejercicioCompletado
                                   ? 'bg-green-600 text-white'
