@@ -79,8 +79,8 @@ export default function StudentList() {
   }
 
   return (
-    <div className="space-y-4 p-4 pb-32 md:pb-6 animate-fade-in relative">
-      <div className="flex flex-col md:flex-row gap-3 animate-slide-in-left">
+    <div className="space-y-4 p-4 pb-32 md:pb-6 animate-fade-in">
+      <div className="flex flex-col md:flex-row gap-3 animate-slide-in-left relative z-30">
         {/* Buscador */}
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#00BFFF]" size={20} />
@@ -94,7 +94,7 @@ export default function StudentList() {
         </div>
 
         {/* Filtro de nivel */}
-        <div className="relative z-10">
+        <div className="relative">
           <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#00BFFF] z-10 pointer-events-none" size={20} />
           <CustomSelect
             value={levelFilter}
@@ -116,7 +116,7 @@ export default function StudentList() {
       </div>
 
       {/* Lista de alumnos */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 relative z-0">
         {filteredStudents.map((student, index) => (
           <button
             key={student.idPersona}
@@ -125,7 +125,7 @@ export default function StudentList() {
               student.necesita_rutina 
                 ? 'border-red-500' 
                 : 'border-transparent hover:border-[#00BFFF]'
-            } relative`}
+            } relative z-0`}
           >
             {/* Badge de alerta */}
             {student.necesita_rutina === 1 && (
