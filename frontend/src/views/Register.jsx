@@ -133,7 +133,7 @@ export default function Register() {
                 onChange={handleChange}
                 required
                 disabled={loading}
-                className="w-full px-4 py-3 border-2 border-[#111827] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent bg-[#111827] text-[#F3F4F6] disabled:opacity-50"
+                className="w-full px-4 py-3 border-2 border-[#1E40AF] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent bg-[#0f1729] text-[#F3F4F6] disabled:opacity-50"
               >
                 <option value="masculino">Masculino</option>
                 <option value="femenino">Femenino</option>

@@ -486,7 +486,7 @@ export default function StudentDetail() {
             <select
               value={selectedRoutineId}
               onChange={(e) => setSelectedRoutineId(e.target.value)}
-              className="flex-1 px-4 py-3 border-2 border-[#111827] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg bg-[#111827] text-[#F3F4F6]"
+              className="flex-1 px-4 py-3 border-2 border-[#1E40AF] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg bg-[#0f1729] text-[#F3F4F6]"
             >
               <option value="">Selecciona una rutina...</option>
               {savedRoutines.map((routine) => (
@@ -951,7 +951,7 @@ export default function StudentDetail() {
                   <select
                     value={editFormData.nivel || 'Intermedio'}
                     onChange={(e) => setEditFormData({...editFormData, nivel: e.target.value})}
-                    className="w-full px-4 py-3 bg-[#111827] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:border-[#00BFFF] focus:outline-none"
+                    className="w-full px-4 py-3 bg-[#0f1729] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent"
                   >
                     <option value="Principiante">Principiante</option>
                     <option value="Intermedio">Intermedio</option>
@@ -964,7 +964,7 @@ export default function StudentDetail() {
                   <select
                     value={editFormData.genero || 'masculino'}
                     onChange={(e) => setEditFormData({...editFormData, genero: e.target.value})}
-                    className="w-full px-4 py-3 bg-[#111827] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:border-[#00BFFF] focus:outline-none"
+                    className="w-full px-4 py-3 bg-[#0f1729] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent"
                   >
                     <option value="masculino">Masculino</option>
                     <option value="femenino">Femenino</option>

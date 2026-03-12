@@ -278,7 +278,7 @@ export default function Profile() {
                     <select
                       value={editFormData.genero || 'masculino'}
                       onChange={(e) => setEditFormData({...editFormData, genero: e.target.value})}
-                      className="w-full px-4 py-3 bg-[#111827] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:border-[#00BFFF] focus:outline-none"
+                      className="w-full px-4 py-3 bg-[#0f1729] text-[#F3F4F6] border-2 border-[#1E40AF] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent"
                     >
                       <option value="masculino">Masculino</option>
                       <option value="femenino">Femenino</option>

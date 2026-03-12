@@ -98,7 +98,7 @@ export default function StudentList() {
           <select
             value={levelFilter}
             onChange={(e) => setLevelFilter(e.target.value)}
-            className="w-full md:w-48 pl-10 pr-4 py-3 border-2 border-[#1E40AF] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg appearance-none bg-[#111827] text-[#F3F4F6] cursor-pointer"
+            className="w-full md:w-48 pl-10 py-3 border-2 border-[#1E40AF] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent text-lg bg-[#0f1729] text-[#F3F4F6] cursor-pointer"
           >
             <option value="all">Todos los niveles</option>
             <option value="Principiante">Principiante</option>

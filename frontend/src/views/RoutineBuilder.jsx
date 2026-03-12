@@ -270,7 +270,7 @@ export default function RoutineBuilder() {
                       <select
                         value={instance.exerciseId}
                         onChange={(e) => updateExercise(instance.id, 'exerciseId', e.target.value)}
-                        className="flex-1 px-3 py-2 border-2 border-[#1E40AF] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent bg-[#1E40AF] text-[#F3F4F6]"
+                        className="flex-1 px-3 py-2 border-2 border-[#1E40AF] rounded-lg focus:ring-2 focus:ring-[#00BFFF] focus:border-transparent bg-[#0f1729] text-[#F3F4F6]"
                       >
                         {exercises.map((ex) => (
                           <option key={ex.id} value={ex.id}>
