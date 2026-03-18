@@ -210,8 +210,8 @@ export default function PersonalizeRoutine({ routine, student, onClose, onSave, 
   }
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 animate-fade-in">
-      <div className="bg-[#1a1f3a] rounded-2xl shadow-2xl max-w-4xl w-full max-h-[95vh] flex flex-col overflow-hidden border border-[#00BFFF]/20">
+    <div className="fixed inset-0 bg-black/70 flex items-start justify-center z-50 p-4 pt-20 animate-fade-in">
+      <div className="bg-[#1a1f3a] rounded-2xl shadow-2xl max-w-4xl w-full max-h-[85vh] flex flex-col overflow-hidden border border-[#00BFFF]/20 mt-6">
         {/* Header */}
         <div className="bg-gradient-to-br from-[#1E40AF] to-[#152e6b] p-6 border-b border-[#00BFFF]/20">
           <div className="flex items-center justify-between">
