@@ -580,7 +580,7 @@ export default function StudentDetail() {
                           className="p-2 bg-[#00BFFF] text-[#111827] rounded-lg hover:bg-[#1E40AF] hover:text-[#00BFFF] active:scale-95 transition-all"
                           title="Editar rutina asignada"
                         >
-                          <Edit size={18} />
+                          <Edit2 size={18} />
                         </button>
                       )}
                       <button
