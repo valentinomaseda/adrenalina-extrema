@@ -22,6 +22,10 @@ export default function PersonalizeRoutine({ routine, student, onClose, onSave, 
     loadRoutineExercises()
   }, [routine])
 
+  // Nombre legible para mostrar en la UI: soportar `nombre` (backend) o `name` (frontend)
+  const routineDisplayName = (routine && (routine.nombre || routine.name || routine.idRutina)) || ''
+  const studentDisplayName = (student && (student.nombre || student.name || student.id || student.idPersona)) || ''
+
   const loadRoutineExercises = async () => {
     try {
       setLoading(true)
@@ -217,7 +221,7 @@ export default function PersonalizeRoutine({ routine, student, onClose, onSave, 
                 Personalizar Rutina
               </h3>
               <p className="text-[#00BFFF] mt-1">
-                {routine.nombre} para {student.nombre}
+                {routineDisplayName} para {studentDisplayName}
               </p>
             </div>
             <button
