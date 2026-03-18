@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { ArrowLeft, TrendingUp, Calendar, CheckCircle2, XCircle, Send, Plus, ChevronDown, ChevronUp, Info, X, Phone, Mail, Weight, Ruler, MapPin, Cake, Trash2, Edit, Loader2 } from 'lucide-react'
+import { ArrowLeft, TrendingUp, Calendar, CheckCircle2, XCircle, Send, Plus, ChevronDown, ChevronUp, Info, X, Phone, Mail, Weight, Ruler, MapPin, Cake, Trash2, Edit2, Loader2 } from 'lucide-react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { useAppContext } from '../context/AppContext'
 import { useNavigate } from 'react-router-dom'
@@ -364,7 +364,7 @@ export default function StudentDetail() {
                 className="p-2 bg-green-600 text-white rounded-full hover:bg-green-700 active:scale-95 transition-all"
                 title="Editar alumno"
               >
-                <Edit size={20} strokeWidth={2.5} />
+                <Edit2 size={20} strokeWidth={2.5} />
               </button>
             </div>
             <p className="text-sm text-gray-600 mt-1">
