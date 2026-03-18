@@ -3,7 +3,6 @@ import { TrendingUp, Calendar } from 'lucide-react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts'
 import { useAppContext } from '../context/AppContext'
 import AchievementBadges from '../components/AchievementBadges'
-import StreakDisplay from '../components/StreakDisplay'
 
 export default function StudentProgress() {
   const { user, myRoutines } = useAppContext()
@@ -31,70 +30,13 @@ export default function StudentProgress() {
     ? Math.round(progressData.reduce((sum, item) => sum + item.rendimiento, 0) / progressData.length)
     : 0
 
-  // Calcular racha de días consecutivos
-  const calculateStreak = () => {
-    if (!myRoutines || myRoutines.length === 0) return { current: 0, longest: 0 }
-    
-    const sortedDates = myRoutines
-      .filter(r => r.status === 'completada')
-      .map(r => new Date(r.date).toDateString())
-      .sort((a, b) => new Date(b) - new Date(a))
-    
-    const uniqueDates = [...new Set(sortedDates)]
-    
-    let currentStreak = 0
-    let longestStreak = 0
-    let tempStreak = 1
-    
-    const today = new Date()
-    const yesterday = new Date(today)
-    yesterday.setDate(yesterday.getDate() - 1)
-    
-    // Verificar si entrenó hoy o ayer para racha actual
-    const lastDate = uniqueDates[0] ? new Date(uniqueDates[0]) : null
-    if (lastDate) {
-      const daysDiff = Math.floor((today - lastDate) / (1000 * 60 * 60 * 24))
-      if (daysDiff <= 1) {
-        currentStreak = 1
-        // Calcular el resto de la racha
-        for (let i = 1; i < uniqueDates.length; i++) {
-          const prevDate = new Date(uniqueDates[i - 1])
-          const currDate = new Date(uniqueDates[i])
-          const diff = Math.floor((prevDate - currDate) / (1000 * 60 * 60 * 24))
-          if (diff === 1) {
-            currentStreak++
-          } else {
-            break
-          }
-        }
-      }
-    }
-    
-    // Calcular la racha más larga
-    for (let i = 1; i < uniqueDates.length; i++) {
-      const prevDate = new Date(uniqueDates[i - 1])
-      const currDate = new Date(uniqueDates[i])
-      const diff = Math.floor((prevDate - currDate) / (1000 * 60 * 60 * 24))
-      
-      if (diff === 1) {
-        tempStreak++
-        longestStreak = Math.max(longestStreak, tempStreak)
-      } else {
-        tempStreak = 1
-      }
-    }
-    
-    longestStreak = Math.max(longestStreak, currentStreak, 1)
-    
-    return { current: currentStreak, longest: longestStreak }
-  }
-
-  const streak = calculateStreak()
+  // Racha eliminada para MVP en producción
+  const streak = { current: 0, longest: 0 }
 
   // Estadísticas para logros
   const achievementStats = {
     completedRoutines,
-    currentStreak: streak.current,
+    currentStreak: 0,
     completionRate,
     averagePerformance
   }
@@ -164,8 +106,7 @@ export default function StudentProgress() {
         </p>
       </div>
 
-      {/* Racha de entrenamiento */}
-      <StreakDisplay currentStreak={streak.current} longestStreak={streak.longest} />
+      {/* Racha eliminada para MVP */}
 
       {/* Sistema de logros */}
       <div className="bg-gradient-to-br from-[#1E40AF] to-[#152e6b] rounded-xl shadow-lg p-6 animate-slide-in-up delay-300 border border-[#00BFFF]/20">
