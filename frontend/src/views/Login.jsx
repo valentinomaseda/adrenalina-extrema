@@ -97,7 +97,7 @@ export default function Login() {
             <div className="text-right">
               <button
                 type="button"
-                onClick={() => setAuthView('forgot-password')}
+                onClick={() => navigate('/forgot-password')}
                 className="text-sm text-[#00BFFF] hover:text-[#1E40AF] font-semibold transition-colors"
               >
                 ¿Olvidaste tu contraseña?
