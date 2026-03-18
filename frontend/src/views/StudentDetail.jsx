@@ -22,7 +22,7 @@ const getUnitName = (type) => {
 }
 
 export default function StudentDetail() {
-  const { selectedStudent, setSelectedStudent, savedRoutines, assignRoutineToStudent, removeRoutineFromStudent, updateStudent, updateStudentRoutineStatus, showAlert, refreshStudents } = useAppContext()
+  const { selectedStudent, setSelectedStudent, savedRoutines, assignRoutineToStudent, removeRoutineFromStudent, updateStudent, updateStudentRoutineStatus, showAlert, refreshStudents, user } = useAppContext()
   const navigate = useNavigate()
   const [selectedRoutineId, setSelectedRoutineId] = useState('')
   const [showProgress, setShowProgress] = useState(false)
@@ -34,6 +34,8 @@ export default function StudentDetail() {
   const [updatingRoutineStatus, setUpdatingRoutineStatus] = useState(null)
   const [showPersonalizeModal, setShowPersonalizeModal] = useState(false)
   const [routineToPersonalize, setRoutineToPersonalize] = useState(null)
+  const [editAssigned, setEditAssigned] = useState(false)
+  const [assignedFecha, setAssignedFecha] = useState(null)
   const [expandedRoutine, setExpandedRoutine] = useState(null)
   const [assigningRoutine, setAssigningRoutine] = useState(false)
   const [deletingRoutine, setDeletingRoutine] = useState(false)
@@ -567,6 +569,20 @@ export default function StudentDetail() {
                           </button>
                         </>
                       )}
+                      {user && (user.rol === 'profesora' || user.rol === 'coach') && (
+                        <button
+                          onClick={() => {
+                            setRoutineToPersonalize(routine)
+                            setAssignedFecha(routine.fechaAsignacion)
+                            setEditAssigned(true)
+                            setShowPersonalizeModal(true)
+                          }}
+                          className="p-2 bg-[#00BFFF] text-[#111827] rounded-lg hover:bg-[#1E40AF] hover:text-[#00BFFF] active:scale-95 transition-all"
+                          title="Editar rutina asignada"
+                        >
+                          <Edit size={18} />
+                        </button>
+                      )}
                       <button
                         onClick={() => {
                           setRoutineToDelete(routine)
@@ -1071,9 +1087,13 @@ export default function StudentDetail() {
         <PersonalizeRoutine
           routine={routineToPersonalize}
           student={selectedStudent}
+          assigned={editAssigned}
+          fechaAsignacion={assignedFecha}
           onClose={() => {
             setShowPersonalizeModal(false)
             setRoutineToPersonalize(null)
+            setEditAssigned(false)
+            setAssignedFecha(null)
           }}
           onSave={handlePersonalizeSave}
           showAlert={showAlert}

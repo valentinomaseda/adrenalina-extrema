@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { X, Save, Dumbbell } from 'lucide-react'
 import { rutinasAPI } from '../services/api'
 
@@ -12,10 +12,11 @@ const parseNumericValue = (value) => {
   return match ? parseInt(match[0]) : null
 }
 
-export default function PersonalizeRoutine({ routine, student, onClose, onSave, showAlert }) {
+export default function PersonalizeRoutine({ routine, student, onClose, onSave, showAlert, assigned = false, fechaAsignacion = null }) {
   const [exercises, setExercises] = useState([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const originalExercisesRef = useRef([])
 
   useEffect(() => {
     loadRoutineExercises()
@@ -24,32 +25,44 @@ export default function PersonalizeRoutine({ routine, student, onClose, onSave, 
   const loadRoutineExercises = async () => {
     try {
       setLoading(true)
-      // Obtener los ejercicios de la rutina plantilla
-      const ejercicios = await rutinasAPI.getEjercicios(routine.idRutina || routine.id)
-      // Inicializar el estado con los valores de la plantilla
+      let ejercicios
+      if (assigned) {
+        ejercicios = await rutinasAPI.getAlumnoEjercicios(
+          routine.idRutina || routine.id,
+          student.id,
+          fechaAsignacion || routine.fechaAsignacion
+        )
+        originalExercisesRef.current = ejercicios.map(e => e.idEjercicio)
+      } else {
+        ejercicios = await rutinasAPI.getEjercicios(routine.idRutina || routine.id)
+      }
+
       setExercises(ejercicios.map(ej => {
-        // Calcular cantidad inicial: primero ej.cantidad, luego distancia/duracion parseada, luego default
-        let cantidadInicial = ej.cantidad
+        // Calcular cantidad inicial tomando en cuenta distintos nombres de campo
+        const cantidadVal = ej.cantidad !== undefined ? ej.cantidad : (ej.cantidad || ej.cantidad === 0 ? ej.cantidad : null)
+        let cantidadInicial = cantidadVal
         if (!cantidadInicial || cantidadInicial === 0) {
           const distanciaValue = parseNumericValue(ej.distancia)
           const duracionValue = parseNumericValue(ej.duracion)
-          cantidadInicial = distanciaValue || duracionValue || (ej.unidad === 'reps' ? 10 : 30)
+          cantidadInicial = distanciaValue || duracionValue || (ej.unidad === 'reps' ? (ej.cantSets || 10) : 30)
         }
-        
+
         return {
           idEjercicio: ej.idEjercicio,
           nombre: ej.nombre,
-          unidad: ej.unidad,
+          unidad: ej.unidad || ej.tipoContador,
           distancia: ej.distancia,
           duracion: ej.duracion,
           descripcionIntervalo: ej.descripcionIntervalo,
-          cantSets: ej.unidad === 'reps' ? ej.cantSets : 1, // Solo reps tiene múltiples series
-          cantidad: cantidadInicial,
+          cantSets: ej.cantSets || (ej.unidad === 'reps' ? 3 : 1),
+          cantidad: (ej.cantidad || ej.cantidad === 0) ? ej.cantidad : cantidadInicial,
           orden: ej.orden,
-          especificaciones: '',
+          especificaciones: ej.especificaciones || '',
           pausaSeries: ej.pausaSeries || '',
           intensidad: ej.intensidad || '',
-          esCalentamiento: ej.esCalentamiento || 0
+          esCalentamiento: ej.esCalentamiento || 0,
+          ejercicioCompletado: ej.ejercicioCompletado,
+          feedbackAlumno: ej.feedbackAlumno || ''
         }
       }))
     } catch (error) {
@@ -91,43 +104,105 @@ export default function PersonalizeRoutine({ routine, student, onClose, onSave, 
       }
     }
 
-    try {
-      setSaving(true)
-      
-      // 1. Primero asignar la rutina al alumno (esto copia los ejercicios)
-      const assignResult = await rutinasAPI.assignToPersona(routine.idRutina || routine.id, student.id)
-      const fechaAsignacion = assignResult.fechaAsignacion
-      
-      // 2. Luego actualizar cada ejercicio con las personalizaciones
-      const updatePromises = exercises.map(exercise => 
-        rutinasAPI.updateAlumnoEjercicio(
-          routine.idRutina || routine.id,
-          student.id,
-          exercise.idEjercicio,
-          {
-            cantSets: exercise.unidad === 'reps' ? parseInt(exercise.cantSets) : 1,
-            cantidad: parseFloat(exercise.cantidad),
-            especificaciones: exercise.especificaciones || null,
-            pausaSeries: exercise.pausaSeries || null,
-            intensidad: exercise.intensidad || null,
-            esCalentamiento: exercise.esCalentamiento ? 1 : 0
-          },
-          fechaAsignacion,
-          exercise.orden  // Pasar el orden para identificar ejercicios repetidos
-        )
-      )
-      
-      await Promise.all(updatePromises)
-      
-      showAlert('Rutina personalizada y asignada exitosamente', 'success')
-      onSave()
-      onClose()
-    } catch (error) {
-      console.error('Error saving personalized routine:', error)
-      showAlert('Error al asignar rutina personalizada', 'error')
-    } finally {
-      setSaving(false)
-    }
+      try {
+        setSaving(true)
+
+        if (assigned) {
+          // Edición de rutina ya asignada: actualizar/insertar/remover según corresponda
+          const currentIds = originalExercisesRef.current.slice()
+          const newIds = exercises.map(e => e.idEjercicio)
+
+          const updatePromises = []
+
+          for (const exercise of exercises) {
+            const payload = {
+              cantSets: exercise.unidad === 'reps' ? parseInt(exercise.cantSets) : 1,
+              cantidad: parseFloat(exercise.cantidad),
+              especificaciones: exercise.especificaciones || null,
+              pausaSeries: exercise.pausaSeries || null,
+              intensidad: exercise.intensidad || null,
+              esCalentamiento: exercise.esCalentamiento ? 1 : 0
+            }
+
+            if (currentIds.includes(exercise.idEjercicio)) {
+              updatePromises.push(
+                rutinasAPI.updateAlumnoEjercicio(
+                  routine.idRutina || routine.id,
+                  student.id,
+                  exercise.idEjercicio,
+                  payload,
+                  fechaAsignacion || routine.fechaAsignacion,
+                  exercise.orden
+                )
+              )
+            } else {
+              // Agregar ejercicio nuevo a la asignación
+              updatePromises.push(
+                rutinasAPI.addAlumnoEjercicio(
+                  routine.idRutina || routine.id,
+                  student.id,
+                  {
+                    idEjercicio: exercise.idEjercicio,
+                    cantSets: payload.cantSets,
+                    cantidad: payload.cantidad,
+                    especificaciones: payload.especificaciones,
+                    orden: exercise.orden,
+                    pausaSeries: payload.pausaSeries,
+                    intensidad: payload.intensidad,
+                    esCalentamiento: payload.esCalentamiento
+                  }
+                )
+              )
+            }
+          }
+
+          // Remover ejercicios que ya no están en la nueva lista
+          const toRemove = currentIds.filter(id => !newIds.includes(id))
+          for (const idEj of toRemove) {
+            updatePromises.push(rutinasAPI.removeAlumnoEjercicio(routine.idRutina || routine.id, student.id, idEj))
+          }
+
+          await Promise.all(updatePromises)
+
+          showAlert('Rutina asignada actualizada correctamente', 'success')
+          onSave()
+          onClose()
+        } else {
+          // Flujo original: asignar la rutina y luego personalizar
+          const assignResult = await rutinasAPI.assignToPersona(routine.idRutina || routine.id, student.id)
+          const fechaAsignacion = assignResult.fechaAsignacion
+        
+          // Actualizar cada ejercicio con las personalizaciones
+          const updatePromises = exercises.map(exercise => 
+            rutinasAPI.updateAlumnoEjercicio(
+              routine.idRutina || routine.id,
+              student.id,
+              exercise.idEjercicio,
+              {
+                cantSets: exercise.unidad === 'reps' ? parseInt(exercise.cantSets) : 1,
+                cantidad: parseFloat(exercise.cantidad),
+                especificaciones: exercise.especificaciones || null,
+                pausaSeries: exercise.pausaSeries || null,
+                intensidad: exercise.intensidad || null,
+                esCalentamiento: exercise.esCalentamiento ? 1 : 0
+              },
+              fechaAsignacion,
+              exercise.orden  // Pasar el orden para identificar ejercicios repetidos
+            )
+          )
+        
+          await Promise.all(updatePromises)
+
+          showAlert('Rutina personalizada y asignada exitosamente', 'success')
+          onSave()
+          onClose()
+        }
+      } catch (error) {
+        console.error('Error saving personalized routine:', error)
+        showAlert(assigned ? 'Error al actualizar la rutina asignada' : 'Error al asignar rutina personalizada', 'error')
+      } finally {
+        setSaving(false)
+      }
   }
 
   return (
@@ -315,12 +390,12 @@ export default function PersonalizeRoutine({ routine, student, onClose, onSave, 
             {saving ? (
               <>
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                Asignando...
+                {assigned ? 'Guardando...' : 'Asignando...'}
               </>
             ) : (
               <>
                 <Save size={20} />
-                Asignar Rutina
+                {assigned ? 'Guardar cambios' : 'Asignar Rutina'}
               </>
             )}
           </button>
