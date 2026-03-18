@@ -142,6 +142,13 @@ export const rutinaController = {
   async update(req, res) {
     try {
       const result = await Rutina.update(req.params.id, req.body);
+
+      // Si se enviaron ejercicios, la operación puede haber sido una sustitución
+      // de los ejercicios aunque el UPDATE de la tabla rutina no afectara filas.
+      if (Array.isArray(req.body.exercises)) {
+        return res.json({ message: 'Rutina actualizada exitosamente' });
+      }
+
       if (result.affectedRows === 0) {
         return res.status(404).json({ error: 'Rutina no encontrada' });
       }

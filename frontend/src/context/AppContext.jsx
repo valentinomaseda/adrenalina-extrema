@@ -738,6 +738,47 @@ export const AppProvider = ({ children }) => {
     }
   }
 
+  // Función para actualizar una rutina existente (incluye reemplazo de ejercicios)
+  const updateRoutine = async (routineId, routine) => {
+    try {
+      // Preparar payload: enviar nombre y arreglo de ejercicios con campos esperados
+      const payload = {
+        nombre: routine.name,
+        exercises: (routine.exercises || []).map((ex, i) => ({
+          idEjercicio: ex.exerciseId || ex.id,
+          cantSets: ex.sets || ex.cantSets || 3,
+          cantidad: ex.value || ex.cantidad || 10,
+          orden: ex.orden || i + 1,
+          pausaSeries: ex.pausaSeries || null,
+          intensidad: ex.intensidad || null,
+          esCalentamiento: ex.esCalentamiento || false
+        }))
+      }
+
+      await rutinasAPI.update(routineId, payload)
+
+      // Recargar todas las rutinas desde el backend con ejercicios
+      const rutinas = await rutinasAPI.getAll()
+      const rutinasConEjercicios = await Promise.all(
+        rutinas.map(async (rutina) => {
+          try {
+            const ejercicios = await rutinasAPI.getEjercicios(rutina.idRutina)
+            return transformRutinaToRoutine(rutina, ejercicios)
+          } catch (error) {
+            console.error(`Error loading exercises for routine ${rutina.idRutina}:`, error)
+            return transformRutinaToRoutine(rutina, [])
+          }
+        })
+      )
+      setSavedRoutines(rutinasConEjercicios)
+
+      return true
+    } catch (error) {
+      console.error('Error updating routine:', error)
+      throw error
+    }
+  }
+
   // Función para eliminar rutina
   const deleteRoutine = async (routineId) => {
     try {
@@ -1041,6 +1082,7 @@ export const AppProvider = ({ children }) => {
     
     // Funciones
     saveRoutine,
+    updateRoutine,
     deleteRoutine,
     assignRoutineToStudent,
     removeRoutineFromStudent,

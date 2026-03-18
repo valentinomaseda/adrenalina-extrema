@@ -22,6 +22,70 @@ export class Rutina {
   }
 
   static async update(id, rutinaData) {
+    // Si se envían ejercicios junto con la rutina, realizar una transacción
+    // que actualice la rutina and reemplace los ejercicios de la plantilla.
+    if (Array.isArray(rutinaData.exercises)) {
+      const connection = await pool.getConnection();
+      try {
+        await connection.beginTransaction();
+
+        // Actualizar campos de la tabla rutina (excepto exercises)
+        const fields = [];
+        const values = [];
+        Object.keys(rutinaData).forEach(key => {
+          if (key === 'exercises' || key === 'idRutina') return;
+          if (rutinaData[key] !== undefined) {
+            fields.push(`${key} = ?`);
+            values.push(rutinaData[key]);
+          }
+        });
+
+        let resultUpdate = { affectedRows: 0 };
+        if (fields.length > 0) {
+          values.push(id);
+          const [res] = await connection.query(
+            `UPDATE rutina SET ${fields.join(', ')} WHERE idRutina = ?`,
+            values
+          );
+          resultUpdate = res;
+        }
+
+        // Eliminar ejercicios antiguos de la rutina
+        await connection.query('DELETE FROM rutina_ejercicio WHERE idRutina = ?', [id]);
+
+        // Insertar los ejercicios nuevos en el orden recibido
+        if (rutinaData.exercises.length > 0) {
+          for (let i = 0; i < rutinaData.exercises.length; i++) {
+            const ex = rutinaData.exercises[i];
+            const { idEjercicio, cantSets, cantidad, orden, pausaSeries, intensidad, esCalentamiento } = ex;
+            await connection.query(
+              `INSERT INTO rutina_ejercicio (idRutina, idEjercicio, cantSets, cantidad, orden, pausaSeries, intensidad, esCalentamiento)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+              [
+                id,
+                idEjercicio || ex.exerciseId || ex.id,
+                cantSets || ex.sets || 3,
+                cantidad || ex.value || 10,
+                orden || (i + 1),
+                pausaSeries || null,
+                intensidad || null,
+                esCalentamiento || false
+              ]
+            );
+          }
+        }
+
+        await connection.commit();
+        return resultUpdate;
+      } catch (error) {
+        await connection.rollback();
+        throw error;
+      } finally {
+        connection.release();
+      }
+    }
+
+    // Comportamiento por defecto: actualizar solo los campos de rutina
     const fields = [];
     const values = [];
     

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, Trash2, Save, Dumbbell, List, Loader2 } from 'lucide-react'
+import { Plus, Trash2, Save, Dumbbell, List, Loader2, Edit2 } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
 import { useNavigate } from 'react-router-dom'
 import Modal from '../components/Modal'
@@ -55,10 +55,11 @@ const parseNumericValue = (value) => {
 }
 
 export default function RoutineBuilder() {
-  const { exercises, saveRoutine, deleteRoutine, savedRoutines, showAlert } = useAppContext()
+  const { exercises, saveRoutine, updateRoutine, deleteRoutine, savedRoutines, showAlert } = useAppContext()
   const navigate = useNavigate()
   const [routineName, setRoutineName] = useState('')
   const [exerciseInstances, setExerciseInstances] = useState([])
+  const [editingRoutineId, setEditingRoutineId] = useState(null)
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, routineId: null, routineName: '' })
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -160,27 +161,58 @@ export default function RoutineBuilder() {
 
     setSaving(true)
     try {
-      const routine = {
+      const routinePayload = {
         name: routineName,
-        exercises: exerciseInstances.map(({ id, ...rest }) => rest), // Remove temp IDs
+        exercises: exerciseInstances.map(({ id, ...rest }, idx) => ({ ...rest, orden: rest.orden || idx + 1 })), // Remove temp IDs and add orden
         createdAt: new Date().toISOString(),
       }
 
-      // Guardar en contexto global
-      await saveRoutine(routine)
-      console.log('Rutina guardada:', routine)
-      
-      showAlert('Rutina guardada exitosamente', 'success')
-      
+      if (editingRoutineId) {
+        // Actualizar rutina existente
+        await updateRoutine(editingRoutineId, routinePayload)
+        showAlert('Rutina actualizada exitosamente', 'success')
+      } else {
+        // Guardar nueva rutina
+        await saveRoutine(routinePayload)
+        showAlert('Rutina guardada exitosamente', 'success')
+      }
+
       // Reset form
       setRoutineName('')
       setExerciseInstances([])
+      setEditingRoutineId(null)
     } catch (error) {
-      console.error('Error al guardar rutina:', error)
+      console.error('Error al guardar/actualizar rutina:', error)
       showAlert('Error al guardar la rutina: ' + (error.message || 'Error desconocido'), 'error')
     } finally {
       setSaving(false)
     }
+  }
+
+  const editRoutine = (routine) => {
+    setEditingRoutineId(routine.id)
+    setRoutineName(routine.name)
+    // Mapear ejercicios a instancia editable
+    const instances = (routine.exercises || []).map((ex, i) => ({
+      id: Date.now() + i,
+      exerciseId: ex.exerciseId || ex.id,
+      name: ex.name,
+      type: ex.type || ex.unidad || 'reps',
+      value: ex.value || ex.cantidad || 10,
+      sets: ex.sets || ex.cantSets || 3,
+      distancia: ex.distancia || null,
+      duracion: ex.duracion || null,
+      descripcionIntervalo: ex.descripcionIntervalo || null,
+      orden: ex.orden || i + 1
+    }))
+    setExerciseInstances(instances)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const cancelEdit = () => {
+    setEditingRoutineId(null)
+    setRoutineName('')
+    setExerciseInstances([])
   }
 
   const handleDeleteRoutine = (routineId, routineName) => {
@@ -360,8 +392,16 @@ export default function RoutineBuilder() {
           ) : (
             <Save size={24} strokeWidth={2.5} />
           )}
-          <span>{saving ? 'Guardando...' : 'Guardar Rutina'}</span>
+          <span>{saving ? (editingRoutineId ? 'Actualizando...' : 'Guardando...') : (editingRoutineId ? 'Actualizar Rutina' : 'Guardar Rutina')}</span>
         </button>
+        {editingRoutineId && (
+          <button
+            onClick={cancelEdit}
+            className="w-full mt-2 flex items-center justify-center space-x-2 px-6 py-3 bg-gray-700 text-[#F3F4F6] rounded-lg hover:bg-gray-600 active:scale-95 transition-all font-semibold"
+          >
+            Cancelar edición
+          </button>
+        )}
       </div>
 
       {/* Lista de rutinas guardadas */}
@@ -412,13 +452,22 @@ export default function RoutineBuilder() {
                       })}
                     </p>
                   </div>
-                  <button
-                    onClick={() => handleDeleteRoutine(routine.id, routine.name)}
-                    className="ml-4 p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 active:scale-95 transition-all"
-                    title="Eliminar rutina"
-                  >
-                    <Trash2 size={20} />
-                  </button>
+                  <div className="ml-4 flex items-center space-x-2">
+                    <button
+                      onClick={() => editRoutine(routine)}
+                      className="p-2 bg-[#00BFFF] text-[#111827] rounded-lg hover:bg-[#1E40AF] active:scale-95 transition-all"
+                      title="Editar rutina"
+                    >
+                      <Edit2 size={18} />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteRoutine(routine.id, routine.name)}
+                      className="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 active:scale-95 transition-all"
+                      title="Eliminar rutina"
+                    >
+                      <Trash2 size={20} />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
