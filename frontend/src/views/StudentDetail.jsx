@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { ArrowLeft, TrendingUp, Calendar, CheckCircle2, XCircle, Send, Plus, ChevronDown, ChevronUp, Info, X, Phone, Mail, Weight, Ruler, MapPin, Cake, Trash2, Edit2, Loader2 } from 'lucide-react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { useAppContext } from '../context/AppContext'
+import { personasAPI } from '../services/api'
 import { useNavigate } from 'react-router-dom'
 import AchievementBadges from '../components/AchievementBadges'
 import StreakDisplay from '../components/StreakDisplay'
@@ -28,7 +29,9 @@ export default function StudentDetail() {
   const [showProgress, setShowProgress] = useState(false)
   const [showInfoModal, setShowInfoModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showDeleteStudentModal, setShowDeleteStudentModal] = useState(false)
   const [routineToDelete, setRoutineToDelete] = useState(null)
+  const [deletingStudent, setDeletingStudent] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [editFormData, setEditFormData] = useState({})
   const [updatingRoutineStatus, setUpdatingRoutineStatus] = useState(null)
@@ -170,6 +173,25 @@ export default function StudentDetail() {
       showAlert(error.message || 'Error al actualizar el alumno', 'error')
     } finally {
       setUpdatingStudent(false)
+    }
+  }
+
+  // Función para eliminar alumno
+  const handleDeleteStudent = async () => {
+    if (!selectedStudent) return
+    setDeletingStudent(true)
+    try {
+      await personasAPI.delete(selectedStudent.id)
+      await refreshStudents()
+      setSelectedStudent(null)
+      showAlert('Alumno eliminado exitosamente', 'success')
+      navigate('/alumnos')
+    } catch (error) {
+      console.error('Error eliminando alumno:', error)
+      showAlert(error.message || 'Error al eliminar el alumno', 'error')
+    } finally {
+      setDeletingStudent(false)
+      setShowDeleteStudentModal(false)
     }
   }
 
@@ -1076,7 +1098,64 @@ export default function StudentDetail() {
                     )}
                   </button>
                 </div>
+                {/* Botón de eliminar alumno - opción al final del modal de edición */}
+                <div className="mt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowDeleteStudentModal(true)}
+                    className="w-full px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 active:scale-95 transition-all font-semibold flex items-center justify-center gap-2"
+                  >
+                    <Trash2 size={18} /> Eliminar alumno
+                  </button>
+                </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de confirmación para eliminar alumno */}
+      {showDeleteStudentModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 animate-fade-in">
+          <div className="bg-gradient-to-br from-[#1a2942] to-[#0f1729] rounded-xl shadow-2xl max-w-md w-full animate-scale-in border border-red-600">
+            <div className="sticky top-0 bg-red-600 text-white p-6 flex items-center justify-between rounded-t-xl">
+              <h3 className="text-xl font-bold">Eliminar Alumno</h3>
+              <button
+                onClick={() => setShowDeleteStudentModal(false)}
+                className="p-2 hover:bg-red-700 rounded-full active:scale-95 transition-all"
+              >
+                <X size={24} strokeWidth={2.5} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <p className="text-[#F3F4F6]">
+                ¿Estás seguro que deseas eliminar al alumno <strong className="text-[#00BFFF]">{selectedStudent.name}</strong>? Esta acción no se puede deshacer.
+              </p>
+
+              <div className="flex space-x-3 mt-6">
+                <button
+                  onClick={() => setShowDeleteStudentModal(false)}
+                  disabled={deletingStudent}
+                  className="flex-1 px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 active:scale-95 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleDeleteStudent}
+                  disabled={deletingStudent}
+                  className="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 active:scale-95 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {deletingStudent ? (
+                    <>
+                      <Loader2 className="animate-spin" size={20} />
+                      Eliminando...
+                    </>
+                  ) : (
+                    'Eliminar alumno'
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </div>
